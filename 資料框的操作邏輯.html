@@ -201,7 +201,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>資料管理</h2>
+        <h2>資料</h2>
         
         <div class="category active">
             <div class="category-header" onclick="toggleCategory('landscape')">
@@ -210,23 +210,23 @@
             <div class="documents" id="landscape-docs">
                 <label class="document-item all-checkbox">
                     <input type="checkbox" class="all-checkbox" data-category="landscape" onclick="toggleAll(this)" checked>
-                    全部選擇
+                    全部
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="landscape" checked>
-                    行道樹轉覆手冊
+                    行道樹導覽手冊
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="landscape" checked>
-                    運中市公園內植栽及行道樹修葺-種植及移植作業規範
+                    臺中市公園內植栽及行道樹修剪-種植及移植作業規範
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="landscape" checked>
-                    運中市公園及行道樹管理員洽詢例
+                   臺中市公園及行道樹管理自治條例
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="landscape" checked>
-                    其他相關文件...
+                    .....
                 </label>
             </div>
         </div>
@@ -238,19 +238,19 @@
             <div class="documents" id="civil-docs">
                 <label class="document-item all-checkbox">
                     <input type="checkbox" class="all-checkbox" data-category="civil" onclick="toggleAll(this)" checked>
-                    全部選擇
+                    全部
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="civil" checked>
-                    土木工程施工規範
+                    臺中市政府建設局接受私人申請自行興建都市計畫道路案件應備資料及注意事項
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="civil" checked>
-                    工程品質管理手冊
+                    臺中市政府建設局接受私人申請自行興建都市計畫道路案件常見審查意見表
                 </label>
                 <label class="document-item">
                     <input type="checkbox" name="civil" checked>
-                    施工安全衛生規範
+                    市區道路及附屬工程設計標準檢核表
                 </label>
             </div>
         </div>
@@ -297,25 +297,16 @@
                     cb.checked = true;
                 });
             } else {
-                // 检查是否已经是全部取消的状态
-                const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
-                
-                if (!anyChecked) {
-                    // 如果没有勾选任何项，显示弹出窗口并保持"全部"勾选状态
-                    showPopup();
-                    return;
-                }
-                
                 // 取消所有勾选
                 checkboxes.forEach(cb => {
                     cb.checked = false;
                 });
-                
-                // 再次检查是否现在没有任何选项被选中
-                const nowAnyChecked = Array.from(checkboxes).some(cb => cb.checked);
-                if (!nowAnyChecked) {
-                    showPopup();
-                    checkbox.checked = true; // 重新勾选"全部"
+                // 显示弹出窗口
+                showPopup();
+                // 自动重新勾选第一个选项
+                if (checkboxes.length > 0) {
+                    checkboxes[0].checked = true;
+                    checkbox.checked = false; // "全部"保持未勾选状态
                 }
             }
         }
@@ -344,6 +335,7 @@
                 if (!anyChecked) {
                     showPopup();
                     this.checked = true; // 保持至少一个选项被选中
+                    allCheckbox.checked = false; // "全部"保持未勾选状态
                     return;
                 }
                 
