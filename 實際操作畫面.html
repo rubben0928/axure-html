@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件选择系统</title>
+    <style>
+        /* 样式部分保持不变，与之前相同 */
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cae;
+            --accent-color: #ff7e5f;
+            --light-gray: #f5f7fa;
+            --medium-gray: #e1e5eb;
+            --dark-gray: #6c757d;
+            --text-color: #333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+        
+        h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--medium-gray);
+        }
+        
+        .category {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .category-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .category-header:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .category-header::after {
+            content: '+';
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+        
+        .category.active .category-header::after {
+            content: '-';
+        }
+        
+        .documents {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .category.active .documents {
+            max-height: 500px;
+            padding: 15px 20px;
+        }
+        
+        .document-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--medium-gray);
+            border-radius: 4px;
+            margin-right: 10px;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .all-checkbox {
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .popup {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            text-align: center;
+            animation: popupFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes popupFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .popup h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .popup button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 15px;
+        }
+        
+        .popup button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+            background-color: var(--medium-gray);
+        }
+        
+        .category.active .status-indicator {
+            background-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>資料</h2>
+        
+        <div class="category active">
+            <div class="category-header" onclick="toggleCategory('landscape')">
+                <span>公園景觀 <span class="status-indicator"></span></span>
+            </div>
+            <div class="documents" id="landscape-docs">
+                <label class="document-item all-checkbox">
+                    <input type="checkbox" class="all-checkbox" data-category="landscape" onclick="toggleAll(this)" checked>
+                    全部
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="landscape" checked>
+                    行道樹導覽手冊
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="landscape" checked>
+                    臺中市公園內植栽及行道樹修剪-種植及移植作業規範
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="landscape" checked>
+                   臺中市公園及行道樹管理自治條例
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="landscape" checked>
+                    .....
+                </label>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header" onclick="toggleCategory('civil')">
+                <span>土木工程 <span class="status-indicator"></span></span>
+            </div>
+            <div class="documents" id="civil-docs">
+                <label class="document-item all-checkbox">
+                    <input type="checkbox" class="all-checkbox" data-category="civil" onclick="toggleAll(this)" checked>
+                    全部
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="civil" checked>
+                    臺中市政府建設局接受私人申請自行興建都市計畫道路案件應備資料及注意事項
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="civil" checked>
+                    臺中市政府建設局接受私人申請自行興建都市計畫道路案件常見審查意見表
+                </label>
+                <label class="document-item">
+                    <input type="checkbox" name="civil" checked>
+                    市區道路及附屬工程設計標準檢核表
+                </label>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-header">
+                <span>行政業務 <span class="status-indicator"></span></span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="popup-overlay" id="validationPopup">
+        <div class="popup">
+            <h3>操作提示</h3>
+            <p>至少需選擇一項文件</p>
+            <button onclick="closePopup()">確認</button>
+        </div>
+    </div>
+
+    <script>
+        // 默认展开公园景观
+        document.querySelector('.category').classList.add('active');
+        
+        function toggleCategory(category) {
+            // 切换当前类别的active状态
+            const categoryElement = event.target.closest('.category');
+            categoryElement.classList.toggle('active');
+            
+            // 关闭其他打开的类别
+            document.querySelectorAll('.category').forEach(cat => {
+                if (cat !== categoryElement) {
+                    cat.classList.remove('active');
+                }
+            });
+        }
+        
+        function toggleAll(checkbox) {
+            const category = checkbox.getAttribute('data-category');
+            const checkboxes = document.querySelectorAll(`input[name="${category}"]`);
+            
+            if (checkbox.checked) {
+                // 勾选全部
+                checkboxes.forEach(cb => {
+                    cb.checked = true;
+                });
+            } else {
+                // 取消所有勾选
+                checkboxes.forEach(cb => {
+                    cb.checked = false;
+                });
+                // 显示弹出窗口
+                showPopup();
+                // 自动重新勾选第一个选项
+                if (checkboxes.length > 0) {
+                    checkboxes[0].checked = true;
+                    checkbox.checked = false; // "全部"保持未勾选状态
+                }
+            }
+        }
+        
+        function showPopup() {
+            document.getElementById('validationPopup').style.display = 'flex';
+        }
+        
+        function closePopup() {
+            document.getElementById('validationPopup').style.display = 'none';
+        }
+        
+        // 为每个文件复选框添加事件监听器，用于更新"全部"复选框状态
+        document.querySelectorAll('input[type="checkbox"]:not(.all-checkbox)').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const category = this.getAttribute('name');
+                const allCheckbox = document.querySelector(`.all-checkbox[data-category="${category}"]`);
+                const checkboxes = document.querySelectorAll(`input[name="${category}"]`);
+                
+                // 检查是否所有复选框都被选中
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                
+                // 检查是否至少有一个复选框被选中
+                const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+                
+                if (!anyChecked) {
+                    showPopup();
+                    this.checked = true; // 保持至少一个选项被选中
+                    allCheckbox.checked = false; // "全部"保持未勾选状态
+                    return;
+                }
+                
+                allCheckbox.checked = allChecked;
+            });
+        });
+    </script>
+</body>
+</html>
