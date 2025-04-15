@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程先行測設梯次管理系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f5f7fa;
+        }
+
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            border: none;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px 8px 0 0 !important;
+            padding: 12px 20px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .table th {
+            background-color: #ecf0f1;
+            border-top: none;
+        }
+
+        .form-control, .form-select {
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+        }
+
+        .text-small {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-road me-2"></i>工程先行測設核定梯次</h2>
+            <p class="text-muted">依年度、計畫別、子計畫別設定工程梯次</p>
+        </div>
+    </div>
+
+    <!-- 梯次設定表單 -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-calendar-alt me-2"></i>梯次設定
+        </div>
+        <div class="card-body">
+            <form id="phaseForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="year" class="form-label">年度</label>
+                        <select class="form-select" id="year" required>
+                            <option value="" selected disabled>請選擇年度</option>
+                            <option>114</option>
+                            <option>113</option>
+                            <option>112</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="projectType" class="form-label">計畫別</label>
+                        <select class="form-select" id="projectType" required>
+                            <option value="" selected disabled>請選擇計畫別</option>
+                            <option>整體性治山防災計畫</option>
+                            <option>重劃區外緊急農路設施改善計畫</option>
+                            <option>農村再生社區發展及環境改善計畫</option>
+                        
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="subProjectType" class="form-label">子計畫別</label>
+                        <select class="form-select" id="subProjectType" required>
+                            <option value="" selected disabled>請選擇子計畫別</option>
+                              <option>保育治理</option>
+                            <option>保育治理(土砂災害防治)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="phase" class="form-label">梯次</label>
+                        <input type="number" class="form-control" id="phase" placeholder="請輸入梯次 (整數)" required min="1">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="phaseDescription" class="form-label">梯次說明</label>
+                        <textarea class="form-control" id="phaseDescription" rows="2" placeholder="請輸入此梯次的相關說明..."></textarea>
+                    </div>
+
+                    <div class="col-12 text-end">
+                       
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> 儲存梯次設定
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 篩選功能 -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label class="form-label">依年度篩選</label>
+            <select id="filterYear" class="form-select">
+                <option value="">全部</option>
+                <option>114</option>
+                            <option>113</option>
+                            <option>112</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">依計畫別篩選</label>
+            <select id="filterProject" class="form-select">
+                <option value="">全部</option>
+              <option>整體性治山防災計畫</option>
+                            <option>重劃區外緊急農路設施改善計畫</option>
+                            <option>農村再生社區發展及環境改善計畫</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 梯次列表 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-list me-2"></i>已設定的工程梯次
+            </div>
+            <div>
+                <span class="badge bg-primary">總計: 3 個梯次</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>年度</th>
+                        <th>計畫別</th>
+                        <th>子計畫別</th>
+                        <th>梯次</th>
+                        <th>說明</th>
+                        <th>更新資訊</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="phaseTableBody">
+                    <tr>
+                        <td>2024</td>
+                        <td>整體性治山防災計畫</td>
+                        <td>保育治理</td>
+                        <td>2</td>
+                        <td>第2梯次提報</td>
+                        <td>
+                            <span class="d-block">2023-11-15 14:25:36</span>
+                            <span class="text-small">張大華</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2024</td>
+                        <td>整體性治山防災計畫</td>
+                        <td>保育治理(土砂災害防治)</td>
+                        <td>1</td>
+                        <td>第1梯次提報</td>
+                        <td>
+                            <span class="d-block">2023-11-10 09:15:42</span>
+                            <span class="text-small">李小名</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2024</td>
+                        <td>整體性治山防災計畫</td>
+                        <td>保育治理(土砂災害防治)</td>
+                        <td>1</td>
+                        <td>第1梯次提報</td>
+                        <td>
+                            <span class="d-block">2023-11-05 16:45:21</span>
+                            <span class="text-small">王大熊</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 子計畫別動態選項
+    document.getElementById('projectType').addEventListener('change', function() {
+        const subProjectSelect = document.getElementById('subProjectType');
+        subProjectSelect.innerHTML = '<option value="" selected disabled>請選擇子計畫別</option>';
+
+        switch(this.value) {
+            case '道路養護計畫':
+                addSubProjectOption(subProjectSelect, '路面整修工程');
+                addSubProjectOption(subProjectSelect, '路基改善工程');
+                addSubProjectOption(subProjectSelect, '道路拓寬工程');
+                break;
+            case '橋梁整建計畫':
+                addSubProjectOption(subProjectSelect, '橋梁安全檢測');
+                addSubProjectOption(subProjectSelect, '橋梁修復工程');
+                addSubProjectOption(subProjectSelect, '橋梁重建工程');
+                break;
+            case '水利改善計畫':
+                addSubProjectOption(subProjectSelect, '排水系統改善');
+                addSubProjectOption(subProjectSelect, '防洪工程');
+                addSubProjectOption(subProjectSelect, '灌溉系統改善');
+                break;
+            case '公共設施計畫':
+                addSubProjectOption(subProjectSelect, '公園整建工程');
+                addSubProjectOption(subProjectSelect, '運動場設施');
+                addSubProjectOption(subProjectSelect, '公共建築維護');
+                break;
+        }
+    });
+
+    function addSubProjectOption(selectElement, text) {
+        const option = document.createElement('option');
+        option.value = text;
+        option.textContent = text;
+        selectElement.appendChild(option);
+    }
+
+    // 表單提交處理
+    document.getElementById('phaseForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('梯次設定已儲存！');
+        // 可在此加入儲存邏輯
+    });
+
+    // 表格篩選功能
+    document.getElementById('filterYear').addEventListener('change', filterTable);
+    document.getElementById('filterProject').addEventListener('change', filterTable);
+
+    function filterTable() {
+        const selectedYear = document.getElementById('filterYear').value;
+        const selectedProject = document.getElementById('filterProject').value;
+        const tableRows = document.querySelectorAll('#phaseTableBody tr');
+
+        tableRows.forEach(row => {
+            const year = row.children[0].textContent.trim();
+            const project = row.children[1].textContent.trim();
+
+            const yearMatch = !selectedYear || year === selectedYear;
+            const projectMatch = !selectedProject || project === selectedProject;
+
+            row.style.display = (yearMatch && projectMatch) ? '' : 'none';
+        });
+    }
+</script>
+</body>
+</html>
