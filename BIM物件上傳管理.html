@@ -84,6 +84,47 @@
             display: block;
         }
         
+        /* 新增的模型類別選擇樣式 */
+        .category-selection {
+            margin-bottom: 25px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .category-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .category-group {
+            flex: 1;
+        }
+        
+        .category-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+        
+        .category-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: #f8fafc;
+            transition: all 0.3s;
+        }
+        
+        .category-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        
         /* 上傳區域樣式 */
         .upload-container {
             background-color: white;
@@ -160,11 +201,12 @@
         
         .models-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr 150px;
             padding: 15px 20px;
             background-color: var(--primary);
             color: white;
             font-weight: 600;
+            gap: 15px;
         }
         
         .model-list {
@@ -174,11 +216,12 @@
         
         .model-item {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr 150px;
             padding: 15px 20px;
             border-bottom: 1px solid #e2e8f0;
             align-items: center;
             transition: background-color 0.2s;
+            gap: 15px;
         }
         
         .model-item:hover {
@@ -210,6 +253,11 @@
             color: #64748b;
         }
         
+        .model-category {
+            font-size: 13px;
+            color: #4a5568;
+        }
+        
         .model-date {
             color: #64748b;
             font-size: 14px;
@@ -221,6 +269,7 @@
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            margin-right: 10px;
         }
         
         .status-uploading {
@@ -247,6 +296,8 @@
             display: flex;
             gap: 10px;
             justify-content: flex-end;
+            padding-left: 10px;
+            border-left: 1px solid #e2e8f0;
         }
         
         .action-btn {
@@ -378,6 +429,28 @@
             background-color: #f1f5f9;
         }
         
+        /* 屬性設定模態框樣式 */
+        .property-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        /* 空狀態 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            color: #cbd5e0;
+            margin-bottom: 15px;
+        }
+        
         /* 響應式調整 */
         @media (max-width: 768px) {
             .models-header {
@@ -395,6 +468,8 @@
                 position: absolute;
                 top: 15px;
                 right: 15px;
+                border-left: none;
+                padding-left: 0;
             }
             
             .model-name {
@@ -406,7 +481,7 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-cube"></i> BIM 模型管理系統</h1>
+            <h1><i class="fas fa-cube"></i> BIM 模型物件管理</h1>
         </header>
         
         <!-- 頁籤導航 -->
@@ -416,10 +491,30 @@
         </div>
         
         <!-- 物件上傳頁籤內容 -->
-        
-        
-        
         <div id="upload-tab" class="tab-content active">
+            <!-- 模型類別選擇區塊 -->
+            <div class="category-selection">
+                <h3><i class="fas fa-layer-group"></i> 模型類別選擇</h3>
+                <div class="category-row">
+                    <div class="category-group">
+                        <label class="category-label">主要類別</label>
+                        <select class="category-select" id="mainCategory">
+                            <option value="">-- 請選擇主要類別 --</option>
+                            <option value="architecture">AR建築模型</option>
+                            <option value="structure">LS景觀模型</option>
+                            <option value="mep">ST結構模型</option>
+                            <option value="civil">MEP機電空調模型</option>
+                        </select>
+                    </div>
+                    <div class="category-group">
+                        <label class="category-label">次級類別</label>
+                        <select class="category-select" id="subCategory" disabled>
+                            <option value="">-- 請先選擇主要類別 --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
             <div class="upload-container">
                 <div class="upload-area" id="dropArea">
                     <div class="upload-icon">
@@ -431,14 +526,12 @@
                     </div>
                     <div class="upload-text">
                         <h3>拖曳 IFC(2x3) 檔案到這裡上傳</h3>
-                        <p>限單個檔案上傳</p>
+                        <p>限單個檔案上傳(容量限400MB以內)</p>
                     </div>
                     <button class="browse-btn">或選擇檔案上傳</button>
                     <input type="file" id="fileInput" class="file-input" accept=".ifc" multiple>
                 </div>
             </div>
-            
-          
         </div>
         
         <!-- 物件清單頁籤內容 -->
@@ -447,6 +540,7 @@
                 <div class="models-header">
                     <div>模型名稱</div>
                     <div>檔案大小</div>
+                    <div>上傳類型</div>
                     <div>上傳日期</div>
                     <div>狀態</div>
                     <div>操作</div>
@@ -457,14 +551,15 @@
                     <div class="model-item">
                         <div class="model-name">
                             <i class="fas fa-building model-icon"></i>
-                            <span>主場館</span>
-                           
+                            <span>1F建物</span>
+                            
                         </div>
                         <div class="model-size">156.7 MB</div>
+                        <div class="model-category">建築模型 / 帷幕外牆</div>
                         <div class="model-date">2023-10-15 14:30</div>
                         <div>
                             <span class="model-status status-completed">
-                                <i class="fas fa-check-circle"></i> 模型建立完成
+                                <i class="fas fa-check-circle"></i> 模型轉檔完成
                             </span>
                         </div>
                         <div class="model-actions">
@@ -483,14 +578,15 @@
                     <div class="model-item">
                         <div class="model-name">
                             <i class="fas fa-hospital model-icon"></i>
-                            <span>副場館</span>
+                            <span>2F建物</span>
                             
                         </div>
                         <div class="model-size">278.3 MB</div>
+                        <div class="model-category">建築模型 / 主場館</div>
                         <div class="model-date">2023-10-14 09:15</div>
                         <div>
                             <span class="model-status status-completed">
-                                <i class="fas fa-check-circle"></i> 模型建立完成
+                                <i class="fas fa-check-circle"></i> 模型轉檔完成
                             </span>
                         </div>
                         <div class="model-actions">
@@ -509,14 +605,15 @@
                     <div class="model-item">
                         <div class="model-name">
                             <i class="fas fa-school model-icon"></i>
-                            <span>地下層</span>
+                            <span>3F建物</span>
                             
                         </div>
-                        <div class="model-size">432.1 MB</div>
+                        <div class="model-size">200.1 MB</div>
+                        <div class="model-category">建築模型 / 主場館</div>
                         <div class="model-date">2023-10-12 16:45</div>
                         <div>
                             <span class="model-status status-processing">
-                                <i class="fas fa-cog fa-spin"></i> 建立模型中 (65%)
+                                <i class="fas fa-cog fa-spin"></i> 模型轉檔中
                             </span>
                             <div class="progress-container">
                                 <div class="progress-bar" style="width: 65%"></div>
@@ -535,145 +632,138 @@
             </div>
         </div>
     </div>
-    
-    <!-- 上傳進度模態框 -->
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">檔案上傳中(約需幾分鐘，請勿關閉本視窗)...</div>
-                <button class="close-btn" id="closeUploadModal">&times;</button>
-            </div>
-          
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelUploadBtn">取消上傳</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 模型設置模態框 -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">模型設置</div>
-                <button class="close-btn" id="closeSettingsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="modelSettingsForm">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">模型名稱</label>
-                        <input type="text" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;" value="主場館">
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">描述</label>
-                        <textarea style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; min-height: 80px;">2023年新建商業大樓，地上25層，地下3層</textarea>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">座標系統</label>
-                        <select style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
-                            <option value="TWD97">TWD97</option>
-                            <option value="WGS84">WGS84</option>
-                            <option value="Local">局部座標</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox">
-                            <span>自動生成縮圖</span>
-                        </label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="cancelSettingsBtn">取消</button>
-                <button class="btn btn-primary" id="saveSettingsBtn">保存設置</button>
-            </div>
-        </div>
-    </div>
-    
+
     <script>
         // 頁籤切換功能
         const tabs = document.querySelectorAll('.tab');
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // 移除所有active類
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 
-                // 添加active類到當前點擊的頁籤
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(`${tabId}-tab`).classList.add('active');
             });
         });
-        
-        // 上傳功能
+
+        // 模型類別數據
+        const categoryData = {
+            architecture: [
+                { value: "curtain_wall", label: "帷幕外牆" },
+                { value: "interior", label: "主場館" },
+                { value: "facade", label: "副場館" },
+                { value: "landscape", label: "地下層" }
+            ],
+            structure: [
+                { value: "steel", label: "LS_Central" },
+                
+            ],
+            mep: [
+                { value: "plumbing", label: "ST04_Central" },
+                
+            ],
+            civil: [
+                { value: "road", label: "空調水系統" },
+                { value: "bridge", label: "電氣系統" },
+                { value: "tunnel", label: "消防系統" }
+            ]
+        };
+
+        // 主要類別選擇事件
+        document.getElementById('mainCategory').addEventListener('change', function() {
+            const mainCategory = this.value;
+            const subCategorySelect = document.getElementById('subCategory');
+            
+            subCategorySelect.innerHTML = '<option value="">-- 請選擇次級類別 --</option>';
+            
+            if (mainCategory) {
+                subCategorySelect.disabled = false;
+                
+                categoryData[mainCategory].forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.value;
+                    option.textContent = item.label;
+                    subCategorySelect.appendChild(option);
+                });
+            } else {
+                subCategorySelect.disabled = true;
+                subCategorySelect.innerHTML = '<option value="">-- 請先選擇主要類別 --</option>';
+            }
+        });
+
+        // 拖放和檔案選擇功能
         const dropArea = document.getElementById('dropArea');
         const fileInput = document.getElementById('fileInput');
-        const recentUploads = document.getElementById('recentUploads');
         const modelList = document.getElementById('modelList');
-        const uploadModal = document.getElementById('uploadModal');
-        const closeUploadModalBtn = document.getElementById('closeUploadModal');
-        const cancelUploadBtn = document.getElementById('cancelUploadBtn');
-        const uploadProgressBar = document.getElementById('uploadProgressBar');
-        const currentFileName = document.getElementById('currentFileName');
-        const progressPercent = document.getElementById('progressPercent');
-        
-        // 拖放功能
+
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
         });
-        
+
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         }
-        
+
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, highlight, false);
         });
-        
+
         ['dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, unhighlight, false);
         });
-        
+
         function highlight() {
             dropArea.classList.add('active');
         }
-        
+
         function unhighlight() {
             dropArea.classList.remove('active');
         }
-        
+
         dropArea.addEventListener('drop', handleDrop, false);
-        
+
         function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
             handleFiles(files);
         }
-        
-        // 點擊選擇檔案
+
         dropArea.querySelector('.browse-btn').addEventListener('click', () => {
             fileInput.click();
         });
-        
+
         fileInput.addEventListener('change', () => {
             handleFiles(fileInput.files);
         });
-        
-        // 處理檔案
+
+        // 處理檔案上傳
         function handleFiles(files) {
+            const mainCategory = document.getElementById('mainCategory').value;
+            const subCategory = document.getElementById('subCategory').value;
+            
+            if (!mainCategory) {
+                alert('請選擇主要類別');
+                return;
+            }
+            
+            if (!subCategory) {
+                alert('請選擇次級類別');
+                return;
+            }
+            
             if (files.length > 0) {
                 Array.from(files).forEach(file => {
                     if (file.name.toLowerCase().endsWith('.ifc')) {
-                        uploadFile(file);
+                        uploadFile(file, mainCategory, subCategory);
                     } else {
                         alert('請選擇 .ifc 格式的 BIM 模型檔案');
                     }
                 });
             }
         }
-        
+
         // 格式化檔案大小
         function formatFileSize(bytes) {
             if (bytes === 0) return '0 Bytes';
@@ -682,79 +772,72 @@
             const i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
-        
+
         // 上傳檔案
-        function uploadFile(file) {
+        function uploadFile(file, mainCategory, subCategory) {
             // 顯示上傳模態框
+            const uploadModal = document.createElement('div');
+            uploadModal.className = 'modal';
             uploadModal.style.display = 'flex';
-            currentFileName.textContent = file.name;
-            
-            // 添加到最近上傳列表
-            addToRecentUploads(file);
-            
-            // 模擬上傳進度 (實際應用中替換為真實的上傳邏輯)
+            uploadModal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title">檔案上傳中(約需數分鐘，請勿關閉本視窗)...</div>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="progress-container">
+                            <div class="progress-bar" id="uploadProgressBar" style="width: 0%"></div>
+                        </div>
+                        <div id="progressPercent" style="text-align: center; margin-top: 10px;">0%</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" id="cancelUploadBtn">取消上傳</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(uploadModal);
+
+            const progressBar = uploadModal.querySelector('#uploadProgressBar');
+            const progressPercent = uploadModal.querySelector('#progressPercent');
+            const cancelBtn = uploadModal.querySelector('#cancelUploadBtn');
+            const closeBtn = uploadModal.querySelector('.close-btn');
+
+            // 模擬上傳進度
             let progress = 0;
             const uploadInterval = setInterval(() => {
                 progress += Math.random() * 5;
                 if (progress > 100) progress = 100;
                 
-                uploadProgressBar.style.width = progress + '%';
+                progressBar.style.width = progress + '%';
                 progressPercent.textContent = Math.round(progress) + '%';
                 
                 if (progress === 100) {
                     clearInterval(uploadInterval);
                     setTimeout(() => {
-                        uploadModal.style.display = 'none';
-                        addToModelList(file);
+                        uploadModal.remove();
+                        addToModelList(file, mainCategory, subCategory);
                     }, 500);
                 }
             }, 200);
             
             // 取消上傳
-            cancelUploadBtn.addEventListener('click', () => {
+            cancelBtn.addEventListener('click', () => {
                 clearInterval(uploadInterval);
-                uploadModal.style.display = 'none';
-                uploadProgressBar.style.width = '0%';
-                progressPercent.textContent = '0%';
+                uploadModal.remove();
+            });
+
+            closeBtn.addEventListener('click', () => {
+                clearInterval(uploadInterval);
+                uploadModal.remove();
             });
         }
-        
-        // 添加到最近上傳列表
-        function addToRecentUploads(file) {
-            if (recentUploads.querySelector('.empty-state')) {
-                recentUploads.innerHTML = '';
-            }
-            
-            const uploadItem = document.createElement('div');
-            uploadItem.className = 'model-item';
-            uploadItem.innerHTML = `
-                <div class="model-name">
-                    <i class="fas fa-file-upload model-icon"></i>
-                    <span>${file.name}</span>
-                    <span class="model-format">IFC</span>
-                </div>
-                <div class="model-size">${formatFileSize(file.size)}</div>
-                <div class="model-date">${new Date().toLocaleString()}</div>
-                <div>
-                    <span class="model-status status-uploading">
-                        <i class="fas fa-upload"></i> 上傳中...
-                    </span>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="model-actions">
-                    <button class="action-btn delete-btn" title="取消上傳">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            `;
-            
-            recentUploads.prepend(uploadItem);
-        }
-        
+
         // 添加到模型列表
-        function addToModelList(file) {
+        function addToModelList(file, mainCategory, subCategory) {
+            const mainCategoryText = document.querySelector(`#mainCategory option[value="${mainCategory}"]`).textContent;
+            const subCategoryText = document.querySelector(`#subCategory option[value="${subCategory}"]`).textContent;
+            
             const modelItem = document.createElement('div');
             modelItem.className = 'model-item';
             modelItem.innerHTML = `
@@ -764,6 +847,7 @@
                     <span class="model-format">IFC</span>
                 </div>
                 <div class="model-size">${formatFileSize(file.size)}</div>
+                <div class="model-category">${mainCategoryText} / ${subCategoryText}</div>
                 <div class="model-date">${new Date().toLocaleString()}</div>
                 <div>
                     <span class="model-status status-processing">
@@ -788,7 +872,7 @@
             // 模擬模型建立過程
             simulateModelProcessing(modelItem, file);
         }
-        
+
         // 模擬模型建立過程
         function simulateModelProcessing(modelItem, file) {
             let progress = 0;
@@ -809,12 +893,15 @@
                         statusElement.innerHTML = '<i class="fas fa-check-circle"></i> 模型建立完成';
                         progressBar.style.backgroundColor = '#bbf7d0';
                         
+                        // 顯示屬性設定彈出視窗
+                        showPropertySettingsModal(file.name.replace('.ifc', ''));
+                        
                         // 啟用編輯按鈕
                         const editBtn = modelItem.querySelector('.edit-btn');
                         editBtn.disabled = false;
                         editBtn.title = '編輯設置';
                         editBtn.addEventListener('click', () => {
-                            document.getElementById('settingsModal').style.display = 'flex';
+                            showPropertySettingsModal(file.name.replace('.ifc', ''));
                         });
                         
                         // 刪除按鈕功能
@@ -828,25 +915,82 @@
                 }
             }, 300);
         }
-        
-        // 設置模態框功能
-        const settingsModal = document.getElementById('settingsModal');
-        const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
-        const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
-        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
-        
-        closeSettingsModalBtn.addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-        
-        cancelSettingsBtn.addEventListener('click', () => {
-            settingsModal.style.display = 'none';
-        });
-        
-        saveSettingsBtn.addEventListener('click', () => {
-            alert('設置已保存');
-            settingsModal.style.display = 'none';
-        });
+
+        // 顯示屬性設定彈出視窗
+        function showPropertySettingsModal(modelName) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'flex';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-title">模型屬性設定 - ${modelName}</div>
+                        <button class="close-btn">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">經度</label>
+                            <input type="text" class="property-input" value="120.4028395284916" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">緯度</label>
+                            <input type="text" class="property-input" value="23.620664285908163" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">高度(公尺)</label>
+                            <input type="number" class="property-input" value="0" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">旋轉角度(度)</label>
+                            <input type="number" class="property-input" value="0" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">縮放倍率(倍)</label>
+                            <input type="number" step="0.1" class="property-input" value="1" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="justify-content: space-between;">
+                        <button class="btn btn-primary" id="applySettingsBtn">套用</button>
+                        <button class="btn btn-outline" id="closeSettingsBtn">關閉</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 關閉按鈕事件
+            const closeBtn = modal.querySelector('.close-btn');
+            const closeSettingsBtn = modal.querySelector('#closeSettingsBtn');
+            
+            const closeModal = () => {
+                modal.remove();
+            };
+            
+            closeBtn.addEventListener('click', closeModal);
+            closeSettingsBtn.addEventListener('click', closeModal);
+            
+            // 套用按鈕事件
+            const applyBtn = modal.querySelector('#applySettingsBtn');
+            applyBtn.addEventListener('click', () => {
+                const inputs = modal.querySelectorAll('.property-input');
+                const settings = {
+                    longitude: inputs[0].value,
+                    latitude: inputs[1].value,
+                    height: inputs[2].value,
+                    rotation: inputs[3].value,
+                    scale: inputs[4].value
+                };
+                
+                // 這裡可以處理套用設定的邏輯
+                console.log('套用設定:', settings);
+                alert('模型屬性設定已套用！');
+                closeModal();
+            });
+        }
     </script>
 </body>
 </html>
