@@ -817,6 +817,8 @@
                     setTimeout(() => {
                         uploadModal.remove();
                         addToModelList(file, mainCategory, subCategory);
+                        // 上傳完成後直接顯示座標編輯視窗
+                        showCoordinateSettingsModal(file.name.replace('.ifc', ''), mainCategory, subCategory);
                     }, 500);
                 }
             }, 200);
@@ -850,16 +852,13 @@
                 <div class="model-category">${mainCategoryText} / ${subCategoryText}</div>
                 <div class="model-date">${new Date().toLocaleString()}</div>
                 <div>
-                    <span class="model-status status-processing">
-                        <i class="fas fa-cog fa-spin"></i> 建立模型中...
+                    <span class="model-status status-completed">
+                        <i class="fas fa-check-circle"></i> 上傳完成
                     </span>
-                    <div class="progress-container">
-                        <div class="progress-bar" style="width: 0%"></div>
-                    </div>
                 </div>
                 <div class="model-actions">
-                    <button class="action-btn edit-btn" title="編輯設置" disabled>
-                        <i class="fas fa-cog"></i>
+                    <button class="action-btn edit-btn" title="編輯座標">
+                        <i class="fas fa-map-marker-alt"></i>
                     </button>
                     <button class="action-btn delete-btn" title="刪除模型">
                         <i class="fas fa-trash"></i>
@@ -869,92 +868,52 @@
             
             modelList.prepend(modelItem);
             
-            // 模擬模型建立過程
-            simulateModelProcessing(modelItem, file);
-        }
-
-        // 模擬模型建立過程
-        function simulateModelProcessing(modelItem, file) {
-            let progress = 0;
-            const progressBar = modelItem.querySelector('.progress-bar');
-            const statusElement = modelItem.querySelector('.model-status');
+            // 編輯按鈕點擊事件
+            const editBtn = modelItem.querySelector('.edit-btn');
+            editBtn.addEventListener('click', () => {
+                showCoordinateSettingsModal(file.name.replace('.ifc', ''), mainCategory, subCategory);
+            });
             
-            const processInterval = setInterval(() => {
-                progress += Math.random() * 3;
-                if (progress > 100) progress = 100;
-                
-                progressBar.style.width = progress + '%';
-                statusElement.innerHTML = `<i class="fas fa-cog fa-spin"></i> 建立模型中 (${Math.round(progress)}%)`;
-                
-                if (progress === 100) {
-                    clearInterval(processInterval);
-                    setTimeout(() => {
-                        statusElement.className = 'model-status status-completed';
-                        statusElement.innerHTML = '<i class="fas fa-check-circle"></i> 模型建立完成';
-                        progressBar.style.backgroundColor = '#bbf7d0';
-                        
-                        // 顯示屬性設定彈出視窗
-                        showPropertySettingsModal(file.name.replace('.ifc', ''));
-                        
-                        // 啟用編輯按鈕
-                        const editBtn = modelItem.querySelector('.edit-btn');
-                        editBtn.disabled = false;
-                        editBtn.title = '編輯設置';
-                        editBtn.addEventListener('click', () => {
-                            showPropertySettingsModal(file.name.replace('.ifc', ''));
-                        });
-                        
-                        // 刪除按鈕功能
-                        const deleteBtn = modelItem.querySelector('.delete-btn');
-                        deleteBtn.addEventListener('click', () => {
-                            if (confirm('確定要刪除這個模型嗎？')) {
-                                modelList.removeChild(modelItem);
-                            }
-                        });
-                    }, 500);
+            // 刪除按鈕點擊事件
+            const deleteBtn = modelItem.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('確定要刪除這個模型嗎？')) {
+                    modelList.removeChild(modelItem);
                 }
-            }, 300);
+            });
         }
 
-        // 顯示屬性設定彈出視窗
-        function showPropertySettingsModal(modelName) {
+        // 顯示座標設定彈出視窗
+        function showCoordinateSettingsModal(modelName, mainCategory, subCategory) {
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.style.display = 'flex';
             modal.innerHTML = `
                 <div class="modal-content">
                     <div class="modal-header">
-                        <div class="modal-title">模型屬性設定 - ${modelName}</div>
+                        <div class="modal-title">模型座標設定 - ${modelName}</div>
                         <button class="close-btn">&times;</button>
                     </div>
                     <div class="modal-body">
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 500;">經度</label>
-                            <input type="text" class="property-input" value="120.4028395284916" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <input type="text" class="property-input" id="longitudeInput" value="120.4028395284916" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
                         </div>
                         
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 500;">緯度</label>
-                            <input type="text" class="property-input" value="23.620664285908163" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <input type="text" class="property-input" id="latitudeInput" value="23.620664285908163" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
                         </div>
                         
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: 500;">高度(公尺)</label>
-                            <input type="number" class="property-input" value="0" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <input type="number" class="property-input" id="heightInput" value="0" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
                         </div>
                         
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">旋轉角度(度)</label>
-                            <input type="number" class="property-input" value="0" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
-                        </div>
                         
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: 500;">縮放倍率(倍)</label>
-                            <input type="number" step="0.1" class="property-input" value="1" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
-                        </div>
                     </div>
                     <div class="modal-footer" style="justify-content: space-between;">
-                        <button class="btn btn-primary" id="applySettingsBtn">套用</button>
+                        <button class="btn btn-primary" id="applySettingsBtn">套用設定</button>
                         <button class="btn btn-outline" id="closeSettingsBtn">關閉</button>
                     </div>
                 </div>
@@ -976,18 +935,27 @@
             // 套用按鈕事件
             const applyBtn = modal.querySelector('#applySettingsBtn');
             applyBtn.addEventListener('click', () => {
-                const inputs = modal.querySelectorAll('.property-input');
-                const settings = {
-                    longitude: inputs[0].value,
-                    latitude: inputs[1].value,
-                    height: inputs[2].value,
-                    rotation: inputs[3].value,
-                    scale: inputs[4].value
-                };
+                const longitude = modal.querySelector('#longitudeInput').value;
+                const latitude = modal.querySelector('#latitudeInput').value;
+                const height = modal.querySelector('#heightInput').value;
+                const rotation = modal.querySelector('#rotationInput').value;
+                const scale = modal.querySelector('#scaleInput').value;
                 
                 // 這裡可以處理套用設定的邏輯
-                console.log('套用設定:', settings);
-                alert('模型屬性設定已套用！');
+                console.log('套用座標設定:', {
+                    modelName,
+                    mainCategory,
+                    subCategory,
+                    coordinates: {
+                        longitude,
+                        latitude,
+                        height,
+                        rotation,
+                        scale
+                    }
+                });
+                
+                alert('模型座標設定已套用！');
                 closeModal();
             });
         }
