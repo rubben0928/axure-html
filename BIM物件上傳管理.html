@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIM 模型管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            background-color: #f1f5f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        h1 {
+            color: var(--primary);
+            font-size: 28px;
+        }
+        
+        /* 頁籤樣式 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab:hover:not(.active) {
+            color: var(--secondary);
+            background-color: #f8fafc;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 上傳區域樣式 */
+        .upload-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: #f8fafc;
+        }
+        
+        .upload-area.active {
+            border-color: var(--primary);
+            background-color: #ebf8ff;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 15px;
+        }
+        
+        .upload-text h3 {
+            margin: 0;
+            color: #2d3748;
+            font-size: 18px;
+        }
+        
+        .upload-text p {
+            margin: 10px 0 0;
+            color: #718096;
+            font-size: 14px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .browse-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+        
+        .browse-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        /* 清單樣式 */
+        .models-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .models-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .model-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .model-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 120px;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            transition: background-color 0.2s;
+        }
+        
+        .model-item:hover {
+            background-color: #f8fafc;
+        }
+        
+        .model-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .model-icon {
+            color: var(--primary);
+            font-size: 18px;
+        }
+        
+        .model-format {
+            background-color: #e0e7ff;
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .model-size {
+            color: #64748b;
+        }
+        
+        .model-date {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .model-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-uploading {
+            background-color: #bfdbfe;
+            color: #1e40af;
+        }
+        
+        .status-processing {
+            background-color: #fef08a;
+            color: #854d0e;
+        }
+        
+        .status-completed {
+            background-color: #bbf7d0;
+            color: #166534;
+        }
+        
+        .status-failed {
+            background-color: #fecaca;
+            color: #991b1b;
+        }
+        
+        .model-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .edit-btn {
+            color: var(--primary);
+        }
+        
+        .delete-btn {
+            color: var(--danger);
+        }
+        
+        .view-btn {
+            color: var(--success);
+        }
+        
+        .progress-container {
+            margin-top: 5px;
+            height: 4px;
+            background-color: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* 上傳模態框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 15px 20px;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            font-size: 18px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border-color: #cbd5e0;
+        }
+        
+        .btn-outline:hover {
+            background-color: #f1f5f9;
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            .models-header {
+                display: none;
+            }
+            
+            .model-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 15px;
+                position: relative;
+            }
+            
+            .model-actions {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+            }
+            
+            .model-name {
+                margin-top: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-cube"></i> BIM 模型管理系統</h1>
+        </header>
+        
+        <!-- 頁籤導航 -->
+        <div class="tabs">
+            <div class="tab active" data-tab="upload">物件上傳</div>
+            <div class="tab" data-tab="list">物件清單</div>
+        </div>
+        
+        <!-- 物件上傳頁籤內容 -->
+        
+        
+        
+        <div id="upload-tab" class="tab-content active">
+            <div class="upload-container">
+                <div class="upload-area" id="dropArea">
+                    <div class="upload-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <div class="upload-text">
+                        <h3>拖曳 IFC(2x3) 檔案到這裡上傳</h3>
+                        <p>限單個檔案上傳</p>
+                    </div>
+                    <button class="browse-btn">或選擇檔案上傳</button>
+                    <input type="file" id="fileInput" class="file-input" accept=".ifc" multiple>
+                </div>
+            </div>
+            
+          
+        </div>
+        
+        <!-- 物件清單頁籤內容 -->
+        <div id="list-tab" class="tab-content">
+            <div class="models-container">
+                <div class="models-header">
+                    <div>模型名稱</div>
+                    <div>檔案大小</div>
+                    <div>上傳日期</div>
+                    <div>狀態</div>
+                    <div>操作</div>
+                </div>
+                
+                <div class="model-list" id="modelList">
+                    <!-- 範例資料 - 實際應用中從後端獲取 -->
+                    <div class="model-item">
+                        <div class="model-name">
+                            <i class="fas fa-building model-icon"></i>
+                            <span>主場館</span>
+                           
+                        </div>
+                        <div class="model-size">156.7 MB</div>
+                        <div class="model-date">2023-10-15 14:30</div>
+                        <div>
+                            <span class="model-status status-completed">
+                                <i class="fas fa-check-circle"></i> 模型建立完成
+                            </span>
+                        </div>
+                        <div class="model-actions">
+                            <button class="action-btn view-btn" title="檢視模型">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn edit-btn" title="編輯設置">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="刪除模型">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="model-item">
+                        <div class="model-name">
+                            <i class="fas fa-hospital model-icon"></i>
+                            <span>副場館</span>
+                            
+                        </div>
+                        <div class="model-size">278.3 MB</div>
+                        <div class="model-date">2023-10-14 09:15</div>
+                        <div>
+                            <span class="model-status status-completed">
+                                <i class="fas fa-check-circle"></i> 模型建立完成
+                            </span>
+                        </div>
+                        <div class="model-actions">
+                            <button class="action-btn view-btn" title="檢視模型">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn edit-btn" title="編輯設置">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="刪除模型">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="model-item">
+                        <div class="model-name">
+                            <i class="fas fa-school model-icon"></i>
+                            <span>地下層</span>
+                            
+                        </div>
+                        <div class="model-size">432.1 MB</div>
+                        <div class="model-date">2023-10-12 16:45</div>
+                        <div>
+                            <span class="model-status status-processing">
+                                <i class="fas fa-cog fa-spin"></i> 建立模型中 (65%)
+                            </span>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 65%"></div>
+                            </div>
+                        </div>
+                        <div class="model-actions">
+                            <button class="action-btn edit-btn" title="編輯設置" disabled>
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="刪除模型">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 上傳進度模態框 -->
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">檔案上傳中(約需幾分鐘，請勿關閉本視窗)...</div>
+                <button class="close-btn" id="closeUploadModal">&times;</button>
+            </div>
+          
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelUploadBtn">取消上傳</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模型設置模態框 -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">模型設置</div>
+                <button class="close-btn" id="closeSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="modelSettingsForm">
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">模型名稱</label>
+                        <input type="text" style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;" value="主場館">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">描述</label>
+                        <textarea style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px; min-height: 80px;">2023年新建商業大樓，地上25層，地下3層</textarea>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">座標系統</label>
+                        <select style="width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <option value="TWD97">TWD97</option>
+                            <option value="WGS84">WGS84</option>
+                            <option value="Local">局部座標</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox">
+                            <span>自動生成縮圖</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelSettingsBtn">取消</button>
+                <button class="btn btn-primary" id="saveSettingsBtn">保存設置</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 頁籤切換功能
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有active類
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 添加active類到當前點擊的頁籤
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // 上傳功能
+        const dropArea = document.getElementById('dropArea');
+        const fileInput = document.getElementById('fileInput');
+        const recentUploads = document.getElementById('recentUploads');
+        const modelList = document.getElementById('modelList');
+        const uploadModal = document.getElementById('uploadModal');
+        const closeUploadModalBtn = document.getElementById('closeUploadModal');
+        const cancelUploadBtn = document.getElementById('cancelUploadBtn');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const currentFileName = document.getElementById('currentFileName');
+        const progressPercent = document.getElementById('progressPercent');
+        
+        // 拖放功能
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('active');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('active');
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        // 點擊選擇檔案
+        dropArea.querySelector('.browse-btn').addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+        });
+        
+        // 處理檔案
+        function handleFiles(files) {
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (file.name.toLowerCase().endsWith('.ifc')) {
+                        uploadFile(file);
+                    } else {
+                        alert('請選擇 .ifc 格式的 BIM 模型檔案');
+                    }
+                });
+            }
+        }
+        
+        // 格式化檔案大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 上傳檔案
+        function uploadFile(file) {
+            // 顯示上傳模態框
+            uploadModal.style.display = 'flex';
+            currentFileName.textContent = file.name;
+            
+            // 添加到最近上傳列表
+            addToRecentUploads(file);
+            
+            // 模擬上傳進度 (實際應用中替換為真實的上傳邏輯)
+            let progress = 0;
+            const uploadInterval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress > 100) progress = 100;
+                
+                uploadProgressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.round(progress) + '%';
+                
+                if (progress === 100) {
+                    clearInterval(uploadInterval);
+                    setTimeout(() => {
+                        uploadModal.style.display = 'none';
+                        addToModelList(file);
+                    }, 500);
+                }
+            }, 200);
+            
+            // 取消上傳
+            cancelUploadBtn.addEventListener('click', () => {
+                clearInterval(uploadInterval);
+                uploadModal.style.display = 'none';
+                uploadProgressBar.style.width = '0%';
+                progressPercent.textContent = '0%';
+            });
+        }
+        
+        // 添加到最近上傳列表
+        function addToRecentUploads(file) {
+            if (recentUploads.querySelector('.empty-state')) {
+                recentUploads.innerHTML = '';
+            }
+            
+            const uploadItem = document.createElement('div');
+            uploadItem.className = 'model-item';
+            uploadItem.innerHTML = `
+                <div class="model-name">
+                    <i class="fas fa-file-upload model-icon"></i>
+                    <span>${file.name}</span>
+                    <span class="model-format">IFC</span>
+                </div>
+                <div class="model-size">${formatFileSize(file.size)}</div>
+                <div class="model-date">${new Date().toLocaleString()}</div>
+                <div>
+                    <span class="model-status status-uploading">
+                        <i class="fas fa-upload"></i> 上傳中...
+                    </span>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="action-btn delete-btn" title="取消上傳">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            recentUploads.prepend(uploadItem);
+        }
+        
+        // 添加到模型列表
+        function addToModelList(file) {
+            const modelItem = document.createElement('div');
+            modelItem.className = 'model-item';
+            modelItem.innerHTML = `
+                <div class="model-name">
+                    <i class="fas fa-cube model-icon"></i>
+                    <span>${file.name.replace('.ifc', '')}</span>
+                    <span class="model-format">IFC</span>
+                </div>
+                <div class="model-size">${formatFileSize(file.size)}</div>
+                <div class="model-date">${new Date().toLocaleString()}</div>
+                <div>
+                    <span class="model-status status-processing">
+                        <i class="fas fa-cog fa-spin"></i> 建立模型中...
+                    </span>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="model-actions">
+                    <button class="action-btn edit-btn" title="編輯設置" disabled>
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="action-btn delete-btn" title="刪除模型">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            modelList.prepend(modelItem);
+            
+            // 模擬模型建立過程
+            simulateModelProcessing(modelItem, file);
+        }
+        
+        // 模擬模型建立過程
+        function simulateModelProcessing(modelItem, file) {
+            let progress = 0;
+            const progressBar = modelItem.querySelector('.progress-bar');
+            const statusElement = modelItem.querySelector('.model-status');
+            
+            const processInterval = setInterval(() => {
+                progress += Math.random() * 3;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                statusElement.innerHTML = `<i class="fas fa-cog fa-spin"></i> 建立模型中 (${Math.round(progress)}%)`;
+                
+                if (progress === 100) {
+                    clearInterval(processInterval);
+                    setTimeout(() => {
+                        statusElement.className = 'model-status status-completed';
+                        statusElement.innerHTML = '<i class="fas fa-check-circle"></i> 模型建立完成';
+                        progressBar.style.backgroundColor = '#bbf7d0';
+                        
+                        // 啟用編輯按鈕
+                        const editBtn = modelItem.querySelector('.edit-btn');
+                        editBtn.disabled = false;
+                        editBtn.title = '編輯設置';
+                        editBtn.addEventListener('click', () => {
+                            document.getElementById('settingsModal').style.display = 'flex';
+                        });
+                        
+                        // 刪除按鈕功能
+                        const deleteBtn = modelItem.querySelector('.delete-btn');
+                        deleteBtn.addEventListener('click', () => {
+                            if (confirm('確定要刪除這個模型嗎？')) {
+                                modelList.removeChild(modelItem);
+                            }
+                        });
+                    }, 500);
+                }
+            }, 300);
+        }
+        
+        // 設置模態框功能
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
+        const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        
+        closeSettingsModalBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+        
+        cancelSettingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+        
+        saveSettingsBtn.addEventListener('click', () => {
+            alert('設置已保存');
+            settingsModal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
