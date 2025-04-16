@@ -3,11 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工程核定管理系統</title>
+    <title>工程核定統計表</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .filter-container {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-end;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        /* 頁籤樣式 */
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            animation: fadeEffect 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        /* 新添加的樣式 */
         :root {
             --primary-color: #3498db;
             --secondary-color: #2980b9;
@@ -18,54 +98,12 @@
             --success-color: #2ecc71;
         }
         
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f9f9f9;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 20px 25px;
-            border-bottom: 4px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .header h1 {
-            font-weight: 500;
-            font-size: 24px;
-            margin: 0;
-        }
-        
-        .header .subtitle {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-        
         .form-section {
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             padding: 20px;
             border-radius: 8px;
-            margin: 20px;
+            margin-bottom: 20px;
         }
         
         .form-label-required::before {
@@ -74,16 +112,10 @@
             margin-right: 2px;
         }
         
-        .table-container {
-            padding: 20px;
-            overflow-x: auto;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            min-width: 800px;
         }
         
         th {
@@ -93,8 +125,6 @@
             text-align: left;
             padding: 12px 15px;
             border-bottom: 2px solid var(--medium-gray);
-            position: sticky;
-            top: 0;
         }
         
         td {
@@ -147,7 +177,7 @@
             background: var(--light-gray);
             border-radius: 6px;
             padding: 15px 20px;
-            margin: 20px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -167,14 +197,6 @@
             font-size: 18px;
             font-weight: 700;
             color: var(--primary-color);
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 15px;
-            font-size: 12px;
-            color: #999;
-            border-top: 1px solid var(--medium-gray);
         }
         
         .action-btn {
@@ -217,71 +239,48 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px 20px;
-        }
-        
-        @media (max-width: 768px) {
-            .summary-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .summary-item {
-                text-align: left;
-                margin-bottom: 10px;
-            }
-            
-            .summary-item:last-child {
-                margin-bottom: 0;
-            }
-            
-            .action-bar {
-                flex-direction: column;
-                gap: 10px;
-            }
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>工程轉入核定作業</h1>
+    <h1>工程轉入核定作業</h1>
+    
+    <div class="filter-container">
+        <div class="filter-item">
+            <label for="year">年度</label>
+            <select id="year">
+                <option value="2023">114</option>
+                <option value="2022">113</option>
+              
+            </select>
+        </div>
+        
+        <div class="filter-item">
+            <label for="project-batch">計畫別-梯次</label>
+            <select id="project-batch">
+                
+                <option value="type1-1">整體性治山防災-治山防災-1</option>
+                <option value="type1-2">整體性治山防災-治山防災-2</option>
+                <option value="type1-3">整體性治山防災-治山防災-3</option>
+                
+            </select>
+        </div>
+        
+        <button onclick="filterData()">查詢</button>
+    </div>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="openTab(event, 'approval-process')">核定作業</button>
+            <button class="tab-button" onclick="openTab(event, 'approved-stats')">已核定統計</button>
+        </div>
+        
+        <!-- 核定作業頁籤內容 - 已替換為新的內容 -->
+        <div id="approval-process" class="tab-content active">
            
-        </div>
-        
-        <!-- 年度、計畫、批次選擇 -->
-        <div class="form-section">
-            <div class="row mb-3">
-                <div class="col-md-2">
-                    <label class="form-label form-label-required">年度</label>
-                    <select class="form-select">
-                        <option>112</option>
-                        <option>111</option>
-                        <option>110</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label form-label-required">計畫</label>
-                    <select class="form-select">
-                        <option>整體性治山防災計畫</option>
-                        <option>水保工程改善計畫</option>
-                        <option>山坡地保育計畫</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label form-label-required">選擇核定批次</label>
-                    <select class="form-select">
-                        <option>112-整體性治山防災計畫-治山防災-1</option>
-                        <option>112-整體性治山防災計畫-治山防災-2</option>
-                        <option>111-水保工程改善計畫-1</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 工程清單區塊 -->
-        <div class="table-container">
-            <h4 class="mb-4">可轉為核定工程清單</h4>
+            
+            <h4 style="margin-bottom: 15px;">可轉為核定工程清單</h4>
             
             <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                 <button class="action-btn" id="autoNumberBtn">
@@ -341,60 +340,120 @@
                 </tbody>
             </table>
             
-            <!-- 施工方式、核定文號等表單元素 (移動到表格下方) -->
-            <div class="form-section" style="margin-top: 30px;">
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label form-label-required">施工方式</label>
-                        <select class="form-select">
+            <div class="form-section" style="margin-top: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label class="form-label-required">施工方式</label>
+                        <select class="form-control">
                             <option>發包工程</option>
                             <option>自辦工程</option>
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label form-label-required">核定文號</label>
+                    <div>
+                        <label class="form-label-required">核定文號</label>
                         <input type="text" class="form-control" placeholder="請輸入文號">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label form-label-required">核定文號日期</label>
+                    <div>
+                        <label class="form-label-required">核定文號日期</label>
                         <input type="date" class="form-control">
                     </div>
                 </div>
                 
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label form-label-required">核定公文電子檔</label>
+                <div style="display: flex; gap: 15px; align-items: flex-end;">
+                    <div style="flex: 1;">
+                        <label class="form-label-required">核定公文電子檔</label>
                         <input class="form-control" type="file">
                     </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button class="btn btn-primary w-100">上傳</button>
+                    <button class="action-btn">上傳</button>
+                </div>
+            </div>
+            
+            <div class="action-bar">
+                <div class="summary-card" style="margin: 0; flex-grow: 1;">
+                    <div class="summary-item">
+                        <div class="label">預定轉為核定工程總經費</div>
+                        <div class="value">8,500,000 元</div>
                     </div>
                 </div>
+                <button class="save-btn" id="saveBtn">
+                    <i class="fas fa-save"></i> 確定轉入核定工程
+                </button>
             </div>
         </div>
         
-        <div class="action-bar">
-            <div class="summary-card" style="margin: 0; flex-grow: 1;">
-                <div class="summary-item">
-                    <div class="label">預定轉為核定工程總經費</div>
-                    <div class="value">8,500,000 元</div>
-                </div>
-            </div>
-            <button class="save-btn" id="saveBtn">
-                <i class="fas fa-save"></i> 確定轉入核定工程
-            </button>
-        </div>
-        
-        <div class="footer">
-            <p> <span id="updateTime"></span></p>
+        <!-- 已核定統計頁籤內容 - 保持不變 -->
+        <div id="approved-stats" class="tab-content">
+            <h3>已核定工程統計</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="background-color: #4CAF50; color: white;">統計項目</th>
+                        <th style="background-color: #4CAF50; color: white;">臺北分署</th>
+                        <th style="background-color: #4CAF50; color: white;">臺中分署</th>
+                        <th style="background-color: #4CAF50; color: white;">南投分署</th>
+                        <th style="background-color: #4CAF50; color: white;">臺南分署</th>
+                        <th style="background-color: #4CAF50; color: white;">臺東分署</th>
+                        <th style="background-color: #4CAF50; color: white;">花蓮分署</th>
+                        <th style="background-color: #4CAF50; color: white;">合計</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>核定件數</td>
+                        <td>25</td>
+                        <td>18</td>
+                        <td>12</td>
+                        <td>20</td>
+                        <td>8</td>
+                        <td>15</td>
+                        <td style="font-weight: bold; background-color: #e6f7ff;">98</td>
+                    </tr>
+                    <tr>
+                        <td>核定經費(千元)</td>
+                        <td>12,500</td>
+                        <td>9,200</td>
+                        <td>6,800</td>
+                        <td>10,750</td>
+                        <td>4,200</td>
+                        <td>7,850</td>
+                        <td style="font-weight: bold; background-color: #e6f7ff;">51,300</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // 自動顯示當前時間
-        document.getElementById('updateTime').textContent = new Date().toLocaleString('zh-TW');
+        function filterData() {
+            const year = document.getElementById('year').value;
+            const projectBatch = document.getElementById('project-batch').value;
+            
+            // 分割選項值以取得計畫別和梯次
+            const [projectType, batch] = projectBatch.split('-');
+            
+            alert(`已選擇: 年度-${year}, 計畫別-梯次: ${document.getElementById('project-batch').options[document.getElementById('project-batch').selectedIndex].text}\n(此為示範，實際應用需連接後端獲取數據)`);
+            
+            // 這裡可以根據選擇更新表格數據
+            // updateTable(year, projectType, batch);
+        }
         
-        // 儲存按鈕功能
+        // 頁籤切換功能
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            const tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        
+        // 新增的 JavaScript 功能
         document.getElementById('saveBtn').addEventListener('click', function() {
             const projectIds = document.querySelectorAll('.project-id');
             const projects = [];
@@ -406,27 +465,23 @@
                 });
             });
             
-            // 這裡可以替換為實際的儲存邏輯
             console.log('儲存的工程序號:', projects);
             alert('所有變更已儲存！');
         });
         
-        // 自動產生序號按鈕
         document.getElementById('autoNumberBtn').addEventListener('click', function() {
             const inputs = document.querySelectorAll('.project-id');
             const currentYear = new Date().getFullYear();
             const prefix = `PROJ-${currentYear}-`;
             
             inputs.forEach((input, index) => {
-                // 產生格式如 PROJ-2023-001 的序號
                 const sequence = (index + 1).toString().padStart(3, '0');
                 input.value = prefix + sequence;
             });
             
-            showToast('已自動產生工程序號！');
+            alert('已自動產生工程序號！');
         });
         
-        // 清除序號按鈕
         document.getElementById('clearNumberBtn').addEventListener('click', function() {
             const inputs = document.querySelectorAll('.project-id');
             
@@ -434,43 +489,8 @@
                 input.value = '';
             });
             
-            showToast('已清除所有工程序號！');
+            alert('已清除所有工程序號！');
         });
-        
-        // 顯示提示訊息
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.textContent = message;
-            toast.style.position = 'fixed';
-            toast.style.bottom = '20px';
-            toast.style.right = '20px';
-            toast.style.backgroundColor = 'rgba(0,0,0,0.7)';
-            toast.style.color = 'white';
-            toast.style.padding = '10px 20px';
-            toast.style.borderRadius = '4px';
-            toast.style.zIndex = '1000';
-            toast.style.animation = 'fadeIn 0.3s';
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.3s';
-                setTimeout(() => toast.remove(), 300);
-            }, 2000);
-        }
-        
-        // 添加動畫樣式
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            @keyframes fadeOut {
-                from { opacity: 1; transform: translateY(0); }
-                to { opacity: 0; transform: translateY(10px); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

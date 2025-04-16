@@ -59,6 +59,12 @@
     .custom-table a:hover {
       text-decoration: underline;
     }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -91,142 +97,206 @@
 
     <!-- Tabs -->
     <div class="tab-header">
-      <div class="active">1. 搜尋工程</div>
-      <div>2. 已選取工程</div>
-      <div>3. 核定情形查詢</div>
+      <div class="tab-link active" data-tab="tab1">1. 搜尋工程</div>
+      <div class="tab-link" data-tab="tab2">2. 已選取工程</div>
+      <div class="tab-link" data-tab="tab3">3. 核定情形查詢</div>
     </div>
 
-    <!-- 查詢條件 -->
-    <div class="form-section">
-      <div class="row mb-3">
-        <div class="col-md-3">
-          <label for="branch" class="form-label">分局</label>
-          <select class="form-select" id="branch">
-            <option>臺北分署</option>
-            <option>臺中分署</option>
-            <option>南投分署</option>
-          </select>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">(勘查日期)年度</label>
-          <div class="d-flex">
-            <select class="form-select me-2">
-              <option>114</option>
-              <option>113</option>
+    <!-- Tab 1: 搜尋工程 -->
+    <div id="tab1" class="tab-content active">
+      <!-- 查詢條件 -->
+      <div class="form-section">
+        <div class="row mb-3">
+          <div class="col-md-3">
+            <label for="branch" class="form-label">分局</label>
+            <select class="form-select" id="branch">
+              <option>臺北分署</option>
+              <option>臺中分署</option>
+              <option>南投分署</option>
             </select>
-            <span class="me-2 mt-2">~</span>
-            <select class="form-select">
-              <option>114</option>
-              <option>113</option>
-            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">(勘查日期)年度</label>
+            <div class="d-flex">
+              <select class="form-select me-2">
+                <option>114</option>
+                <option>113</option>
+              </select>
+              <span class="me-2 mt-2">~</span>
+              <select class="form-select">
+                <option>114</option>
+                <option>113</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">概估經費</label>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="budgetLow" checked>
+              <label class="form-check-label" for="budgetLow">1,000萬(含)以下</label>
+            </div>
           </div>
         </div>
 
-        <div class="col-md-5">
-          <label class="form-label">概估經費</label>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="budgetLow" checked>
-            <label class="form-check-label" for="budgetLow">1,000萬(含)以下</label>
+        <div class="row mb-3">
+          <div class="col-md-5">
+            <label class="form-label">執行單位</label>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="execBranch" checked>
+              <label class="form-check-label" for="execBranch">分署</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" id="execLocal">
+              <label class="form-check-label" for="execLocal">地方單位</label>
+            </div>
           </div>
+          <div class="col-md-4">
+            <label class="form-label">縣市鄉鎮市區</label>
+            <div class="d-flex">
+              <select class="form-select me-2">
+                <option>全部</option>
+                <option>臺北市</option>
+                <option>新北市</option>
+              </select>
+              <select class="form-select">
+                <option>全部</option>
+                <option>信義區</option>
+                <option>板橋區</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <label for="projectName" class="form-label">工程勘查名稱</label>
+            <input type="text" class="form-control" id="projectName" placeholder="請輸入工程名稱">
+          </div>
+        </div>
+
+        <div class="text-center search-btn">
+          <button class="btn btn-primary btn-lg">查詢</button>
         </div>
       </div>
 
-      <div class="row mb-3">
-        <div class="col-md-5">
-          <label class="form-label">執行單位</label>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="execBranch" checked>
-            <label class="form-check-label" for="execBranch">分署</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="execLocal">
-            <label class="form-check-label" for="execLocal">地方單位</label>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <label class="form-label">縣市鄉鎮市區</label>
-          <div class="d-flex">
-            <select class="form-select me-2">
-              <option>全部</option>
-              <option>臺北市</option>
-              <option>新北市</option>
-            </select>
-            <select class="form-select">
-              <option>全部</option>
-              <option>信義區</option>
-              <option>板橋區</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label for="projectName" class="form-label">工程勘查名稱</label>
-          <input type="text" class="form-control" id="projectName" placeholder="請輸入工程名稱">
-        </div>
-      </div>
-
-      <div class="text-center search-btn">
-        <button class="btn btn-primary btn-lg">查詢</button>
-      </div>
-    </div>
-
-    <!-- 表格顯示 -->
-    <h4 class="mb-3">預定轉為核定工程清單</h4>
-    <div class="table-responsive">
-      <table class="custom-table">
-        <thead>
-          <tr>
-            <th>項次</th>
-            <th>工程名稱</th>
-            <th>工作項目</th>
-            <th>執行單位</th>
-            <th>縣市</th>
-            <th>鄉鎮市區</th>
-            <th>概估經費(仟元)</th>
-            <th>坐標X</th>
-            <th>坐標Y</th>
-            <th>生態檢核分級</th>
-            <th>移除</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>1</td>
-            <td><a href="#">三層坪農塘設施改善三期工程</a></td>
-            <td>主委藍單</td>
-            <td>臺北分署</td>
-            <td>宜蘭縣</td>
-            <td>員山鄉</td>
-            <td>4,000</td>
-            <td>318849</td>
-            <td>2741982</td>
-            <td>2</td>
-            <td><a href="#">移除</a></td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td><a href="#">小錦屏野溪溫泉道路坍塌坡場防治工程</a></td>
-            <td>主委藍單</td>
-            <td>臺北分署</td>
-            <td>新竹縣</td>
-            <td>尖石鄉</td>
-            <td>4,500</td>
-            <td>271052</td>
-            <td>2726873</td>
-            <td>2</td>
-            <td><a href="#">移除</a></td>
-          </tr>
-          
-        </tbody>
+      <!-- 查詢結果表格 -->
+      <h4 class="mb-3">查詢結果</h4>
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox"></th>
+              <th>工程名稱</th>
+              <th>工作項目</th>
+              <th>執行單位</th>
+              <th>縣市</th>
+              <th>鄉鎮市區</th>
+              <th>概估經費(仟元)</th>
+              <th>坐標X</th>
+              <th>坐標Y</th>
+              <th>生態檢核分級</th>
+              <th>加入</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td><a href="#">清水溪防災護岸工程</a></td>
+              <td>護岸</td>
+              <td>臺中分署</td>
+              <td>臺中市</td>
+              <td>和平區</td>
+              <td>5,000</td>
+              <td>312000</td>
+              <td>2750000</td>
+              <td>3</td>
+              <td><a href="#">加入</a></td>
+            </tr>
+          </tbody>
+        </table>
         
-      </table>
-    </div>
- 
-    </div>
-   <div class="text-center search-btn">
-        <button class="btn btn-primary btn-lg">儲存</button>
+         <button class="btn btn-primary btn-lg">確定提選</button>
       </div>
+    </div>
+
+    <!-- Tab 2: 已選取工程 -->
+    <div id="tab2" class="tab-content">
+      <h4 class="mb-3">預定轉為核定工程清單</h4>
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll"></th>
+              <th>工程名稱</th>
+              <th>工作項目</th>
+              <th>執行單位</th>
+              <th>縣市</th>
+              <th>鄉鎮市區</th>
+              <th>概估經費(仟元)</th>
+              <th>坐標X</th>
+              <th>坐標Y</th>
+              <th>生態檢核分級</th>
+              <th>移除</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td><a href="#">三層坪農塘設施改善三期工程</a></td>
+              <td>主委藍單</td>
+              <td>臺北分署</td>
+              <td>宜蘭縣</td>
+              <td>員山鄉</td>
+              <td>4,000</td>
+              <td>318849</td>
+              <td>2741982</td>
+              <td>2</td>
+              <td><a href="#">移除</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td><a href="#">小錦屏野溪溫泉道路坍塌坡場防治工程</a></td>
+              <td>主委藍單</td>
+              <td>臺北分署</td>
+              <td>新竹縣</td>
+              <td>尖石鄉</td>
+              <td>4,500</td>
+              <td>271052</td>
+              <td>2726873</td>
+              <td>2</td>
+              <td><a href="#">移除</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="text-center search-btn mt-4">
+        <button class="btn btn-success btn-lg">傳送農村水保署</button>
+      </div>
+    </div>
+
+    <!-- Tab 3 -->
+    <div id="tab3" class="tab-content">
+      <p>此處為核定情形查詢內容。</p>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Tab 切換功能
+    const tabLinks = document.querySelectorAll(".tab-link");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabLinks.forEach(link => {
+      link.addEventListener("click", () => {
+        tabLinks.forEach(l => l.classList.remove("active"));
+        tabContents.forEach(c => c.classList.remove("active"));
+        link.classList.add("active");
+        document.getElementById(link.dataset.tab).classList.add("active");
+      });
+    });
+
+    // 全選功能
+    document.getElementById('selectAll').addEventListener('change', function () {
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+  </script>
 </body>
 </html>
