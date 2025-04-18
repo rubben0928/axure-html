@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 測試工具 | 專業版</title>
+    <!-- Swagger UI CSS -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --error-color: #f72585;
+            --warning-color: #f8961e;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            color: white;
+        }
+        
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .step {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .step:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .step-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .step-title {
+            font-weight: 500;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .step-icon {
+            font-size: 1.2rem;
+        }
+        
+        .step-number {
+            background-color: white;
+            color: var(--primary-color);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .step-status {
+            font-size: 0.9rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .step-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: var(--dark-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #dee2e6;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+        
+        .result {
+            margin-top: 1.5rem;
+            padding: 1.2rem;
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .result-title {
+            font-weight: 500;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .result-content {
+            font-family: 'Roboto', monospace;
+        }
+        
+        .success {
+            color: var(--success-color);
+        }
+        
+        .error {
+            color: var(--error-color);
+        }
+        
+        .warning {
+            color: var(--warning-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #swagger-ui-container {
+            margin-top: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+        
+        .status-error {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--error-color);
+        }
+        
+        .status-warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning-color);
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        /* 報告表格樣式 */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        .report-table th, .report-table td {
+            padding: 0.8rem;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        .report-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .report-table tr.success-row {
+            background-color: rgba(76, 201, 240, 0.05);
+        }
+
+        .report-table tr.error-row {
+            background-color: rgba(247, 37, 133, 0.05);
+        }
+
+        .report-table tr.warning-row {
+            background-color: rgba(248, 150, 30, 0.05);
+        }
+
+        /* 報告區塊樣式 */
+        .report-section {
+            margin-bottom: 2rem;
+        }
+
+        .report-section h3 {
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .error-details {
+            background-color: #fff9fa;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            border-left: 4px solid var(--error-color);
+        }
+
+        .error-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .error-item h4 {
+            color: var(--error-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-item p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* 總結報告樣式 */
+        .summary {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .summary-item {
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .summary-item.success {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .summary-item.warning {
+            background-color: rgba(248, 150, 30, 0.1);
+            color: var(--warning-color);
+        }
+
+        .summary-item.error {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--error-color);
+        }
+
+        .summary-score {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin: 1rem 0;
+        }
+
+        .summary-score .score {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .recommendation {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1.5rem;
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .report-table {
+                font-size: 0.8rem;
+            }
+            
+            .report-table th, .report-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div>
+                <h1>內政部資訊服務司 API 驗證工具</h1>
+                
+            </div>
+            <div class="logo">
+                <i class="fas fa-api"></i>
+            </div>
+        </div>
+    </header>
+    
+    <main class="container">
+        <div class="step-container">
+            <!-- Step 1: 输入 API URL -->
+            <div class="step" id="step1">
+                <div class="step-header" onclick="toggleStep('step1-body')">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        <i class="fas fa-link step-icon"></i>
+                        <span>請輸入 API-URL</span>
+                    </div>
+                    <span class="step-status">待處理</span>
+                </div>
+                <div class="step-body" id="step1-body">
+                    <div class="form-group">
+                        <label for="apiUrl"><i class="fas fa-globe"></i> API 端點 URL</label>
+                        <input type="text" id="apiUrl" placeholder="輸入 API URL" value="https://hurc-api.hurc.org.tw/v1/housing/getdata">
+                    </div>
+                    <div class="progress-container hidden" id="step1-progress">
+                        <div class="progress-bar" id="step1-progress-bar"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="checkApiUrl()">
+                            <i class="fas fa-search"></i> 開始檢測 API-URL
+                        </button>
+                    </div>
+                    <div class="result hidden" id="step1Result">
+                        <div class="result-title"><i class="fas fa-clipboard-list"></i> 檢測結果</div>
+                        <div class="result-content" id="step1-result-content"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: API 检测结果 -->
+            <div class="step hidden" id="step2">
+                <div class="step-header" onclick="toggleStep('step2-body')">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        <i class="fas fa-check-circle step-icon"></i>
+                        <span>API 檢測結果</span>
+                    </div>
+                    <span class="step-status">待處理</span>
+                </div>
+                <div class="step-body" id="step2-body">
+                    <div class="result" id="step2Result">
+                        <div class="result-title"><i class="fas fa-chart-line"></i> API 狀態報告</div>
+                        <div class="result-content" id="step2-result-content">
+                            <div class="report-section">
+                                <h3><i class="fas fa-table"></i> API 檢測結果表</h3>
+                                <div class="table-responsive">
+                                    <table class="report-table">
+                                        <thead>
+                                            <tr>
+                                                <th>項次</th>
+                                                <th>檢測項目</th>
+                                                <th>檢測內容</th>
+                                                <th>檢測結果</th>
+                                                <th>備註</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="success-row">
+                                                <td>1</td>
+                                                <td>API URL 格式檢查</td>
+                                                <td>
+                                                    <p>驗證要求：URL 必須符合以下組成要素：</p>
+                                                    <ul>
+                                                        <li>服務根網址 (Service Root URL, SRU)</li>
+                                                        <li>資源路徑 (resource path)</li>
+                                                        <li>查詢選項 (query options)</li>
+                                                    </ul>
+                                                </td>
+                                                <td><span class="status-badge status-success">符合</span></td>
+                                                <td>URL 結構完整</td>
+                                            </tr>
+                                            <tr class="success-row">
+                                                <td>2</td>
+                                                <td>服務根網址的組成</td>
+                                                <td>
+                                                    <p>驗證要求：SRU 必須符合以下組成要素：</p>
+                                                    <ul>
+                                                        <li>scheme (協議，如 HTTPS)</li>
+                                                        <li>host (主機)</li>
+                                                        <li>port (導號)</li>
+                                                        <li>URL 一律採用 HTTPS 區隔</li>
+                                                    </ul>
+                                                </td>
+                                                <td><span class="status-badge status-success">符合</span></td>
+                                                <td>使用 HTTPS 協議</td>
+                                            </tr>
+                                            <tr class="error-row">
+                                                <td>3</td>
+                                                <td>提供「Landing Page」</td>
+                                                <td>必須有一個起始頁面，連結 API 資源並提供相關說明。</td>
+                                                <td><span class="status-badge status-error">不符合</span></td>
+                                                <td>缺少標準 landing page，僅有 API 端點</td>
+                                            </tr>
+                                            <tr class="success-row">
+                                                <td>4</td>
+                                                <td>API 定義文件格式</td>
+                                                <td>API 定義文件必須採用 JSON 或 YAML 格式。</td>
+                                                <td><span class="status-badge status-success">符合</span></td>
+                                                <td>提供 JSON 格式文件</td>
+                                            </tr>
+                                            <tr class="warning-row">
+                                                <td>5</td>
+                                                <td>特定查詢功能支援</td>
+                                                <td>
+                                                    <p>API 必須支援以下查詢參數：</p>
+                                                    <ul>
+                                                        <li>bbox：限制回傳資料的空間範圍 (可為二維或三維坐標值)</li>
+                                                        <li>datetime：限制回傳資料的時間範圍，可為特定時間點或區間</li>
+                                                        <li>limit：限制回傳資料的筆數</li>
+                                                    </ul>
+                                                </td>
+                                                <td><span class="status-badge status-warning">部分符合</span></td>
+                                                <td>缺少 datetime 參數支援</td>
+                                            </tr>
+                                            <tr class="success-row">
+                                                <td>6</td>
+                                                <td>坐標參考系統檢查</td>
+                                                <td>確認 API 使用的坐標參考系統是否符合規範。</td>
+                                                <td><span class="status-badge status-success">符合</span></td>
+                                                <td>使用 WGS84 坐標系統</td>
+                                            </tr>
+                                            <tr class="error-row">
+                                                <td>7</td>
+                                                <td>Landing Page 資料檢視</td>
+                                                <td>
+                                                    <p>Landing Page 必須包含「collection」連結，並提供以下資訊：</p>
+                                                    <ul>
+                                                        <li>資料特徵的識別碼 (如唯一 ID)</li>
+                                                        <li>坐標參考系統資訊</li>
+                                                        <li>名稱與描述 (選擇性)</li>
+                                                        <li>空間或時間範圍 (選擇性)</li>
+                                                    </ul>
+                                                </td>
+                                                <td><span class="status-badge status-error">不符合</span></td>
+                                                <td>缺少 collection 連結</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3><i class="fas fa-exclamation-triangle"></i> 不符合項目詳細說明</h3>
+                                <div class="error-details">
+                                    <div class="error-item">
+                                        <h4>3. 缺少 Landing Page</h4>
+                                        <p><strong>問題描述：</strong>API 服務缺少標準的 landing page，無法提供 API 資源的整體說明和導覽。</p>
+                                        <p><strong>建議解決方案：</strong></p>
+                                        <ul>
+                                            <li>建立符合規範的 landing page，包含 API 基本資訊</li>
+                                            <li>在 landing page 中提供所有可用資源的連結</li>
+                                            <li>範例符合的 landing page: <code>https://api.example.com/</code></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="error-item">
+                                        <h4>5. 部分查詢功能缺失</h4>
+                                        <p><strong>問題描述：</strong>API 缺少 datetime 查詢參數支援，無法按時間範圍篩選資料。</p>
+                                        <p><strong>建議解決方案：</strong></p>
+                                        <ul>
+                                            <li>實作 datetime 查詢參數功能</li>
+                                            <li>支援 ISO 8601 時間格式</li>
+                                            <li>範例符合的查詢: <code>?datetime=2023-01-01T00:00:00Z/2023-12-31T23:59:59Z</code></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="error-item">
+                                        <h4>7. 缺少 Collection 連結</h4>
+                                        <p><strong>問題描述：</strong>Landing page 中缺少 collection 資源的連結和基本描述。</p>
+                                        <p><strong>建議解決方案：</strong></p>
+                                        <ul>
+                                            <li>在 landing page 中添加 collections 連結</li>
+                                            <li>為每個 collection 提供基本描述</li>
+                                            <li>範例符合的結構: 
+                                                <pre>{
+  "collections": [
+    {
+      "id": "housing",
+      "title": "住宅資料",
+      "description": "全台住宅相關資料集"
+    }
+  ]
+}</pre>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="report-section">
+                                <h3><i class="fas fa-check-circle"></i> 總結報告</h3>
+                                <div class="summary">
+                                    <div class="summary-item success">
+                                        <i class="fas fa-check"></i>
+                                        <span>4 項檢測通過</span>
+                                    </div>
+                                    <div class="summary-item warning">
+                                        <i class="fas fa-exclamation"></i>
+                                        <span>1 項部分符合</span>
+                                    </div>
+                                    <div class="summary-item error">
+                                        <i class="fas fa-times"></i>
+                                        <span>2 項不符合</span>
+                                    </div>
+                                    <div class="summary-score">
+                                        總體符合率: <span class="score">71%</span>
+                                    </div>
+                                </div>
+                                <p class="recommendation">
+                                    <i class="fas fa-lightbulb"></i> <strong>改善建議：</strong> 
+                                    請優先解決 landing page 和 collection 連結的問題，這些是 API 可發現性(discoverability)的關鍵要素。
+                                    其次建議實作 datetime 查詢參數以增強 API 的查詢能力。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="proceedToStep3()">
+                            <i class="fas fa-arrow-right"></i> 繼續下一步
+                        </button>
+                        <button class="btn btn-secondary" onclick="generateReportPDF()">
+                            <i class="fas fa-file-pdf"></i> 下載 PDF 報告
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: 输入 Swagger URL -->
+            <div class="step hidden" id="step3">
+                <div class="step-header" onclick="toggleStep('step3-body')">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        <i class="fas fa-file-alt step-icon"></i>
+                        <span>輸入 Swagger URL</span>
+                    </div>
+                    <span class="step-status">限通道 Step2</span>
+                </div>
+                <div class="step-body" id="step3-body">
+                    <div class="form-group">
+                        <label for="swaggerUrl"><i class="fas fa-file-code"></i> Swagger/OpenAPI 文檔 URL</label>
+                        <input type="text" id="swaggerUrl" placeholder="輸入 Swagger URL" value="https://petstore.swagger.io/v2/swagger.json">
+                    </div>
+                    <div class="progress-container hidden" id="step3-progress">
+                        <div class="progress-bar" id="step3-progress-bar"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="validateSwagger()">
+                            <i class="fas fa-check"></i> 驗證 Swagger
+                        </button>
+                        <button class="btn btn-success" onclick="loadSwaggerUI()">
+                            <i class="fas fa-eye"></i> 顯示 Swagger UI
+                        </button>
+                    </div>
+                    <div class="result hidden" id="step3Result">
+                        <div class="result-title"><i class="fas fa-clipboard-check"></i> 驗證結果</div>
+                        <div class="result-content" id="step3-result-content"></div>
+                    </div>
+                    <div id="swagger-ui-container" class="hidden"></div>
+                </div>
+            </div>
+            
+            <!-- Step 4: 测试 API 资料 -->
+            <div class="step hidden" id="step4">
+                <div class="step-header" onclick="toggleStep('step4-body')">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        <i class="fas fa-vial step-icon"></i>
+                        <span>測試 API 資料</span>
+                    </div>
+                    <span class="step-status">最終步驟</span>
+                </div>
+                <div class="step-body" id="step4-body">
+                    <div class="result" id="step4Result">
+                        <div class="result-title"><i class="fas fa-tasks"></i> API 測試報告</div>
+                        <div class="result-content" id="step4-result-content"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="testApiData()">
+                            <i class="fas fa-play"></i> 執行 API 測試
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetAll()">
+                            <i class="fas fa-redo"></i> 重新開始
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer>
+       
+    </footer>
+    
+    <!-- Swagger UI 的 JS 文件 -->
+    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
+    
+    <script>
+        // 切換步驟內容顯示/隱藏
+        function toggleStep(stepBodyId) {
+            const stepBody = document.getElementById(stepBodyId);
+            stepBody.classList.toggle('hidden');
+        }
+        
+        // 更新步驟狀態
+        function updateStepStatus(stepNumber, status) {
+            const step = document.getElementById(`step${stepNumber}`);
+            const statusElement = step.querySelector('.step-status');
+            
+            statusElement.textContent = status;
+            
+            if (status === '成功') {
+                statusElement.classList.add('status-success');
+                statusElement.classList.remove('status-error');
+            } else if (status === '失敗') {
+                statusElement.classList.add('status-error');
+                statusElement.classList.remove('status-success');
+            } else {
+                statusElement.classList.remove('status-success', 'status-error');
+            }
+        }
+        
+        // 模擬進度條動畫
+        function animateProgress(progressBarId, duration = 1000) {
+            const progressBar = document.getElementById(progressBarId);
+            progressBar.style.width = '0%';
+            
+            setTimeout(() => {
+                progressBar.style.width = '100%';
+            }, 10);
+            
+            return new Promise(resolve => {
+                setTimeout(resolve, duration);
+            });
+        }
+        
+        // Step 1: 檢測 API URL
+        async function checkApiUrl() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultDiv = document.getElementById('step1Result');
+            const resultContent = document.getElementById('step1-result-content');
+            const progressContainer = document.getElementById('step1-progress');
+            
+            if (!apiUrl) {
+                resultContent.innerHTML = '<span class="error"><i class="fas fa-exclamation-circle"></i> 請輸入 API URL</span>';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // 顯示進度條
+            progressContainer.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            
+            // 模擬 API 檢測過程
+            try {
+                await animateProgress('step1-progress-bar');
+                
+                if (apiUrl.includes('hurc-api.hurc.org.tw')) {
+                    resultContent.innerHTML = `
+                        <p><span class="success"><i class="fas fa-check-circle"></i> API URL 檢測成功!</span></p>
+                        <p><i class="fas fa-server"></i> <strong>端點:</strong> ${apiUrl}</p>
+                        <p><i class="fas fa-clock"></i> <strong>檢測時間:</strong> ${new Date().toLocaleString()}</p>
+                    `;
+                    updateStepStatus(1, '成功');
+                    
+                    // 顯示 Step 2
+                    document.getElementById('step2').classList.remove('hidden');
+                    document.getElementById('step2-body').classList.remove('hidden');
+                    updateStepStatus(2, '檢測完成');
+                } else {
+                    resultContent.innerHTML = `
+                        <p><span class="error"><i class="fas fa-times-circle"></i> API URL 檢測失敗</span></p>
+                        <p>請確認 URL 是否正確且可存取</p>
+                        <p><i class="fas fa-question-circle warning"></i> 提示: 請檢查網路連接或 API 端點是否正確</p>
+                    `;
+                    updateStepStatus(1, '失敗');
+                }
+            } catch (error) {
+                resultContent.innerHTML = `
+                    <p><span class="error"><i class="fas fa-times-circle"></i> 檢測過程中發生錯誤</span></p>
+                    <p>${error.message || '未知錯誤'}</p>
+                `;
+                updateStepStatus(1, '失敗');
+            } finally {
+                progressContainer.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+            }
+        }
+        
+        // Step 2: 繼續到 Step 3
+        function proceedToStep3() {
+            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('step3-body').classList.remove('hidden');
+            updateStepStatus(3, '就緒');
+        }
+        
+        // Step 3: 驗證 Swagger
+        async function validateSwagger() {
+            const swaggerUrl = document.getElementById('swaggerUrl').value;
+            const resultDiv = document.getElementById('step3Result');
+            const resultContent = document.getElementById('step3-result-content');
+            const progressContainer = document.getElementById('step3-progress');
+            
+            if (!swaggerUrl) {
+                resultContent.innerHTML = '<span class="error"><i class="fas fa-exclamation-circle"></i> 請輸入 Swagger URL</span>';
+                resultDiv.classList.remove('hidden');
+                return;
+            }
+            
+            // 顯示進度條
+            progressContainer.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            
+            // 模擬 Swagger 驗證過程
+            try {
+                await animateProgress('step3-progress-bar');
+                
+                if (swaggerUrl.includes('swagger') || swaggerUrl.includes('openapi')) {
+                    resultContent.innerHTML = `
+                        <p><span class="success"><i class="fas fa-check-circle"></i> Swagger URL 驗證成功!</span></p>
+                        <p><i class="fas fa-file-code"></i> <strong>文檔類型:</strong> ${swaggerUrl.includes('.json') ? 'JSON' : 'YAML'}</p>
+                        <p><i class="fas fa-clock"></i> <strong>驗證時間:</strong> ${new Date().toLocaleString()}</p>
+                    `;
+                    updateStepStatus(3, '成功');
+                    
+                    // 顯示 Step 4
+                    document.getElementById('step4').classList.remove('hidden');
+                    document.getElementById('step4-body').classList.remove('hidden');
+                    updateStepStatus(4, '就緒');
+                } else {
+                    resultContent.innerHTML = `
+                        <p><span class="error"><i class="fas fa-times-circle"></i> 無效的 Swagger URL</span></p>
+                        <p>請確認 URL 指向有效的 Swagger/OpenAPI 文檔</p>
+                        <p><i class="fas fa-question-circle warning"></i> 提示: 標準 Swagger 文檔通常以 swagger.json 或 openapi.yaml 結尾</p>
+                    `;
+                    updateStepStatus(3, '失敗');
+                }
+            } catch (error) {
+                resultContent.innerHTML = `
+                    <p><span class="error"><i class="fas fa-times-circle"></i> 驗證過程中發生錯誤</span></p>
+                    <p>${error.message || '未知錯誤'}</p>
+                `;
+                updateStepStatus(3, '失敗');
+            } finally {
+                progressContainer.classList.add('hidden');
+                resultDiv.classList.remove('hidden');
+            }
+        }
+        
+        // Step 3: 載入 Swagger UI
+        function loadSwaggerUI() {
+            const swaggerUrl = document.getElementById('swaggerUrl').value;
+            const container = document.getElementById('swagger-ui-container');
+            
+            if (!swaggerUrl) {
+                alert('請先輸入 Swagger URL');
+                return;
+            }
+            
+            container.classList.remove('hidden');
+            container.innerHTML = '<div id="swagger-ui"></div>';
+            
+            // 初始化 Swagger UI
+            SwaggerUIBundle({
+                url: swaggerUrl,
+                dom_id: '#swagger-ui',
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                layout: "StandaloneLayout",
+                deepLinking: true,
+                displayOperationId: true,
+                filter: true
+            });
+        }
+        
+        // Step 4: 測試 API 資料
+        async function testApiData() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const resultContent = document.getElementById('step4-result-content');
+            
+            resultContent.innerHTML = `
+                <p><i class="fas fa-spinner fa-spin"></i> 正在測試 API 資料...</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="step4-progress-bar"></div>
+                </div>
+            `;
+            
+            // 模擬 API 測試過程
+            try {
+                await animateProgress('step4-progress-bar', 1500);
+                
+                resultContent.innerHTML = `
+                    <p><span class="success"><i class="fas fa-check-circle"></i> API 測試成功完成!</span></p>
+                    <p><i class="fas fa-server"></i> <strong>API URL:</strong> ${apiUrl}</p>
+                    <p><i class="fas fa-check success"></i> <strong>狀態:</strong> <span class="status-badge status-success">200 OK</span></p>
+                    <p><i class="fas fa-stopwatch"></i> <strong>回應時間:</strong> 320ms</p>
+                    <p><i class="fas fa-database"></i> <strong>回應資料範例:</strong></p>
+                    <pre>{
+  "status": "success",
+  "data": {
+    "housing": [
+      {
+        "id": 1,
+        "name": "範例住宅",
+        "address": "台北市大安區",
+        "price": 25000000,
+        "size": 35.5,
+        "features": ["近捷運", "學區", "公園"]
+      },
+      {
+        "id": 2,
+        "name": "精緻套房",
+        "address": "新北市板橋區",
+        "price": 18000000,
+        "size": 28.2,
+        "features": ["新裝潢", "獨立陽台", "管理完善"]
+      }
+    ],
+    "pagination": {
+      "total": 2,
+      "page": 1,
+      "per_page": 10
+    }
+  },
+  "timestamp": "${new Date().toISOString()}"
+}</pre>
+                `;
+                updateStepStatus(4, '成功');
+            } catch (error) {
+                resultContent.innerHTML = `
+                    <p><span class="error"><i class="fas fa-times-circle"></i> API 測試失敗</span></p>
+                    <p><i class="fas fa-bug"></i> <strong>錯誤訊息:</strong> ${error.message || '未知錯誤'}</p>
+                    <p><i class="fas fa-question-circle warning"></i> 建議檢查 API 端點是否正確且服務是否正常運行</p>
+                `;
+                updateStepStatus(4, '失敗');
+            }
+        }
+        
+        // 重置所有步驟
+        function resetAll() {
+            // 隱藏所有步驟 (除了第一步)
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step3').classList.add('hidden');
+            document.getElementById('step4').classList.add('hidden');
+            
+            // 重置狀態
+            updateStepStatus(1, '待處理');
+            updateStepStatus(2, '待處理');
+            updateStepStatus(3, '限通道 Step2');
+            updateStepStatus(4, '最終步驟');
+            
+            // 清空結果
+            document.getElementById('step1-result-content').innerHTML = '';
+            document.getElementById('step1Result').classList.add('hidden');
+            document.getElementById('swagger-ui-container').classList.add('hidden');
+            document.getElementById('swagger-ui-container').innerHTML = '';
+        }
+        
+        // 生成 PDF 報告 (模擬功能)
+        function generateReportPDF() {
+            alert('PDF 報告生成功能需要後端支援，此為示範用按鈕');
+            // 實際應用中這裡會呼叫後端 API 生成 PDF
+        }
+    </script>
+</body>
+</html>
