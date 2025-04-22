@@ -496,11 +496,11 @@
                         <i class="fas fa-link step-icon"></i>
                         <span>請輸入 API-URL</span>
                     </div>
-                    <span class="step-status">待處理</span>
+                    <span class="step-status">尚未執行</span>
                 </div>
                 <div class="step-body" id="step1-body">
                     <div class="form-group">
-                        <label for="apiUrl"><i class="fas fa-globe"></i> API 端點 URL</label>
+                        <label for="apiUrl"><i class="fas fa-globe"></i> 其SRU內容至少包括scheme、host 及 port(通訊埠)等三項資訊</label>
                         <input type="text" id="apiUrl" placeholder="輸入 API URL" value="https://hurc-api.hurc.org.tw/v1/housing/getdata">
                     </div>
                     <div class="progress-container hidden" id="step1-progress">
@@ -530,10 +530,10 @@
                 </div>
                 <div class="step-body" id="step2-body">
                     <div class="result" id="step2Result">
-                        <div class="result-title"><i class="fas fa-chart-line"></i> API 狀態報告</div>
+                       
                         <div class="result-content" id="step2-result-content">
                             <div class="report-section">
-                                <h3><i class="fas fa-table"></i> API 檢測結果表</h3>
+                                <h3><i class="fas fa-table"></i> API 檢測報告</h3>
                                 <div class="table-responsive">
                                     <table class="report-table">
                                         <thead>
@@ -542,89 +542,66 @@
                                                 <th>檢測項目</th>
                                                 <th>檢測內容</th>
                                                 <th>檢測結果</th>
-                                                <th>備註</th>
+                                                <th>檢測依據</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr class="success-row">
                                                 <td>1</td>
-                                                <td>API URL 格式檢查</td>
+                                                <td>API URL 網址檢查</td>
                                                 <td>
-                                                    <p>驗證要求：URL 必須符合以下組成要素：</p>
+                                                    <p>API 之 URL網址主要包括服務根網址(service root url, SRU)、資源路徑(resource path)及查詢選項(query options)。</p>
                                                     <ul>
-                                                        <li>服務根網址 (Service Root URL, SRU)</li>
-                                                        <li>資源路徑 (resource path)</li>
-                                                        <li>查詢選項 (query options)</li>
+                                                        <li>服務根網址:SRU 之內容包括scheme、host 及 port(通訊埠)等三項資訊。在本規範中，「scheme」一律採用 HTTP 或 HTTPS；「host」由開發單位設計，通常為主機名稱、單位名稱、單位性質、所在國家名稱縮寫等各類資訊之組合。必要時須指定特定的「port」(通訊埠)</li>
+                                                        <li>資源路徑:以階層式樹狀架構連結該 API 所提供之所有資源及其相關說明，各單位可依其服務內容設計(例如資料種類)，若有多重版本，版本資訊建議列於「path」之最前頭。OGC API 標準中保留部分關鍵字，用於指定特定用途之資訊(例如以「/confornamce」取得該 API 所符合標準之名稱)</li>
+                                                        <li>查詢選項:運用於查詢與取得符合條件之資料，常以參數方式表示。</li>
                                                     </ul>
                                                 </td>
                                                 <td><span class="status-badge status-success">符合</span></td>
-                                                <td>URL 結構完整</td>
+                                                <td><li>OGC API - Common - Part 1: Core(https://docs.ogc.org/is/19-072/19-072.html)</li><li>國土空間資訊圖資 API 共同規範</li></td>
+                                                
                                             </tr>
-                                            <tr class="success-row">
-                                                <td>2</td>
-                                                <td>服務根網址的組成</td>
-                                                <td>
-                                                    <p>驗證要求：SRU 必須符合以下組成要素：</p>
-                                                    <ul>
-                                                        <li>scheme (協議，如 HTTPS)</li>
-                                                        <li>host (主機)</li>
-                                                        <li>port (導號)</li>
-                                                        <li>URL 一律採用 HTTPS 區隔</li>
-                                                    </ul>
-                                                </td>
-                                                <td><span class="status-badge status-success">符合</span></td>
-                                                <td>使用 HTTPS 協議</td>
-                                            </tr>
+                                           
                                             <tr class="error-row">
-                                                <td>3</td>
-                                                <td>提供「Landing Page」</td>
-                                                <td>必須有一個起始頁面，連結 API 資源並提供相關說明。</td>
+                                                <td>2</td>
+                                                <td>「Landing Page」檢查</td>
+                                                <td><li>API 須提供一個「landing page」，用以連結提供之資源及提供必要之說明，包括如 API 目的及可進行操作等。</li><li>「landing page」可透過指定 SRU，並以 HTTP GET 之操作取得。</li><li>該 API 所提供之相關資源可進一步結合「SRU」及「path」資訊後取得。</li><li>「landing page」之回傳內容須包括以下資源之連結(links)，並可以 OpenAPI 之 schema 描述。 </li><li>
+「API definition」：主要為「service」之說明。 </li>
+ <li>「conformance declaration」：以「conformsTo」說明該 API
+設定之符合類別名稱或 URI。 </li><li>當提供資料時，「landing page」須增加「collection」之連結，並提供包括如識別碼(例如可識別特定資料集之資訊)、提供
+資源之坐標參考系統、名稱及描述(選擇性項目)、空間或時間範圍(選擇性項目)等。</li></td>
                                                 <td><span class="status-badge status-error">不符合</span></td>
-                                                <td>缺少標準 landing page，僅有 API 端點</td>
+                                                <td><li>國土空間資訊圖資 API 共同規範</li></td>
                                             </tr>
                                             <tr class="success-row">
-                                                <td>4</td>
+                                                <td>3</td>
                                                 <td>API 定義文件格式</td>
                                                 <td>API 定義文件必須採用 JSON 或 YAML 格式。</td>
                                                 <td><span class="status-badge status-success">符合</span></td>
-                                                <td>提供 JSON 格式文件</td>
+                                                <td><li>國土空間資訊圖資 API 共同規範</li></td>
                                             </tr>
                                             <tr class="warning-row">
-                                                <td>5</td>
+                                                <td>4</td>
                                                 <td>特定查詢功能支援</td>
                                                 <td>
                                                     <p>API 必須支援以下查詢參數：</p>
                                                     <ul>
-                                                        <li>bbox：限制回傳資料的空間範圍 (可為二維或三維坐標值)</li>
-                                                        <li>datetime：限制回傳資料的時間範圍，可為特定時間點或區間</li>
-                                                        <li>limit：限制回傳資料的筆數</li>
+                                                        <li>bbox：以坐標極值限制回傳資料之空間範圍，可為二維或三維。判斷以是否具有交集(intersect)為條件。</li>
+                                                        <li>datetime：針對日期與時間限制回傳資料，可為時間點或時間段。判斷以是否具有交集(intersect)為條件。</li>
+                                                        <li> limit：限制資料之回傳筆數。</li>
                                                     </ul>
                                                 </td>
                                                 <td><span class="status-badge status-warning">部分符合</span></td>
-                                                <td>缺少 datetime 參數支援</td>
+                                                <td><li>國土空間資訊圖資 API 共同規範</li></td>
                                             </tr>
                                             <tr class="success-row">
-                                                <td>6</td>
+                                                <td>5</td>
                                                 <td>坐標參考系統檢查</td>
-                                                <td>確認 API 使用的坐標參考系統是否符合規範。</td>
+                                                <td>「OGC API – Features – Part 1: Core corrigendum」實作規定中之坐標參考系統僅包括對於CRS84之預設規定(包含2D及3D)，若要採用其他之坐標參考系統，必須進一步遵循「OGC API – Features – Part 2: Coordinate Reference Systems by Reference corrigendum」之規定。</td>
                                                 <td><span class="status-badge status-success">符合</span></td>
-                                                <td>使用 WGS84 坐標系統</td>
+                                                <td><li>「OGC API – Features – Part 1: Core corrigendum」</li><li>國土空間資訊圖資 API 共同規範</li></td>
                                             </tr>
-                                            <tr class="error-row">
-                                                <td>7</td>
-                                                <td>Landing Page 資料檢視</td>
-                                                <td>
-                                                    <p>Landing Page 必須包含「collection」連結，並提供以下資訊：</p>
-                                                    <ul>
-                                                        <li>資料特徵的識別碼 (如唯一 ID)</li>
-                                                        <li>坐標參考系統資訊</li>
-                                                        <li>名稱與描述 (選擇性)</li>
-                                                        <li>空間或時間範圍 (選擇性)</li>
-                                                    </ul>
-                                                </td>
-                                                <td><span class="status-badge status-error">不符合</span></td>
-                                                <td>缺少 collection 連結</td>
-                                            </tr>
+                                           
                                         </tbody>
                                     </table>
                                 </div>
@@ -634,8 +611,8 @@
                                 <h3><i class="fas fa-exclamation-triangle"></i> 不符合項目詳細說明</h3>
                                 <div class="error-details">
                                     <div class="error-item">
-                                        <h4>3. 缺少 Landing Page</h4>
-                                        <p><strong>問題描述：</strong>API 服務缺少標準的 landing page，無法提供 API 資源的整體說明和導覽。</p>
+                                        <h4>「Landing Page」檢查</h4>
+                                        
                                         <p><strong>建議解決方案：</strong></p>
                                         <ul>
                                             <li>建立符合規範的 landing page，包含 API 基本資訊</li>
@@ -645,8 +622,8 @@
                                     </div>
                                     
                                     <div class="error-item">
-                                        <h4>5. 部分查詢功能缺失</h4>
-                                        <p><strong>問題描述：</strong>API 缺少 datetime 查詢參數支援，無法按時間範圍篩選資料。</p>
+                                        <h4>5.特定查詢功能支援</h4>
+                                        
                                         <p><strong>建議解決方案：</strong></p>
                                         <ul>
                                             <li>實作 datetime 查詢參數功能</li>
@@ -656,8 +633,8 @@
                                     </div>
                                     
                                     <div class="error-item">
-                                        <h4>7. 缺少 Collection 連結</h4>
-                                        <p><strong>問題描述：</strong>Landing page 中缺少 collection 資源的連結和基本描述。</p>
+                                        <h4>7.Landing Page 資料檢視</h4>
+                                        
                                         <p><strong>建議解決方案：</strong></p>
                                         <ul>
                                             <li>在 landing page 中添加 collections 連結</li>
@@ -697,11 +674,7 @@
                                         總體符合率: <span class="score">71%</span>
                                     </div>
                                 </div>
-                                <p class="recommendation">
-                                    <i class="fas fa-lightbulb"></i> <strong>改善建議：</strong> 
-                                    請優先解決 landing page 和 collection 連結的問題，這些是 API 可發現性(discoverability)的關鍵要素。
-                                    其次建議實作 datetime 查詢參數以增強 API 的查詢能力。
-                                </p>
+                               
                             </div>
                         </div>
                     </div>
@@ -741,38 +714,15 @@
                         <button class="btn btn-success" onclick="loadSwaggerUI()">
                             <i class="fas fa-eye"></i> 顯示 Swagger UI
                         </button>
+                        <button class="btn btn-secondary" onclick="resetAll()">
+                            <i class="fas fa-redo"></i> 重新開始
+                        </button>
                     </div>
                     <div class="result hidden" id="step3Result">
                         <div class="result-title"><i class="fas fa-clipboard-check"></i> 驗證結果</div>
                         <div class="result-content" id="step3-result-content"></div>
                     </div>
                     <div id="swagger-ui-container" class="hidden"></div>
-                </div>
-            </div>
-            
-            <!-- Step 4: 测试 API 资料 -->
-            <div class="step hidden" id="step4">
-                <div class="step-header" onclick="toggleStep('step4-body')">
-                    <div class="step-title">
-                        <span class="step-number">4</span>
-                        <i class="fas fa-vial step-icon"></i>
-                        <span>測試 API 資料</span>
-                    </div>
-                    <span class="step-status">最終步驟</span>
-                </div>
-                <div class="step-body" id="step4-body">
-                    <div class="result" id="step4Result">
-                        <div class="result-title"><i class="fas fa-tasks"></i> API 測試報告</div>
-                        <div class="result-content" id="step4-result-content"></div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-primary" onclick="testApiData()">
-                            <i class="fas fa-play"></i> 執行 API 測試
-                        </button>
-                        <button class="btn btn-secondary" onclick="resetAll()">
-                            <i class="fas fa-redo"></i> 重新開始
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -825,7 +775,7 @@
             });
         }
         
-        // Step 1: 檢測 API URL
+        // Step 1: 檢測 API url
         async function checkApiUrl() {
             const apiUrl = document.getElementById('apiUrl').value;
             const resultDiv = document.getElementById('step1Result');
@@ -848,8 +798,8 @@
                 
                 if (apiUrl.includes('hurc-api.hurc.org.tw')) {
                     resultContent.innerHTML = `
-                        <p><span class="success"><i class="fas fa-check-circle"></i> API URL 檢測成功!</span></p>
-                        <p><i class="fas fa-server"></i> <strong>端點:</strong> ${apiUrl}</p>
+                        <p><span class="success"><i class="fas fa-check-circle"></i> API-URL 檢測成功!</span></p>
+                        <p><i class="fas fa-server"></i> <strong>檢測端點:</strong> ${apiUrl}</p>
                         <p><i class="fas fa-clock"></i> <strong>檢測時間:</strong> ${new Date().toLocaleString()}</p>
                     `;
                     updateStepStatus(1, '成功');
@@ -913,11 +863,6 @@
                         <p><i class="fas fa-clock"></i> <strong>驗證時間:</strong> ${new Date().toLocaleString()}</p>
                     `;
                     updateStepStatus(3, '成功');
-                    
-                    // 顯示 Step 4
-                    document.getElementById('step4').classList.remove('hidden');
-                    document.getElementById('step4-body').classList.remove('hidden');
-                    updateStepStatus(4, '就緒');
                 } else {
                     resultContent.innerHTML = `
                         <p><span class="error"><i class="fas fa-times-circle"></i> 無效的 Swagger URL</span></p>
@@ -966,87 +911,26 @@
             });
         }
         
-        // Step 4: 測試 API 資料
-        async function testApiData() {
-            const apiUrl = document.getElementById('apiUrl').value;
-            const resultContent = document.getElementById('step4-result-content');
-            
-            resultContent.innerHTML = `
-                <p><i class="fas fa-spinner fa-spin"></i> 正在測試 API 資料...</p>
-                <div class="progress-container">
-                    <div class="progress-bar" id="step4-progress-bar"></div>
-                </div>
-            `;
-            
-            // 模擬 API 測試過程
-            try {
-                await animateProgress('step4-progress-bar', 1500);
-                
-                resultContent.innerHTML = `
-                    <p><span class="success"><i class="fas fa-check-circle"></i> API 測試成功完成!</span></p>
-                    <p><i class="fas fa-server"></i> <strong>API URL:</strong> ${apiUrl}</p>
-                    <p><i class="fas fa-check success"></i> <strong>狀態:</strong> <span class="status-badge status-success">200 OK</span></p>
-                    <p><i class="fas fa-stopwatch"></i> <strong>回應時間:</strong> 320ms</p>
-                    <p><i class="fas fa-database"></i> <strong>回應資料範例:</strong></p>
-                    <pre>{
-  "status": "success",
-  "data": {
-    "housing": [
-      {
-        "id": 1,
-        "name": "範例住宅",
-        "address": "台北市大安區",
-        "price": 25000000,
-        "size": 35.5,
-        "features": ["近捷運", "學區", "公園"]
-      },
-      {
-        "id": 2,
-        "name": "精緻套房",
-        "address": "新北市板橋區",
-        "price": 18000000,
-        "size": 28.2,
-        "features": ["新裝潢", "獨立陽台", "管理完善"]
-      }
-    ],
-    "pagination": {
-      "total": 2,
-      "page": 1,
-      "per_page": 10
-    }
-  },
-  "timestamp": "${new Date().toISOString()}"
-}</pre>
-                `;
-                updateStepStatus(4, '成功');
-            } catch (error) {
-                resultContent.innerHTML = `
-                    <p><span class="error"><i class="fas fa-times-circle"></i> API 測試失敗</span></p>
-                    <p><i class="fas fa-bug"></i> <strong>錯誤訊息:</strong> ${error.message || '未知錯誤'}</p>
-                    <p><i class="fas fa-question-circle warning"></i> 建議檢查 API 端點是否正確且服務是否正常運行</p>
-                `;
-                updateStepStatus(4, '失敗');
-            }
-        }
-        
         // 重置所有步驟
         function resetAll() {
             // 隱藏所有步驟 (除了第一步)
             document.getElementById('step2').classList.add('hidden');
             document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step4').classList.add('hidden');
             
             // 重置狀態
             updateStepStatus(1, '待處理');
             updateStepStatus(2, '待處理');
             updateStepStatus(3, '限通道 Step2');
-            updateStepStatus(4, '最終步驟');
             
             // 清空結果
             document.getElementById('step1-result-content').innerHTML = '';
             document.getElementById('step1Result').classList.add('hidden');
             document.getElementById('swagger-ui-container').classList.add('hidden');
             document.getElementById('swagger-ui-container').innerHTML = '';
+            
+            // 重置輸入欄位
+            document.getElementById('apiUrl').value = 'https://hurc-api.hurc.org.tw/v1/housing/getdata';
+            document.getElementById('swaggerUrl').value = 'https://petstore.swagger.io/v2/swagger.json';
         }
         
         // 生成 PDF 報告 (模擬功能)
