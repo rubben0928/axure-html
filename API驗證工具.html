@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+    <title>內政部資訊服務司 API 驗證工具</title>
     <!-- Swagger UI CSS -->
     <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css">
     <!-- Google Fonts -->
@@ -49,7 +49,7 @@
         header {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            padding: 2rem 0;
+            padding: 0rem 0;
             margin-bottom: 2rem;
             box-shadow: var(--box-shadow);
         }
@@ -75,6 +75,30 @@
         .logo {
             font-size: 2.5rem;
             color: white;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .example-link {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+        }
+        
+        .example-link:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
         
         .step-container {
@@ -459,6 +483,11 @@
                 gap: 1rem;
             }
             
+            .header-actions {
+                margin-top: 1rem;
+                justify-content: center;
+            }
+            
             .btn-group {
                 flex-direction: column;
             }
@@ -477,11 +506,16 @@
     <header>
         <div class="container header-content">
             <div>
-                <h1>內政部資訊服務司 API 驗證工具</h1>
+                <h1></h1>
                 
             </div>
-            <div class="logo">
-                <i class="fas fa-api"></i>
+            <div class="header-actions">
+                <a href="#" class="example-link" onclick="showExamples()">
+                    <i class="fas fa-check-circle"></i> 通過檢測案例
+                </a>
+                <div class="logo">
+                    <i class="fas fa-api"></i>
+                </div>
             </div>
         </div>
     </header>
@@ -490,6 +524,7 @@
         <div class="step-container">
             <!-- Step 1: 输入 API URL -->
             <div class="step" id="step1">
+            
                 <div class="step-header" onclick="toggleStep('step1-body')">
                     <div class="step-title">
                         <span class="step-number">1</span>
@@ -500,7 +535,7 @@
                 </div>
                 <div class="step-body" id="step1-body">
                     <div class="form-group">
-                        <label for="apiUrl"><i class="fas fa-globe"></i> 其SRU內容至少包括scheme、host 及 port(通訊埠)等三項資訊</label>
+                        <label for="apiUrl"><i class="fas fa-globe"></i> API-URL輸入範例:到時候再放範例在這裡!</label>
                         <input type="text" id="apiUrl" placeholder="輸入 API URL" value="https://hurc-api.hurc.org.tw/v1/housing/getdata">
                     </div>
                     <div class="progress-container hidden" id="step1-progress">
@@ -550,10 +585,10 @@
                                                 <td>1</td>
                                                 <td>API URL 網址檢查</td>
                                                 <td>
-                                                    <p>API 之 URL網址主要包括服務根網址(service root url, SRU)、資源路徑(resource path)及查詢選項(query options)。</p>
+                                                    <p>API 之 URL網址須包括服務根網址(service root url, SRU)、資源路徑(resource path)及查詢選項(query options)。</p>
                                                     <ul>
-                                                        <li>服務根網址:SRU 之內容包括scheme、host 及 port(通訊埠)等三項資訊。在本規範中，「scheme」一律採用 HTTP 或 HTTPS；「host」由開發單位設計，通常為主機名稱、單位名稱、單位性質、所在國家名稱縮寫等各類資訊之組合。必要時須指定特定的「port」(通訊埠)</li>
-                                                        <li>資源路徑:以階層式樹狀架構連結該 API 所提供之所有資源及其相關說明，各單位可依其服務內容設計(例如資料種類)，若有多重版本，版本資訊建議列於「path」之最前頭。OGC API 標準中保留部分關鍵字，用於指定特定用途之資訊(例如以「/confornamce」取得該 API 所符合標準之名稱)</li>
+                                                        <li>服務根網址:SRU之內容應包括scheme、host及port(通訊埠)等三項資訊。其「scheme」一律採用 HTTP 或 HTTPS；「host」由開發單位設計，通常為主機名稱、單位名稱、單位性質、所在國家名稱縮寫等各類資訊之組合。必要時須指定特定的「port」(通訊埠)</li>
+                                                        <li>資源路徑:以階層式樹狀架構連結該API所提供之所有資源及其相關說明，各單位可依其服務內容設計(例如資料種類)，若有多重版本，版本資訊建議列於「path」之最前頭。OGC API標準中保留部分關鍵字，用於指定特定用途之資訊(例如以「/confornamce」取得該 API 所符合標準之名稱)。</li>
                                                         <li>查詢選項:運用於查詢與取得符合條件之資料，常以參數方式表示。</li>
                                                     </ul>
                                                 </td>
@@ -565,13 +600,12 @@
                                             <tr class="error-row">
                                                 <td>2</td>
                                                 <td>「Landing Page」檢查</td>
-                                                <td><li>API 須提供一個「landing page」，用以連結提供之資源及提供必要之說明，包括如 API 目的及可進行操作等。</li><li>「landing page」可透過指定 SRU，並以 HTTP GET 之操作取得。</li><li>該 API 所提供之相關資源可進一步結合「SRU」及「path」資訊後取得。</li><li>「landing page」之回傳內容須包括以下資源之連結(links)，並可以 OpenAPI 之 schema 描述。 </li><li>
-「API definition」：主要為「service」之說明。 </li>
- <li>「conformance declaration」：以「conformsTo」說明該 API
-設定之符合類別名稱或 URI。 </li><li>當提供資料時，「landing page」須增加「collection」之連結，並提供包括如識別碼(例如可識別特定資料集之資訊)、提供
-資源之坐標參考系統、名稱及描述(選擇性項目)、空間或時間範圍(選擇性項目)等。</li></td>
+                                                <td><li>API須提供一個「landing page」，用以連結提供之資源及提供必要之說明，包括如API目的及可進行操作等。</li><li>「landing page」可透過指定SRU，並以HTTP GET之操作取得。</li><li>該 API 所提供之相關資源可進一步結合「SRU」及「path」資訊後取得。</li><li>「landing page」之回傳內容須包括以下資源之連結(links)，並可以OpenAPI之schema描述。 </li><li>
+「API definition」：主要為「service」之說明，例如查詢參數若以列舉型態記錄時，列出所有的可能紀錄值)。 </li>
+ <li>「conformance declaration」：以「conformsTo」說明該 API設定之符合類別名稱或URI。</li></td>
                                                 <td><span class="status-badge status-error">不符合</span></td>
-                                                <td><li>國土空間資訊圖資 API 共同規範</li></td>
+                                                <td><li>國土空間資訊圖資 API 共同規範</li><li>「OGC API – Features – Part 1: Core 
+corrigendum」之附錄 B</li></td>
                                             </tr>
                                             <tr class="success-row">
                                                 <td>3</td>
@@ -601,55 +635,56 @@
                                                 <td><span class="status-badge status-success">符合</span></td>
                                                 <td><li>「OGC API – Features – Part 1: Core corrigendum」</li><li>國土空間資訊圖資 API 共同規範</li></td>
                                             </tr>
-                                           
+                                            <tr class="warning-row">
+                                                <td>6</td>
+                                                <td>「collection」檢查</td>
+                                                <td>
+                                                    <p><li>當提供資料時，「landing page」須增加「collection」之連結，並提供包括如識別碼(例如可識別特定資料集之資訊)、提供資源之坐標參考系統、名稱及描述(選擇性項目)、空間或時間範圍(選擇性項目)等。</li></p>
+                                                    <ul>
+                                                        <li>需求資料之描述資訊可透過標準化 API 介面回傳，供應模式包括 Collections 及 Collection 等。「Collections」為該 API 路徑可提供之所有資源之詮釋資料；Collection」則為單一資料集合，通常為預先建立之資料集，可透過指定 ID 而取得。</li>
+                                                         
+                                                        
+                                                    </ul>
+                                                </td>
+                                                <td><span class="status-badge status-warning">部分符合</span></td>
+                                                <td><li>國土空間資訊圖資 API 共同規範</li></td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                             
                             <div class="report-section">
-                                <h3><i class="fas fa-exclamation-triangle"></i> 不符合項目詳細說明</h3>
+                                <h3><i class="fas fa-exclamation-triangle"></i> 不符合項目說明</h3>
                                 <div class="error-details">
                                     <div class="error-item">
-                                        <h4>「Landing Page」檢查</h4>
+                                        <h4>2.「Landing Page」檢查</h4>
                                         
-                                        <p><strong>建議解決方案：</strong></p>
+                                        <p><strong>底下所列為不符項目，請依循相關規範修正</strong></p>
                                         <ul>
-                                            <li>建立符合規範的 landing page，包含 API 基本資訊</li>
-                                            <li>在 landing page 中提供所有可用資源的連結</li>
-                                            <li>範例符合的 landing page: <code>https://api.example.com/</code></li>
+                                            <li>API須提供一個「landing page」，用以連結提供之資源及提供必要之說明，包括如API目的及可進行操作等。</li>
+                                            <li>「landing page」可透過指定SRU，並以HTTP GET之操作取得。</li>
+                                            <li>該 API 所提供之相關資源可進一步結合「SRU」及「path」資訊後取得。 </li>
                                         </ul>
                                     </div>
                                     
                                     <div class="error-item">
-                                        <h4>5.特定查詢功能支援</h4>
+                                        <h4>4.特定查詢功能支援</h4>
                                         
-                                        <p><strong>建議解決方案：</strong></p>
+                                        <p><strong>底下所列為不符項目，請依循相關規範修正</strong></p>
                                         <ul>
-                                            <li>實作 datetime 查詢參數功能</li>
-                                            <li>支援 ISO 8601 時間格式</li>
-                                            <li>範例符合的查詢: <code>?datetime=2023-01-01T00:00:00Z/2023-12-31T23:59:59Z</code></li>
+                                            <li>bbox：以坐標極值限制回傳資料之空間範圍，可為二維或三維。判斷以是否具有交集(intersect)為條件。</li>
+                                            <li>limit：限制資料之回傳筆數。</code></li>
                                         </ul>
                                     </div>
                                     
                                     <div class="error-item">
-                                        <h4>7.Landing Page 資料檢視</h4>
+                                        <h4>6.「collection」檢查</h4>
                                         
-                                        <p><strong>建議解決方案：</strong></p>
+                                        <p><strong>底下所列為不符項目，請依循相關規範修正</strong></p>
                                         <ul>
-                                            <li>在 landing page 中添加 collections 連結</li>
-                                            <li>為每個 collection 提供基本描述</li>
-                                            <li>範例符合的結構: 
-                                                <pre>{
-  "collections": [
-    {
-      "id": "housing",
-      "title": "住宅資料",
-      "description": "全台住宅相關資料集"
-    }
-  ]
-}</pre>
-                                            </li>
+                                            <li>當提供資料時，「landing page」須增加「collection」之連結，並提供包括如識別碼(例如可識別特定資料集之資訊)、提供資源之坐標參考系統、名稱及描述(選擇性項目)、空間或時間範圍(選擇性項目)等。</li>
+                                            
                                         </ul>
                                     </div>
                                 </div>
@@ -660,18 +695,18 @@
                                 <div class="summary">
                                     <div class="summary-item success">
                                         <i class="fas fa-check"></i>
-                                        <span>4 項檢測通過</span>
+                                        <span>3 項檢測通過</span>
                                     </div>
                                     <div class="summary-item warning">
                                         <i class="fas fa-exclamation"></i>
-                                        <span>1 項部分符合</span>
+                                        <span>2 項部分符合</span>
                                     </div>
                                     <div class="summary-item error">
                                         <i class="fas fa-times"></i>
-                                        <span>2 項不符合</span>
+                                        <span>1 項不符合</span>
                                     </div>
                                     <div class="summary-score">
-                                        總體符合率: <span class="score">71%</span>
+                                        總體符合率: <span class="score">62%</span>
                                     </div>
                                 </div>
                                
@@ -729,7 +764,9 @@
     </main>
     
     <footer>
-       
+        <div class="container">
+           
+        </div>
     </footer>
     
     <!-- Swagger UI 的 JS 文件 -->
@@ -737,6 +774,12 @@
     <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-standalone-preset.js"></script>
     
     <script>
+        // 新增的函數：顯示通過檢測案例
+        function showExamples() {
+            alert('這裡將顯示通過檢測的 API 案例列表，實際應用中可以連接後端資料庫或顯示預設案例');
+            // 實際應用中可以在此處載入案例列表或跳轉到案例頁面
+        }
+        
         // 切換步驟內容顯示/隱藏
         function toggleStep(stepBodyId) {
             const stepBody = document.getElementById(stepBodyId);
@@ -859,7 +902,7 @@
                 if (swaggerUrl.includes('swagger') || swaggerUrl.includes('openapi')) {
                     resultContent.innerHTML = `
                         <p><span class="success"><i class="fas fa-check-circle"></i> Swagger URL 驗證成功!</span></p>
-                        <p><i class="fas fa-file-code"></i> <strong>文檔類型:</strong> ${swaggerUrl.includes('.json') ? 'JSON' : 'YAML'}</p>
+                        
                         <p><i class="fas fa-clock"></i> <strong>驗證時間:</strong> ${new Date().toLocaleString()}</p>
                     `;
                     updateStepStatus(3, '成功');
