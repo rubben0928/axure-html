@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>材料送審、試驗管制</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .alert {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            background-color: white;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f1f9ff;
+        }
+        
+        .status-passed {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .status-failed {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 2px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-download {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-settings {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-settings:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-add {
+            background-color: #9b59b6;
+            color: white;
+            padding: 8px 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn-add:hover {
+            background-color: #8e44ad;
+        }
+        
+        .btn-submit {
+            background-color: #2ecc71;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 10px;
+        }
+        
+        .btn-submit:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 10px;
+            margin-left: 10px;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #7f8c8d;
+        }
+        
+        .form-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .required:after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        .reason-section {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 3px solid #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h1>材料送審、試驗管制</h1>
+    
+    <div class="alert">
+        <strong>注意：</strong> 第一次請先上傳材料設備送審及試驗管制總表，後續再依材料送審資料時程依序上傳相關文件！
+    </div>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="openTab('submission')">材料設備送審管制</button>
+            <button class="tab-btn" onclick="openTab('test')">材料設備試驗管制</button>
+        </div>
+        
+        <!-- 材料設備送審頁籤 -->
+        <div id="submission" class="tab-content active">
+            <button class="btn btn-add" onclick="showAddForm('submission')">+ 新增送審資料</button>
+            
+            <div id="submissionAddForm" class="form-container">
+                <h2>新增送審資料</h2>
+                <div class="form-group">
+                    <label for="submissionDesc" class="required">說明</label>
+                    <input type="text" id="submissionDesc" placeholder="請輸入材料設備送審說明(最多50字)">
+                </div>
+                <div class="form-group">
+                    <label for="submissionFile" class="required">檔案</label>
+                    <input type="file" id="submissionFile">
+                </div>
+                <div class="form-group">
+                    <label for="submissionStatus" class="required">審核狀態</label>
+                    <select id="submissionStatus" onchange="toggleReasonSection('submission')">
+                        <option value="pending">審核中</option>
+                        <option value="passed">通過</option>
+                        <option value="failed">未通過</option>
+                    </select>
+                </div>
+                <div id="submissionReasonSection" class="reason-section">
+                    <div class="form-group">
+                        <label for="submissionReason" class="required">未通過原因</label>
+                        <textarea id="submissionReason" placeholder="請詳細說明未通過的原因"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="submissionDeadline" class="required">限期改善日期</label>
+                        <input type="date" id="submissionDeadline">
+                    </div>
+                </div>
+                <button class="btn btn-submit" onclick="submitMaterial('submission')">新增</button>
+                <button class="btn btn-cancel" onclick="hideAddForm('submission')">取消</button>
+            </div>
+            
+            <table id="submissionTable">
+                <thead>
+                    <tr>
+                        <th>序號</th>
+                        <th>新增日期</th>
+                        <th>說明</th>
+                        <th>監造檢核</th>
+                        <th>未通過原因</th>
+                        <th>限期改善日期</th>
+                        <th>檔案</th>
+                        <th>編修</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2020/10/26</td>
+                        <td>材料設備送審管制總表</td>
+                        <td class="status-passed">通過</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><a href="#" class="btn btn-download">下載</a></td>
+                        <td><button class="btn btn-settings" onclick="editMaterial(1, 'submission')">編修</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2020/11/15</td>
+                        <td>鋼筋材料送審</td>
+                        <td class="status-failed">未通過</td>
+                        <td>檢驗報告未附原廠證明</td>
+                        <td class="deadline">2020/11/30</td>
+                        <td><a href="#" class="btn btn-download">下載</a></td>
+                        <td><button class="btn btn-settings" onclick="editMaterial(2, 'submission')">編修</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 材料設備試驗頁籤 -->
+        <div id="test" class="tab-content">
+            <button class="btn btn-add" onclick="showAddForm('test')">+ 新增試驗資料</button>
+            
+            <div id="testAddForm" class="form-container">
+                <h2>新增試驗資料</h2>
+                <div class="form-group">
+                    <label for="testDesc" class="required">說明</label>
+                    <input type="text" id="testDesc" placeholder="請輸入材料設備試驗說明(最多50字)">
+                </div>
+                <div class="form-group">
+                    <label for="testFile" class="required">檔案</label>
+                    <input type="file" id="testFile">
+                </div>
+                <div class="form-group">
+                    <label for="testStatus" class="required">審核狀態</label>
+                    <select id="testStatus" onchange="toggleReasonSection('test')">
+                        <option value="pending">審核中</option>
+                        <option value="passed">通過</option>
+                        <option value="failed">未通過</option>
+                    </select>
+                </div>
+                <div id="testReasonSection" class="reason-section">
+                    <div class="form-group">
+                        <label for="testReason" class="required">未通過原因</label>
+                        <textarea id="testReason" placeholder="請詳細說明未通過的原因"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="testDeadline" class="required">限期改善日期</label>
+                        <input type="date" id="testDeadline">
+                    </div>
+                </div>
+                <button class="btn btn-submit" onclick="submitMaterial('test')">新增</button>
+                <button class="btn btn-cancel" onclick="hideAddForm('test')">取消</button>
+            </div>
+            
+            <table id="testTable">
+                <thead>
+                    <tr>
+                        <th>序號</th>
+                        <th>新增日期</th>
+                        <th>說明</th>
+                        <th>監造檢核</th>
+                        <th>未通過原因</th>
+                        <th>限期改善日期</th>
+                        <th>檔案</th>
+                        <th>編修</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2020/10/26</td>
+                        <td>材料設備試驗管制總表</td>
+                        <td class="status-passed">通過</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td><a href="#" class="btn btn-download">下載</a></td>
+                        <td><button class="btn btn-settings" onclick="editMaterial(1, 'test')">編修</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2020/11/18</td>
+                        <td>混凝土抗壓試驗報告</td>
+                        <td class="status-failed">未通過</td>
+                        <td>試體養護條件不符合規範</td>
+                        <td class="deadline">2020/12/05</td>
+                        <td><a href="#" class="btn btn-download">下載</a></td>
+                        <td><button class="btn btn-settings" onclick="editMaterial(2, 'test')">編修</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // 切換頁籤
+        function openTab(tabName) {
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+            
+            const tabButtons = document.getElementsByClassName('tab-btn');
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+        
+        // 顯示新增表單
+        function showAddForm(type) {
+            document.getElementById(`${type}AddForm`).style.display = 'block';
+            resetForm(type);
+        }
+        
+        // 隱藏新增表單
+        function hideAddForm(type) {
+            document.getElementById(`${type}AddForm`).style.display = 'none';
+        }
+        
+        // 重置表單
+        function resetForm(type) {
+            document.getElementById(`${type}Desc`).value = '';
+            document.getElementById(`${type}File`).value = '';
+            document.getElementById(`${type}Status`).value = 'pending';
+            document.getElementById(`${type}Reason`).value = '';
+            document.getElementById(`${type}Deadline`).value = '';
+            document.getElementById(`${type}ReasonSection`).style.display = 'none';
+        }
+        
+        // 根據審核狀態顯示/隱藏原因區塊
+        function toggleReasonSection(type) {
+            const status = document.getElementById(`${type}Status`).value;
+            const reasonSection = document.getElementById(`${type}ReasonSection`);
+            
+            if (status === 'failed') {
+                reasonSection.style.display = 'block';
+            } else {
+                reasonSection.style.display = 'none';
+            }
+        }
+        
+        // 提交材料設備
+        function submitMaterial(type) {
+            const desc = document.getElementById(`${type}Desc`).value;
+            const file = document.getElementById(`${type}File`).value;
+            const status = document.getElementById(`${type}Status`).value;
+            const reason = document.getElementById(`${type}Reason`).value;
+            const deadline = document.getElementById(`${type}Deadline`).value;
+            
+            // 簡單驗證
+            if (!desc || !file) {
+                alert('請填寫所有必填欄位！');
+                return;
+            }
+            
+            if (status === 'failed' && (!reason || !deadline)) {
+                alert('未通過狀態必須填寫原因和限期改善日期！');
+                return;
+            }
+            
+            // 這裡應該有實際的提交邏輯，例如AJAX請求
+            // 現在只是模擬添加到表格中
+            
+            const today = new Date();
+            const dateStr = today.getFullYear() + '/' + 
+                           (today.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                           today.getDate().toString().padStart(2, '0');
+            
+            let statusText = '';
+            let statusClass = '';
+            switch(status) {
+                case 'passed':
+                    statusText = '通過';
+                    statusClass = 'status-passed';
+                    break;
+                case 'failed':
+                    statusText = '未通過';
+                    statusClass = 'status-failed';
+                    break;
+                default:
+                    statusText = '審核中';
+                    statusClass = 'status-pending';
+            }
+            
+            const tableId = `${type}Table`;
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            const newRowId = tbody.rows.length + 1;
+            
+            const newRow = `
+                <tr>
+                    <td>${newRowId}</td>
+                    <td>${dateStr}</td>
+                    <td>${desc}</td>
+                    <td class="${statusClass}">${statusText}</td>
+                    <td>${status === 'failed' ? reason : '-'}</td>
+                    <td>${status === 'failed' ? `<span class="deadline">${deadline}</span>` : '-'}</td>
+                    <td><a href="#" class="btn btn-download">下載</a></td>
+                    <td><button class="btn btn-settings" onclick="editMaterial(${newRowId}, '${type}')">設定</button></td>
+                </tr>
+            `;
+            
+            tbody.insertAdjacentHTML('beforeend', newRow);
+            
+            // 重置表單並隱藏
+            resetForm(type);
+            hideAddForm(type);
+            
+            alert('資料已成功提交！');
+        }
+        
+        // 編輯材料設備
+        function editMaterial(id, type) {
+            // 這裡應該彈出編輯表單，邏輯類似新增表單
+            // 只是預先填入現有資料
+            alert(`即將編輯ID為 ${id} 的${type === 'submission' ? '送審' : '試驗'}材料設備`);
+            
+            // 實際應用中，這裡會:
+            // 1. 取得該筆資料的詳細資訊
+            // 2. 顯示編輯表單並填入現有值
+            // 3. 提供更新按鈕來提交變更
+        }
+    </script>
+</body>
+</html>
