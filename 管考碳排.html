@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程碳排放量生命週期管控</title>
+    <style>
+        :root {
+            --primary-color: #e91e63;
+            --primary-light: #f8bbd0;
+            --primary-dark: #c2185b;
+            --secondary-color: #ad1457;
+            --success-color: #f06292;
+            --warning-color: #ff80ab;
+            --alert-color: #ff4081;
+            --border-color: #fce4ec;
+            --background-color: #fff9fb;
+            --text-color: #4a148c;
+            --light-gray: #fdf2f5;
+            --white: #ffffff;
+            --card-shadow: 0 1px 3px rgba(233, 30, 99, 0.12), 0 1px 2px rgba(233, 30, 99, 0.24);
+            --card-shadow-hover: 0 14px 28px rgba(233, 30, 99, 0.12), 0 10px 10px rgba(233, 30, 99, 0.10);
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--white);
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--secondary-color);
+            transition: all 0.3s;
+            text-align: center;
+            flex-grow: 1;
+        }
+        
+        .tab:hover {
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
+        
+        .tab.active {
+            color: var(--white);
+            background-color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .title {
+            font-size: 1.8em;
+            font-weight: 600;
+            margin: 30px 0;
+            color: var(--primary-dark);
+            text-align: center;
+            position: relative;
+        }
+        
+        .title:after {
+            content: "";
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--warning-color));
+            margin: 10px auto 0;
+            border-radius: 2px;
+        }
+        
+        .stages-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .stage-card {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s;
+            border-top: 4px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stage-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+        
+        .stage-card:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--warning-color));
+        }
+        
+        .stage-title {
+            font-weight: 600;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: var(--primary-dark);
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .stage-title:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+        
+        .stage-status {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 0.85em;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .status-filled {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .status-empty {
+            background-color: #ffe0e9;
+            color: #d81b60;
+            border: 1px solid #ff80ab;
+        }
+        
+        .emission-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin: 20px 0;
+            text-align: center;
+            color: var(--primary-dark);
+            font-family: 'Arial', sans-serif;
+            position: relative;
+        }
+        
+        .emission-unit {
+            font-size: 0.7em;
+            color: var(--secondary-color);
+            vertical-align: super;
+        }
+        
+        .progress-container {
+            margin-top: 25px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--warning-color));
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 0.85em;
+            color: var(--secondary-color);
+            margin-top: 8px;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        .alert-icon {
+            color: var(--alert-color);
+            font-size: 1.2em;
+            margin-left: 5px;
+            vertical-align: middle;
+            display: none;
+        }
+        
+        .comparison-info {
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            background-color: var(--light-gray);
+            display: none;
+        }
+        
+        .higher {
+            color: #d81b60;
+            background-color: #ffebee;
+        }
+        
+        .lower {
+            color: #4a148c;
+            background-color: #f3e5f5;
+        }
+        
+        .reference-mark {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .stages-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 1.5em;
+                margin: 20px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tabs {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tab {
+                padding: 10px 5px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab">基本資料</div>
+            <div class="tab">預定執行</div>
+            <div class="tab">執行狀況</div>
+            <div class="tab">預算額度</div>
+            <div class="tab active">工程碳排</div>
+            <div class="tab">每月進度</div>
+        </div>
+        
+        <div class="title">工程碳排放量生命週期管控</div>
+        
+        <div class="stages-container">
+            <div class="stage-card" id="stage2">
+                <div class="stage-title">核定階段</div>
+                <div class="stage-status status-filled">核定碳排量(基準值)</div>
+                <div class="emission-value">110 <span class="emission-unit">tonCO<sub>2</sub>e</span>
+                    <div class="reference-mark">基</div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-text">填寫狀態:已填寫</div>
+                </div>
+            </div>
+            
+            <div class="stage-card" id="stage3">
+                <div class="stage-title">規劃設計階段</div>
+                <div class="stage-status status-filled">碳精算</div>
+                <div class="emission-value">137.43 <span class="emission-unit">tonCO<sub>2</sub>e</span>
+                    <span class="alert-icon">⚠️</span>
+                </div>
+                <div class="comparison-info higher">比基準值高 24.9</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                    <div class="progress-text">填寫狀態:已填寫</div>
+                </div>
+            </div>
+            
+            <div class="stage-card" id="stage4">
+                <div class="stage-title">結算階段</div>
+                <div class="stage-status status-empty">碳精算</div>
+                <div class="emission-value">-- <span class="emission-unit">tonCO<sub>2</sub>e</span>
+                    <span class="alert-icon">⚠️</span>
+                </div>
+                <div class="comparison-info">待填寫數據</div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">填寫狀態:尚未填寫</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 基準值（階段二）
+        const baselineValue = 110;
+        
+        // 階段三數據
+        const stage3Value = 137.43;
+        const stage3Element = document.getElementById('stage3');
+        const stage3Alert = stage3Element.querySelector('.alert-icon');
+        const stage3Comparison = stage3Element.querySelector('.comparison-info');
+        
+        // 計算與基準值的差異
+        const difference3 = stage3Value - baselineValue;
+        const percentageDiff3 = ((difference3 / baselineValue) * 100).toFixed(1);
+        
+        // 顯示警示和比較信息
+        if(difference3 !== 0) {
+            stage3Alert.style.display = 'inline-block';
+            stage3Comparison.style.display = 'block';
+            
+            if(difference3 > 0) {
+                stage3Comparison.textContent = `碳排量為(合理範圍): 0.23`;
+                stage3Comparison.classList.add('higher');
+            } else {
+                stage3Comparison.textContent = `比基準值低 ${Math.abs(percentageDiff3)}%`;
+                stage3Comparison.classList.add('lower');
+            }
+        }
+        
+        // 階段四數據（假設填寫後的情況）
+        // 這裡可以根據實際數據動態更新
+        function updateStage4(value) {
+            const stage4Element = document.getElementById('stage4');
+            const stage4ValueElement = stage4Element.querySelector('.emission-value');
+            const stage4Alert = stage4Element.querySelector('.alert-icon');
+            const stage4Comparison = stage4Element.querySelector('.comparison-info');
+            const stage4Status = stage4Element.querySelector('.stage-status');
+            const stage4Progress = stage4Element.querySelector('.progress-fill');
+            
+            if(value !== null) {
+                stage4ValueElement.innerHTML = `${value} <span class="emission-unit">tonCO<sub>2</sub>e</span>`;
+                stage4Status.textContent = "結算階段(已填寫)";
+                stage4Status.className = "stage-status status-filled";
+                stage4Progress.style.width = "100%";
+                stage4Element.querySelector('.progress-text').textContent = "100% 完成";
+                
+                const difference4 = value - baselineValue;
+                const percentageDiff4 = ((difference4 / baselineValue) * 100).toFixed(1);
+                
+                if(difference4 !== 0) {
+                    stage4Alert.style.display = 'inline-block';
+                    stage4Comparison.style.display = 'block';
+                    
+                    if(difference4 > 0) {
+                        stage4Comparison.textContent = `碳排量為(合理範圍) ${percentageDiff4}%`;
+                        stage4Comparison.className = "comparison-info higher";
+                    } else {
+                        stage4Comparison.textContent = `比基準值低 ${Math.abs(percentageDiff4)}%`;
+                        stage4Comparison.className = "comparison-info lower";
+                    }
+                } else {
+                    stage4Alert.style.display = 'none';
+                    stage4Comparison.style.display = 'none';
+                }
+            }
+        }
+        
+        // 示例：更新階段四數據（可以從實際數據源獲取）
+        // updateStage4(95); // 比基準值低的情況
+        // updateStage4(125); // 比基準值高的情況
+    </script>
+</body>
+</html>
