@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瀝青混凝土設計情形表單</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .radio-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .input-field {
+            display: flex;
+            align-items: center;
+            margin-left: 25px;
+            margin-top: 8px;
+        }
+        
+        .input-field label {
+            width: 120px;
+            margin-right: 10px;
+        }
+        
+        .input-field input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .input-field .unit {
+            color: #666;
+        }
+        
+        .checkbox-group {
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-option {
+            margin-bottom: 8px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 80px;
+            margin-top: 10px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .required:after {
+            content: " *";
+            color: red;
+        }
+        
+        label {
+            cursor: pointer;
+        }
+        
+        .sub-options {
+            margin-left: 25px;
+        }
+        
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .status-info {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: #e8f4f8;
+            color: #31708f;
+            border: 1px solid #bce8f1;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-reference {
+            background-color: #2196F3;
+        }
+        
+        .btn-reference:hover {
+            background-color: #0b7dda;
+        }
+        
+        .btn-save {
+            background-color: #ff9800;
+        }
+        
+        .btn-save:hover {
+            background-color: #e68a00;
+        }
+        
+        .action-buttons {
+            margin-top: 20px;
+        }
+        
+        .status-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="tabs">
+            <div class="tab active" data-tab="design">再生瀝青(設計階段)</div>
+            <div class="tab" data-tab="settlement">再生瀝青(結算階段)</div>
+        </div>
+        
+        <!-- 設計階段內容 -->
+        <div id="design-tab" class="tab-content active">
+            <div class="status-info">
+                <div>目前狀態: <strong id="design-status">未登錄</strong></div>
+                <div class="status-actions">
+                    <button class="btn btn-save" id="save-design">儲存設計資料</button>
+                </div>
+            </div>
+            
+            <h1 class="required">瀝青混凝土設計情形：</h1>
+            
+            <div class="form-section">
+                <div class="radio-group">
+                    <input type="radio" id="none" name="design" checked>
+                    <label for="none">無</label>
+                </div>
+                
+                <div class="radio-group">
+                    <input type="radio" id="has-design" name="design">
+                    <label for="has-design">有(需填寫底下三項)</label>
+                </div>
+                
+                <div class="sub-options">
+                    <div class="input-field">
+                        <label for="concreteAmount">瀝青混凝土量</label>
+                        <input type="number" id="concreteAmount" value="10.00" step="0.01">
+                        <span class="unit">平方公尺</span>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="removalAmount">刨除量</label>
+                        <input type="number" id="removalAmount" value="10.00" step="0.01">
+                        <span class="unit">平方公尺</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h1 class="required">再生瀝青混凝土量：</h1>
+                
+                <div class="radio-group">
+                    <input type="radio" id="use" name="reuse" checked>
+                    <label for="use">使用</label>
+                </div>
+                
+                <div class="input-field">
+                    
+                    <input type="number" id="reuseAmount" value="10.00" step="0.01">
+                    <span class="unit">平方公尺</span>
+                </div>
+                
+                <div class="radio-group">
+                    <input type="radio" id="has" name="condition" checked>
+                    <label for="has">不使用</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="traffic">
+                        <label for="traffic">交通量大</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="heavy">
+                        <label for="heavy">重車常行經路段</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="noRemoval">
+                        <label for="noRemoval">無刨除(經評估加鋪後，無高差致生危險疑慮路段)</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="other">
+                        <label for="other">其他</label>
+                    </div>
+                    
+                   
+                </div>
+                
+                <div class="form-group">
+                   
+                    <textarea id="reason" placeholder="請填寫原因" maxlength="200"></textarea>
+                    <div class="char-counter"><span id="charCount">(字數限制:0</span>/200)</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn">暫存</button>
+                <button class="btn" id="submit-design">提交</button>
+            </div>
+        </div>
+        
+        <!-- 結算階段內容 -->
+        <div id="settlement-tab" class="tab-content">
+            <div class="status-info">
+                <div>目前狀態: <strong id="settlement-status">未登錄</strong></div>
+                <div class="status-actions">
+                    <button class="btn btn-save" id="save-settlement">儲存結算資料</button>
+                    <button class="btn btn-reference" id="reference-design">引用設計階段資料</button>
+                </div>
+            </div>
+            
+            <h1 class="required">瀝青混凝土結算情形：</h1>
+            
+            <div class="form-section">
+                <div class="radio-group">
+                    <input type="radio" id="settlement-none" name="settlement-design" checked>
+                    <label for="settlement-none">無</label>
+                </div>
+                
+                <div class="radio-group">
+                    <input type="radio" id="settlement-has-design" name="settlement-design">
+                    <label for="settlement-has-design">有(需填寫底下三項)</label>
+                </div>
+                
+                <div class="sub-options">
+                    <div class="input-field">
+                        <label for="settlement-concreteAmount">瀝青混凝土量</label>
+                        <input type="number" id="settlement-concreteAmount" value="" step="0.01">
+                        <span class="unit">平方公尺</span>
+                    </div>
+                    
+                    <div class="input-field">
+                        <label for="settlement-removalAmount">刨除量</label>
+                        <input type="number" id="settlement-removalAmount" value="" step="0.01">
+                        <span class="unit">平方公尺</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h1 class="required">再生瀝青混凝土量：</h1>
+                
+                <div class="radio-group">
+                    <input type="radio" id="settlement-use" name="settlement-reuse" checked>
+                    <label for="settlement-use">使用</label>
+                </div>
+                
+                <div class="input-field">
+                    
+                    <input type="number" id="settlement-reuseAmount" value="" step="0.01">
+                    <span class="unit">平方公尺</span>
+                </div>
+                
+                <div class="radio-group">
+                    <input type="radio" id="settlement-has" name="settlement-condition" checked>
+                    <label for="settlement-has">不使用</label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="settlement-traffic">
+                        <label for="settlement-traffic">交通量大</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="settlement-heavy">
+                        <label for="settlement-heavy">重車常行經路段</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="settlement-noRemoval">
+                        <label for="settlement-noRemoval">無刨除(經評估加鋪後，無高差致生危險疑慮路段)</label>
+                    </div>
+                    
+                    <div class="checkbox-option">
+                        <input type="checkbox" id="settlement-other">
+                        <label for="settlement-other">其他</label>
+                    </div>
+                    
+                   
+                </div>
+                
+                <div class="form-group">
+                   
+                    <textarea id="settlement-reason" placeholder="請填寫原因" maxlength="200"></textarea>
+                    <div class="char-counter"><span id="settlement-charCount">(字數限制:0</span>/200)</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn">暫存</button>
+                <button class="btn" id="submit-settlement">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 頁籤切換功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有active類
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 添加active類到當前點擊的頁籤和內容
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+        
+        // 字數計算功能
+        const reasonTextarea = document.getElementById('reason');
+        const charCount = document.getElementById('charCount');
+        const settlementReasonTextarea = document.getElementById('settlement-reason');
+        const settlementCharCount = document.getElementById('settlement-charCount');
+        
+        reasonTextarea.addEventListener('input', function() {
+            charCount.textContent = this.value.length;
+        });
+        
+        settlementReasonTextarea.addEventListener('input', function() {
+            settlementCharCount.textContent = this.value.length;
+        });
+        
+        // 設計資料儲存功能
+        document.getElementById('save-design').addEventListener('click', function() {
+            document.getElementById('design-status').textContent = '已登錄';
+            this.textContent = '更新設計資料';
+            alert('設計資料已儲存！');
+        });
+        
+        // 結算資料儲存功能
+        document.getElementById('save-settlement').addEventListener('click', function() {
+            document.getElementById('settlement-status').textContent = '已登錄';
+            this.textContent = '更新結算資料';
+            alert('結算資料已儲存！');
+        });
+        
+        // 引用設計階段資料功能
+        document.getElementById('reference-design').addEventListener('click', function() {
+            if(document.getElementById('design-status').textContent === '已登錄') {
+                // 從設計階段複製資料到結算階段
+                document.getElementById('settlement-concreteAmount').value = 
+                    document.getElementById('concreteAmount').value;
+                document.getElementById('settlement-removalAmount').value = 
+                    document.getElementById('removalAmount').value;
+                document.getElementById('settlement-reuseAmount').value = 
+                    document.getElementById('reuseAmount').value;
+                document.getElementById('settlement-reason').value = 
+                    document.getElementById('reason').value;
+                
+                // 更新狀態
+                document.getElementById('settlement-status').textContent = '已登錄';
+                document.getElementById('save-settlement').textContent = '更新結算資料';
+                alert('已成功引用設計階段資料！');
+            } else {
+                alert('請先儲存設計階段資料！');
+            }
+        });
+        
+        // 提交按鈕功能
+        document.getElementById('submit-design').addEventListener('click', function() {
+            alert('設計資料已提交！');
+        });
+        
+        document.getElementById('submit-settlement').addEventListener('click', function() {
+            alert('結算資料已提交！');
+        });
+    </script>
+</body>
+</html>
