@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社團管理系統</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --dark-color: #34495e;
+            --light-color: #ecf0f1;
+            --gray-color: #95a5a6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+        
+        h1, h2, h3 {
+            color: var(--dark-color);
+            margin-top: 0;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tab-container {
+            margin-bottom: 30px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            background: #f1f1f1;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            background: #e0e0e0;
+        }
+        
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        form {
+            margin-bottom: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .form-section h3::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 5px;
+            height: 70%;
+            width: 4px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        .btn-dark {
+            background-color: var(--dark-color);
+            color: white;
+        }
+        
+        .btn-dark:hover {
+            background-color: #2c3e50;
+        }
+        
+        .toggle-admin {
+            background-color: var(--dark-color);
+            color: white;
+        }
+        
+        .admin-mode .toggle-admin {
+            background-color: var(--secondary-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px #eee;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--dark-color);
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .status {
+            font-weight: 600;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            display: inline-block;
+        }
+        
+        .status-pending {
+            color: #d35400;
+            background-color: #fdebd0;
+        }
+        
+        .status-approved {
+            color: #27ae60;
+            background-color: #d5f5e3;
+        }
+        
+        .status-rejected {
+            color: #c0392b;
+            background-color: #fadbd8;
+        }
+        
+        .status-disbanded {
+            color: #7f8c8d;
+            background-color: #ebedef;
+        }
+        
+        .action-btn {
+            padding: 8px 12px;
+            margin-right: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .btn-review {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        .btn-review:hover {
+            background-color: #8e44ad;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 60%;
+            max-width: 800px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        
+        .close {
+            color: #aaa;
+            position: absolute;
+            right: 25px;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #333;
+        }
+        
+        .member-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .member-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        
+        .admin-tab {
+            display: none;
+        }
+        
+        .admin-mode .admin-tab {
+            display: block;
+        }
+        
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .search-filter input, .search-filter select {
+            margin-bottom: 0;
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        
+        .card-title {
+            font-size: 1.1em;
+            color: var(--dark-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+            background: #f1f1f1;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>GIS集團-員工社團管理系統</h1>
+            <button class="toggle-admin" onclick="toggleAdminMode()">切換成管理員模式</button>
+        </div>
+        
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab('create-club')">我要申請社團成立</button>
+                <button class="tab-button" onclick="openTab('my-clubs')">我已申請的社團</button>
+                <button class="tab-button" onclick="openTab('join-club')">線上申請社團</button>
+                <button class="tab-button admin-tab" onclick="openTab('admin-approval')">社團申請審核</button>
+            </div>
+            
+            <!-- 建立新社團 -->
+            <div id="create-club" class="tab-content active">
+                <div class="card">
+                    <h2>申請說明</h2>
+                    <p class="text-muted">請先填寫以下資訊並線上提送申請，俟審核通過後即可開放同仁加入!</p>
+                </div>
+                
+                <form id="new-club-form">
+                    <div class="form-section">
+                        <h3>基本資訊</h3>
+                        <div class="form-group">
+                            <label for="club-name">社團名稱</label>
+                            <input type="text" id="club-name" name="club-name" placeholder="請輸入社團名稱" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="club-category">社團類型</label>
+                            <select id="club-category" name="club-category" required>
+                                <option value="">請選擇社團類型</option>
+                                <option value="運動">運動</option>
+                                <option value="藝術">藝術</option>
+                                <option value="音樂">音樂</option>
+                                <option value="學術">學術</option>
+                                <option value="休閒">休閒</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="club-time">社團活動時間</label>
+                            <input type="text" id="club-time" name="club-time" placeholder="例如: 每週三 12:00-13:30" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="club-location">社團活動地點</label>
+                            <input type="text" id="club-location" name="club-location" placeholder="請輸入活動地點" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="club-description">社團描述</label>
+                            <textarea id="club-description" name="club-description" rows="4" placeholder="請簡要描述社團活動內容與宗旨" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3>社團人數限制</h3>
+                        <div class="form-group">
+                            <label for="club-max-members">最大成員數 <span class="badge">選填</span></label>
+                            <input type="number" id="club-max-members" name="club-max-members" min="1" placeholder="若不限制請留空">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">確定送出申請</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 我建立的社團 -->
+            <div id="my-clubs" class="tab-content">
+                <div class="card">
+                    <h2>說明</h2>
+                    <p class="text-muted">以下是您已申請的社團清單，可進行編輯管理等設定!</p>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>社團名稱</th>
+                            <th>社團類型</th>
+                            <th>社團活動時間</th>
+                            <th>審核狀態</th>
+                            <th>已參加人數/人數上限</th>
+                            <th>管理</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>籃球社</td>
+                            <td>運動</td>
+                            <td>每週三 12:00-13:30</td>
+                            <td><span class="status status-approved">已批准</span></td>
+                            <td><span class="member-link" onclick="showMembers('籃球社')">15/20</span></td>
+                            <td>
+                                <button class="action-btn btn-warning">編輯</button>
+                                <button class="action-btn btn-review" onclick="showReviewModal('籃球社')">人員審核</button>
+                                <button class="action-btn btn-dark" onclick="showDisbandModal('籃球社')">解散</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>攝影社</td>
+                            <td>藝術</td>
+                            <td>每週五 18:00-20:00</td>
+                            <td><span class="status status-pending">審核中</span></td>
+                            <td>0/-</td>
+                            <td>
+                                <button class="action-btn btn-danger">取消申請</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>桌遊社</td>
+                            <td>休閒</td>
+                            <td>每週四 17:00-19:00</td>
+                            <td><span class="status status-disbanded">已解散</span></td>
+                            <td><span class="member-link" onclick="showMembers('桌遊社')">0/15</span></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 參加社團 -->
+            <div id="join-club" class="tab-content">
+                <div class="card">
+                    <h2>說明</h2>
+                    <p class="text-muted">以下是目前已開放申請加入的所有社團，可點擊"申請加入"即可報名成功!</p>
+                </div>
+                
+                <div class="search-filter">
+                    <input type="text" placeholder="搜尋社團名稱...">
+                    <select>
+                        <option value="">所有類型</option>
+                        <option value="運動">運動</option>
+                        <option value="藝術">藝術</option>
+                        <option value="音樂">音樂</option>
+                        <option value="學術">學術</option>
+                        <option value="休閒">休閒</option>
+                    </select>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>社團名稱</th>
+                            <th>社團類型</th>
+                            <th>社團活動時間</th>
+                            <th>社團活動地點</th>
+                            <th>已參加人數/人數限制</th>
+                            <th>申請作業</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>籃球社</td>
+                            <td>運動</td>
+                            <td>每週三 12:00-13:30</td>
+                            <td>體育館</td>
+                            <td><span class="member-link" onclick="showMembers('籃球社')">15/20</span></td>
+                            <td><button class="action-btn btn-success">申請加入</button></td>
+                        </tr>
+                        <tr>
+                            <td>桌遊社</td>
+                            <td>休閒</td>
+                            <td>每週四 17:00-19:00</td>
+                            <td>員工休息室</td>
+                            <td><span class="member-link" onclick="showMembers('桌遊社')">8/15</span></td>
+                            <td><button class="action-btn btn-success">申請加入</button></td>
+                        </tr>
+                        <tr>
+                            <td>讀書會</td>
+                            <td>學術</td>
+                            <td>每週二 19:00-21:00</td>
+                            <td>圖書館</td>
+                            <td><span class="member-link" onclick="showMembers('讀書會')">10/12</span></td>
+                            <td><button class="action-btn btn-success">申請加入</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 社團審核 (管理員專用) -->
+            <div id="admin-approval" class="tab-content admin-tab">
+                <div class="card">
+                    <h2>社團審核</h2>
+                    <p class="text-muted">以下是待審核的社團申請，請仔細審查後再決定是否批准!!</p>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>社團名稱</th>
+                            <th>申請人</th>
+                            <th>類型</th>
+                            <th>申請日期</th>
+                            <th>狀態</th>
+                            <th>審核</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>攝影社</td>
+                            <td>張三</td>
+                            <td>藝術</td>
+                            <td>2023-11-01</td>
+                            <td><span class="status status-pending">審核中</span></td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="approveClub('攝影社')">同意</button>
+                                <button class="action-btn btn-danger" onclick="showRejectModal('攝影社')">不同意</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>羽球社</td>
+                            <td>李四</td>
+                            <td>運動</td>
+                            <td>2023-11-05</td>
+                            <td><span class="status status-pending">審核中</span></td>
+                            <td>
+                                <button class="action-btn btn-success" onclick="approveClub('羽球社')">同意</button>
+                                <button class="action-btn btn-danger" onclick="showRejectModal('羽球社')">不同意</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>登山社</td>
+                            <td>王五</td>
+                            <td>休閒</td>
+                            <td>2023-10-28</td>
+                            <td><span class="status status-rejected">不同意</span></td>
+                            <td>
+                                <button class="action-btn" disabled>已處理</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 解散社團模態框 -->
+    <div id="disband-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('disband-modal')">&times;</span>
+            <h2>解散社團</h2>
+            <form id="disband-form">
+                <input type="hidden" id="disband-club-name">
+                <div class="form-group">
+                    <label for="disband-date">解散日期</label>
+                    <input type="date" id="disband-date" name="disband-date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="disband-reason">解散原因</label>
+                    <textarea id="disband-reason" name="disband-reason" rows="4" placeholder="請簡要說明解散原因" required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-danger">確認解散</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 拒絕申請模態框 -->
+    <div id="reject-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('reject-modal')">&times;</span>
+            <h2>不同意社團申請</h2>
+            <form id="reject-form">
+                <input type="hidden" id="reject-club-name">
+                <div class="form-group">
+                    <label for="reject-reason">不同意原因</label>
+                    <textarea id="reject-reason" name="reject-reason" rows="4" placeholder="請說明拒絕此申請的原因" required></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-danger">確認不同意</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 人員審核模態框 -->
+    <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('review-modal')">&times;</span>
+            <h2 id="review-modal-title">社團申請人員審核</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>項次</th>
+                        <th>姓名</th>
+                        <th>部門</th>
+                        <th>申請日期</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="review-list">
+                    <tr>
+                        <td>1</td>
+                        <td>張三</td>
+                        <td>人事處</td>
+                        <td>2023-11-10</td>
+                        <td>
+                            <button class="action-btn btn-success" style="padding: 5px 10px;">同意</button>
+                            <button class="action-btn btn-danger" style="padding: 5px 10px;">拒絕</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>李四</td>
+                        <td>財務處</td>
+                        <td>2023-11-12</td>
+                        <td>
+                            <button class="action-btn btn-success" style="padding: 5px 10px;">同意</button>
+                            <button class="action-btn btn-danger" style="padding: 5px 10px;">拒絕</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>王五</td>
+                        <td>資訊處</td>
+                        <td>2023-11-15</td>
+                        <td>
+                            <button class="action-btn btn-success" style="padding: 5px 10px;">同意</button>
+                            <button class="action-btn btn-danger" style="padding: 5px 10px;">拒絕</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 成員清單模態框 -->
+    <div id="members-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('members-modal')">&times;</span>
+            <h2 id="members-modal-title">社團成員清單</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>項次</th>
+                        <th>處別</th>
+                        <th>姓名</th>
+                        <th>加入日期</th>
+                    </tr>
+                </thead>
+                <tbody id="members-list">
+                    <tr>
+                        <td>1</td>
+                        <td>人事處</td>
+                        <td>張三</td>
+                        <td>2023-09-01</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>財務處</td>
+                        <td>李四</td>
+                        <td>2023-09-05</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>資訊處</td>
+                        <td>王五</td>
+                        <td>2023-09-10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 切換標籤
+        function openTab(tabName) {
+            // 隱藏所有標籤內容
+            var tabContents = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            // 移除所有標籤按鈕的active類
+            var tabButtons = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            // 顯示當前標籤內容並將按鈕設為active
+            document.getElementById(tabName).classList.add("active");
+            event.currentTarget.classList.add("active");
+        }
+        
+        // 切換管理員模式
+        function toggleAdminMode() {
+            document.body.classList.toggle("admin-mode");
+            
+            // 如果切換到管理員模式且"社團審核"頁籤存在，則自動切換到該頁籤
+            if (document.body.classList.contains("admin-mode")) {
+                var adminTab = document.querySelector('.admin-tab.tab-button');
+                if (adminTab) {
+                    adminTab.click();
+                }
+            }
+        }
+        
+        // 關閉模態框
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+        
+        // 顯示解散社團模態框
+        function showDisbandModal(clubName) {
+            document.getElementById("disband-club-name").value = clubName;
+            document.getElementById("disband-modal").style.display = "block";
+        }
+        
+        // 顯示拒絕申請模態框
+        function showRejectModal(clubName) {
+            document.getElementById("reject-club-name").value = clubName;
+            document.getElementById("reject-modal").style.display = "block";
+        }
+        
+        // 顯示人員審核模態框
+        function showReviewModal(clubName) {
+            document.getElementById("review-modal-title").textContent = clubName + " 申請人員審核";
+            document.getElementById("review-modal").style.display = "block";
+        }
+        
+        // 顯示成員清單模態框
+        function showMembers(clubName) {
+            document.getElementById("members-modal-title").textContent = clubName + " 成員清單";
+            document.getElementById("members-modal").style.display = "block";
+        }
+        
+        // 批准社團
+        function approveClub(clubName) {
+            if (confirm("確定要批准 " + clubName + " 的申請嗎？")) {
+                alert(clubName + " 已批准！");
+                // 這裡應該有AJAX請求更新後端數據
+            }
+        }
+        
+        // 表單提交處理
+        document.getElementById("new-club-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            alert("社團申請已提交，請等待管理員審核！");
+            this.reset();
+            // 這裡應該有AJAX請求提交數據到後端
+        });
+        
+        document.getElementById("disband-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var clubName = document.getElementById("disband-club-name").value;
+            var disbandDate = document.getElementById("disband-date").value;
+            alert(clubName + " 將於 " + disbandDate + " 解散！");
+            closeModal("disband-modal");
+            this.reset();
+            // 這裡應該有AJAX請求提交數據到後端
+        });
+        
+        document.getElementById("reject-form").addEventListener("submit", function(e) {
+            e.preventDefault();
+            var clubName = document.getElementById("reject-club-name").value;
+            alert(clubName + " 的申請已被拒絕！");
+            closeModal("reject-modal");
+            this.reset();
+            // 這裡應該有AJAX請求提交數據到後端
+        });
+    </script>
+</body>
+</html>
