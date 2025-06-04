@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>督導記錄管理系統</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #2c7be5;
+      --secondary-color: #6c757d;
+      --success-color: #00a854;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --light-gray: #f8f9fa;
+      --border-color: #e1e5eb;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+      padding: 30px;
+    }
+
+    h1 {
+      color: var(--primary-color);
+      margin-top: 0;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      font-weight: 500;
+      padding: 12px 15px;
+      text-align: left;
+    }
+
+    td {
+      padding: 15px;
+      border: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--light-gray);
+    }
+
+    tr:hover {
+      background-color: rgba(44, 123, 229, 0.05);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-pending {
+      background-color: var(--warning-color);
+      color: #333;
+    }
+
+    .status-completed {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .condition-need-improve {
+      color: var(--danger-color);
+      font-weight: 500;
+    }
+
+    .condition-no-need {
+      color: var(--success-color);
+      font-weight: 500;
+    }
+
+    .view-field {
+      padding: 8px 10px;
+      display: inline-block;
+      min-width: 100px;
+    }
+
+    .year-month-view {
+      display: flex;
+      align-items: center;
+    }
+
+    .action-btn {
+      width: 160px;
+      height: 40px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tracking-btn {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .detail-btn {
+      background-color: var(--secondary-color);
+      color: white;
+      width: auto;
+      padding: 6px 10px;
+    }
+
+    .action-btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .action-btn i {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>(管處)督導記錄歷程</h1>
+    <table id="supervisionTable">
+      <thead>
+        <tr>
+          <th>督導日期</th>
+          <th>督導內容</th>
+          <th>督導結果</th>
+          <th>監造限期改善時間</th>
+          <th>施工限期改善時間</th>
+          <th>追蹤改善現況</th>
+          <th>登錄</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="view-field">2023-05-10</span></td>
+          <td>
+            <button class="action-btn detail-btn" onclick="window.location.href='detail.html?supervisionId=1'">
+              <i class="fas fa-file-alt"></i> 查看督導紀錄
+            </button>
+          </td>
+          <td class="condition-need-improve"><span class="view-field">需改善</span></td>
+          <td><span class="view-field">2023-06-10</span></td>
+          <td><span class="view-field">2023-06-12</span></td>
+          <td><span class="status-badge status-pending">待登錄</span></td>
+          <td>
+            <button class="action-btn tracking-btn" onclick="window.location.href='tracking.html?supervisionId=1'">
+              <i class="fas fa-clipboard-list"></i> 缺失改善追蹤表
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="view-field">2023-05-13</span></td>
+          <td>
+            <button class="action-btn detail-btn" onclick="window.location.href='detail.html?supervisionId=2'">
+              <i class="fas fa-file-alt"></i> 查看督導紀錄
+            </button>
+          </td>
+          <td class="condition-need-improve"><span class="view-field">需改善</span></td>
+          <td><span class="view-field">2023-06-16</span></td>
+          <td><span class="view-field">2023-06-17</span></td>
+          <td><span class="status-badge status-completed">已登錄</span></td>
+          <td>
+            <button class="action-btn tracking-btn" onclick="window.location.href='tracking.html?supervisionId=2'">
+              <i class="fas fa-clipboard-list"></i> 缺失改善追蹤表
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td><span class="view-field">2023-06-18</span></td>
+          <td>
+            <button class="action-btn detail-btn" onclick="window.location.href='detail.html?supervisionId=3'">
+              <i class="fas fa-file-alt"></i> 查看督導紀錄
+            </button>
+          </td>
+          <td class="condition-no-need"><span class="view-field">無須改善</span></td>
+          <td><span class="view-field">-</span></td>
+          <td><span class="view-field">-</span></td>
+          <td><span class="view-field">-</span></td>
+          <td><span class="view-field">-</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

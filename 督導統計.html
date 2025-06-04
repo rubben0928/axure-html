@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程督導缺失統計查詢系統</title>
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --secondary-color: #4CAF50;
+            --accent-color: #D32F2F;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #757575;
+            --white: #ffffff;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .header p {
+            margin: 5px 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .search-title {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -10px;
+        }
+        
+        .form-col {
+            flex: 1;
+            min-width: 200px;
+            padding: 0 10px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark-gray);
+        }
+        
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--medium-gray);
+            border-radius: 4px;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: var(--white);
+            transition: border-color 0.3s;
+        }
+        
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .checkbox-group {
+            margin-top: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-item input {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            font-weight: normal;
+            color: #333;
+        }
+        
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-reset {
+            background-color: var(--medium-gray);
+            margin-left: 10px;
+        }
+        
+        .btn-reset:hover {
+            background-color: var(--dark-gray);
+        }
+        
+        .result-section {
+            background-color: var(--white);
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-title {
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--medium-gray);
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .stats-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .result-card {
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-card h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--medium-gray);
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .result-label {
+            font-weight: bold;
+            color: var(--dark-gray);
+            display: inline-block;
+            min-width: 100px;
+        }
+        
+        .result-value {
+            color: #333;
+        }
+        
+        .highlight {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        .no-result {
+            text-align: center;
+            padding: 40px;
+            color: var(--dark-gray);
+            font-style: italic;
+        }
+        
+        .chart-container {
+            height: 400px;
+            background-color: var(--light-gray);
+            border-radius: 5px;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .chart-placeholder {
+            text-align: center;
+            color: var(--dark-gray);
+            width: 100%;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            height: 100%;
+        }
+        
+        .chart-item {
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .form-col {
+                flex: 100%;
+                margin-bottom: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-reset {
+                margin-left: 0;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+       
+        
+        <div class="search-section">
+            <h2 class="search-title">查詢條件</h2>
+            <form id="searchForm">
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="year">年度</label>
+                            <select id="year">
+                                <option value="">全部年度</option>
+                                <option value="2024">2024年</option>
+                                <option value="2023">2023年</option>
+                                <option value="2022">2022年</option>
+                                <option value="2021">2021年</option>
+                                <option value="2020">2020年</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="station">工作站</label>
+                            <select id="station">
+                                <option value="">全部工作站</option>
+                                <option value="大湖工作站">大湖工作站</option>
+                                <option value="銅鑼工作站">銅鑼工作站</option>
+                                <option value="通霄工作站">通霄工作站</option>
+                                <option value="苑裡工作站">苑裡工作站</option>
+                                <option value="後龍工作站">後龍工作站</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="projectName">工程名稱關鍵字</label>
+                            <input type="text" id="projectName" placeholder="輸入工程名稱關鍵字">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>缺失項目篩選</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="item1" checked>
+                            <label for="item1">一、承攬廠商及監造單位到場人員</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="item2" checked>
+                            <label for="item2">二、品質文件記錄管理</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="item3" checked>
+                            <label for="item3">三、安衛環境管理</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="item4" checked>
+                            <label for="item4">四、結構設備施工品質</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="item5" checked>
+                            <label for="item5">五、其他事項</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn">查詢統計</button>
+                    <button type="reset" class="btn btn-reset">重置條件</button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="result-section">
+            <h2 class="result-title">統計結果</h2>
+            
+            <div class="result-grid">
+                <div class="stats-container">
+                    <div class="result-card">
+                        <h3>缺失項目統計</h3>
+                        <div class="result-item">
+                            <span class="result-label">總督導次數</span>
+                            <span class="result-value">128</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">有缺失次數</span>
+                            <span class="result-value highlight">87 (68%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">項一缺失</span>
+                            <span class="result-value">23 (18%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">項二缺失</span>
+                            <span class="result-value">35 (27%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">項三缺失</span>
+                            <span class="result-value highlight">56 (44%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">項四缺失</span>
+                            <span class="result-value">18 (14%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">項五缺失</span>
+                            <span class="result-value">12 (9%)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>工作站缺失統計</h3>
+                        <div class="result-item">
+                            <span class="result-label">大湖工作站</span>
+                            <span class="result-value">32 (25%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">銅鑼工作站</span>
+                            <span class="result-value">28 (22%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">通霄工作站</span>
+                            <span class="result-value">15 (12%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">苑裡工作站</span>
+                            <span class="result-value highlight">45 (35%)</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">後龍工作站</span>
+                            <span class="result-value">8 (6%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-grid">
+                    <div class="chart-item">
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <div class="chart-title">缺失項目統計圖</div>
+                                <p>此處將顯示缺失項目統計圖表</p>
+                                <p>可包含柱狀圖或圓餅圖等視覺化數據</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-item">
+                        <div class="chart-container">
+                            <div class="chart-placeholder">
+                                <div class="chart-title">工作站缺失統計圖</div>
+                                <p>此處將顯示工作站缺失統計圖表</p>
+                                <p>可包含柱狀圖或圓餅圖等視覺化數據</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // 這裡可以加入實際的查詢邏輯
+            alert('查詢功能將在此處執行，實際應用時會連接後端資料庫');
+        });
+    </script>
+</body>
+</html>

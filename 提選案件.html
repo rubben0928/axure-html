@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>苗栗管理處工程提選督導系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        /* 保持所有原有樣式不變 */
+        :root {
+            --primary-color: #2c7d3f;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ffc107;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        /* ... 其他樣式保持不變 ... */
+        
+        /* 新增督導設定欄位樣式 */
+        .supervision-date-input {
+            width: 150px;
+        }
+        
+        .supervision-leader-select {
+            width: 180px;
+        }
+        
+        .supervision-members-select {
+            width: 200px;
+        }
+        
+        /* 調整表格欄位寬度 */
+        #selectedList th:nth-child(4),
+        #selectedList td:nth-child(4) {
+            width: 25%;
+        }
+        
+        #selectedList th:nth-child(5),
+        #selectedList td:nth-child(5) {
+            width: 15%;
+        }
+        
+        #selectedList th:nth-child(6),
+        #selectedList td:nth-child(6) {
+            width: 15%;
+        }
+        
+        /* 響應式調整 */
+        @media (max-width: 1200px) {
+            .supervision-date-input,
+            .supervision-leader-select,
+            .supervision-members-select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 保持原有的header和container部分不變 -->
+    <div class="header">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <div>
+                    <h4 class="mb-0 mt-1">工程督導管理</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- 年度月份選擇器 -->
+        <div class="period-selector d-flex align-items-center flex-wrap">
+            <div class="me-4 mb-2">
+                <label for="currentYear">年度：</label>
+                <select class="form-select form-select-sm" id="currentYear">
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2021">2021</option>
+                    <option value="2020">2020</option>
+                </select>
+            </div>
+            <div class="me-4 mb-2">
+                <label for="currentMonth">月份：</label>
+                <select class="form-select form-select-sm" id="currentMonth">
+                    <option value="all">全部月份</option>
+                    <option value="1">1月</option>
+                    <option value="2">2月</option>
+                    <option value="3">3月</option>
+                    <option value="4">4月</option>
+                    <option value="5">5月</option>
+                    <option value="6">6月</option>
+                    <option value="7">7月</option>
+                    <option value="8">8月</option>
+                    <option value="9">9月</option>
+                    <option value="10">10月</option>
+                    <option value="11">11月</option>
+                    <option value="12">12月</option>
+                </select>
+            </div>
+            <div class="ms-auto mb-2">
+                <span class="badge bg-primary">
+                    <i class="bi bi-calendar"></i> 當前選擇：<span id="currentPeriod">2023年 全部月份</span>
+                </span>
+            </div>
+        </div>
+        
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="search-tab" data-bs-toggle="tab" data-bs-target="#search" type="button" role="tab">工程查詢</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="selected-tab" data-bs-toggle="tab" data-bs-target="#selected" type="button" role="tab">提選案件設定</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="supervision-tab" data-bs-toggle="tab" data-bs-target="#supervision" type="button" role="tab">督導結果登錄</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- 工程查詢頁籤 -->
+            <div class="tab-pane fade show active" id="search" role="tabpanel" aria-labelledby="search-tab">
+                <div class="filter-section">
+                    <h5 class="mb-3"><i class="bi bi-funnel"></i> 查詢條件</h5>
+                    <form id="searchForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="year" class="form-label">年度</label>
+                                <select class="form-select" id="year">
+                                    <option value="">全部年度</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="station" class="form-label">工作站</label>
+                                <select class="form-select" id="station">
+                                    <option value="">全部工作站</option>
+                                    <option value="苗栗工作站">苗栗工作站</option>
+                                    <option value="頭份工作站">頭份工作站</option>
+                                    <option value="通霄工作站">通霄工作站</option>
+                                    <option value="苑裡工作站">苑裡工作站</option>
+                                    <option value="銅鑼工作站">銅鑼工作站</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="projectName" class="form-label">工程名稱</label>
+                                <input type="text" class="form-control" id="projectName" placeholder="輸入工程名稱關鍵字">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> 查詢
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-list-check"></i> 工程清單</span>
+                        <span class="badge bg-light text-dark">共 <span id="projectCount">5</span> 筆資料</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="40px">
+                                            <input type="checkbox" class="form-check-input" id="selectAll">
+                                        </th>
+                                        <th>年度</th>
+                                        <th>工程編號</th>
+                                        <th>工程名稱</th>
+                                        <th>工作站</th>
+                                        <th>工程類別</th>
+                                        <th>預算金額(元)</th>
+                                        <th>承包商</th>
+                                        <th>進度</th>
+                                        <th>狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projectList">
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check-input project-checkbox"></td>
+                                        <td>2023</td>
+                                        <td>ML-2023-001</td>
+                                        <td>苗栗工作站灌區渠道改善工程(第一標)</td>
+                                        <td>苗栗工作站</td>
+                                        <td>渠道工程</td>
+                                        <td>2,450,000</td>
+                                        <td>大展營造</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">65%</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-info badge-status">施工中</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check-input project-checkbox"></td>
+                                        <td>2023</td>
+                                        <td>ML-2023-002</td>
+                                        <td>頭份灌區蓄水池新建工程</td>
+                                        <td>頭份工作站</td>
+                                        <td>蓄水工程</td>
+                                        <td>3,200,000</td>
+                                        <td>永興工程</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: 30%;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">30%</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-info badge-status">施工中</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check-input project-checkbox"></td>
+                                        <td>2023</td>
+                                        <td>ML-2023-003</td>
+                                        <td>通霄工作站農路改善工程</td>
+                                        <td>通霄工作站</td>
+                                        <td>農路工程</td>
+                                        <td>1,850,000</td>
+                                        <td>宏國建設</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-secondary badge-status">已完工</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check-input project-checkbox"></td>
+                                        <td>2022</td>
+                                        <td>ML-2022-015</td>
+                                        <td>苑裡灌區排水改善工程</td>
+                                        <td>苑裡工作站</td>
+                                        <td>排水工程</td>
+                                        <td>2,750,000</td>
+                                        <td>長榮營造</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-success badge-status">已驗收</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="checkbox" class="form-check-input project-checkbox"></td>
+                                        <td>2022</td>
+                                        <td>ML-2022-022</td>
+                                        <td>銅鑼工作站水閘門更新工程</td>
+                                        <td>銅鑼工作站</td>
+                                        <td>水門工程</td>
+                                        <td>1,200,000</td>
+                                        <td>鑫隆工程</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">100%</div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-success badge-status">已驗收</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="action-buttons d-flex justify-content-between">
+                            <div>
+                                <button class="btn btn-outline-primary" id="btnSelectAll">
+                                    <i class="bi bi-check2-square"></i> 全選
+                                </button>
+                                <button class="btn btn-outline-secondary" id="btnClearSelection">
+                                    <i class="bi bi-x-square"></i> 清除選擇
+                                </button>
+                            </div>
+                            <button class="btn btn-primary" id="btnAddToSelected">
+                                <i class="bi bi-plus-circle"></i> 加入提選清單
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 已提選案件頁籤 -->
+            <div class="tab-pane fade" id="selected" role="tabpanel" aria-labelledby="selected-tab">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-check2-circle"></i> 提選案件設定</span>
+                        <span class="badge bg-light text-dark">共 <span id="selectedCount">0</span> 筆資料</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            請為每個提選工程設定督導日期和督導委員
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th width="40px"></th>
+                                        <th>年度</th>
+                                        <th>工程編號</th>
+                                        <th>工程名稱</th>
+                                        <th>工作站</th>
+                                        <th>督導日期</th>
+                                        <th>督導委員(召集人)</th>
+                                        <th>其他督導委員</th>
+                                        <th>刪除</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="selectedList">
+                                    <!-- 已選取的工程會顯示在這裡 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="action-buttons d-flex justify-content-end mt-3">
+                            <button class="btn btn-danger me-2" id="btnRemoveSelected">
+                                <i class="bi bi-trash"></i> 移除選擇項目
+                            </button>
+                            <button class="btn btn-primary" id="btnSubmitSelection">
+                                <i class="bi bi-save"></i> 儲存督導設定
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 督導結果登錄頁籤 -->
+            <div class="tab-pane fade" id="supervision" role="tabpanel" aria-labelledby="supervision-tab">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clipboard2-check"></i> 督導結果登錄</span>
+                        <span class="badge bg-light text-dark">有 <span id="supervisionCount">2</span> 筆待登錄</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>年度</th>
+                                        <th>工程編號</th>
+                                        <th>工程名稱</th>
+                                        <th>工作站</th>
+                                        <th>督導日期</th>
+                                        <th>督導委員</th>
+                                        <th>登錄狀態</th>
+                                        <th>登錄</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supervisionList">
+                                    <tr>
+                                        <td>2023</td>
+                                        <td>ML-2023-001</td>
+                                        <td>苗栗工作站灌區渠道改善工程(第一標)</td>
+                                        <td>苗栗工作站</td>
+                                        <td>2023-05-15</td>
+                                        <td>王大明 等3人</td>
+                                        <td><span class="supervision-status status-pending"><i class="bi bi-hourglass"></i> 待登錄</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary log-supervision-btn" data-project-id="ML-2023-001">
+                                                <i class="bi bi-pencil-square"></i> 登錄結果
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2023</td>
+                                        <td>ML-2023-002</td>
+                                        <td>頭份灌區蓄水池新建工程</td>
+                                        <td>頭份工作站</td>
+                                        <td>2023-05-18</td>
+                                        <td>李小花 等2人</td>
+                                        <td><span class="supervision-status status-completed"><i class="bi bi-check-circle"></i> 已登錄</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary view-supervision-btn" data-project-id="ML-2023-002">
+                                                <i class="bi bi-eye"></i> 查看結果
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 督導報告模態框 -->
+    <div class="modal fade" id="supervisionReportModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl report-modal">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-clipboard2-check"></i> 工程督導報告</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 模態框內容保持不變 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveSupervisionReport">儲存督導報告</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 提報成功模態框 -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle"></i> 提報成功</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>工程案件已成功提報督導！</p>
+                    <p>系統將自動發送通知給相關人員。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 督導登錄成功模態框 -->
+    <div class="modal fade" id="supervisionSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="bi bi-check-circle"></i> 登錄成功</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>督導結果已成功登錄！</p>
+                    <p>系統已記錄本次督導資料。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 更新工程數量
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProjectCount();
+            updateSelectedCount();
+            updateSupervisionCount();
+            
+            // 全選/取消全選
+            document.getElementById('selectAll').addEventListener('change', function() {
+                const checkboxes = document.querySelectorAll('.project-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+            
+            // 加入提選清單 - 修正後的函數
+            document.getElementById('btnAddToSelected').addEventListener('click', function() {
+                const selectedProjects = [];
+                const checkboxes = document.querySelectorAll('.project-checkbox:checked');
+                
+                checkboxes.forEach(checkbox => {
+                    const row = checkbox.closest('tr');
+                    const project = {
+                        year: row.cells[1].textContent,
+                        id: row.cells[2].textContent,
+                        name: row.cells[3].textContent,
+                        station: row.cells[4].textContent,
+                        type: row.cells[5].textContent,
+                        budget: row.cells[6].textContent,
+                        progress: row.cells[8].innerHTML,
+                        status: row.cells[9].innerHTML
+                    };
+                    selectedProjects.push(project);
+                });
+                
+                if (selectedProjects.length === 0) {
+                    alert('請至少選擇一個工程案件');
+                    return;
+                }
+                
+                addToSelectedList(selectedProjects);
+                
+                // 清除選擇
+                document.getElementById('selectAll').checked = false;
+                document.querySelectorAll('.project-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // 顯示成功訊息
+                alert(已成功加入 ${selectedProjects.length} 筆工程到提選清單);
+                
+                // 自動切換到提選案件設定頁籤
+                const selectedTab = new bootstrap.Tab(document.getElementById('selected-tab'));
+                selectedTab.show();
+            });
+            
+            // 移除已選項目
+            document.getElementById('btnRemoveSelected').addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('#selectedList input[type="checkbox"]:checked');
+                if (checkboxes.length === 0) {
+                    alert('請至少選擇一個要移除的項目');
+                    return;
+                }
+                
+                if(confirm(確定要移除 ${checkboxes.length} 筆工程嗎？)) {
+                    checkboxes.forEach(checkbox => {
+                        checkbox.closest('tr').remove();
+                    });
+                    
+                    updateSelectedCount();
+                }
+            });
+            
+            // 提報督導
+            document.getElementById('btnSubmitSelection').addEventListener('click', function() {
+                const rows = document.querySelectorAll('#selectedList tr');
+                if (rows.length === 0) {
+                    alert('沒有可提報的工程案件');
+                    return;
+                }
+                
+                // 檢查所有必填欄位
+                let isValid = true;
+                const selectedProjects = [];
+                
+                rows.forEach(row => {
+                    const dateInput = row.querySelector('.supervision-date-input');
+                    const leaderSelect = row.querySelector('.supervision-leader-select');
+                    const membersSelect = row.querySelector('.supervision-members-select');
+                    
+                    // 驗證必填欄位
+                    if (!dateInput.value) {
+                        dateInput.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        dateInput.classList.remove('is-invalid');
+                    }
+                    
+                    if (!leaderSelect.value) {
+                        leaderSelect.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        leaderSelect.classList.remove('is-invalid');
+                    }
+                    
+                    if (isValid) {
+                        const members = Array.from(membersSelect.selectedOptions)
+                            .map(option => option.value).join(', ');
+                        
+                        selectedProjects.push({
+                            year: row.cells[1].textContent,
+                            id: row.cells[2].textContent,
+                            name: row.cells[3].textContent,
+                            station: row.cells[4].textContent,
+                            date: dateInput.value,
+                            leader: leaderSelect.value,
+                            members: members
+                        });
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('請填寫所有必填欄位（督導日期和召集人）');
+                    return;
+                }
+                
+                // 將已選案件加入督導清單
+                addToSupervisionList(selectedProjects);
+                
+                // 顯示成功模態框
+                const modal = new bootstrap.Modal(document.getElementById('successModal'));
+                modal.show();
+                
+                // 清空已選清單
+                document.getElementById('selectedList').innerHTML = '';
+                updateSelectedCount();
+                updateSupervisionCount();
+            });
+            
+            // 全選按鈕
+            document.getElementById('btnSelectAll').addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.project-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                document.getElementById('selectAll').checked = true;
+            });
+            
+            // 清除選擇按鈕
+            document.getElementById('btnClearSelection').addEventListener('click', function() {
+                const checkboxes = document.querySelectorAll('.project-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                document.getElementById('selectAll').checked = false;
+            });
+            
+            // 年度月份選擇器事件
+            const yearSelect = document.getElementById('currentYear');
+            const monthSelect = document.getElementById('currentMonth');
+            const currentPeriod = document.getElementById('currentPeriod');
+            
+            function updatePeriodDisplay() {
+                const year = yearSelect.value;
+                const month = monthSelect.value === 'all' ? '全部月份' : ${monthSelect.value}月;
+                currentPeriod.textContent = ${year}年 ${month};
+                
+                // 這裡可以加入根據選擇的年度月份過濾資料的邏輯
+                filterProjectsByPeriod(year, month);
+            }
+            
+            yearSelect.addEventListener('change', updatePeriodDisplay);
+            monthSelect.addEventListener('change', updatePeriodDisplay);
+            
+            // 初始化顯示
+            updatePeriodDisplay();
+            
+            // 登錄督導結果按鈕點擊事件
+            document.querySelectorAll('.log-supervision-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-project-id');
+                    openSupervisionModal(projectId);
+                });
+            });
+            
+            // 查看督導結果按鈕點擊事件
+            document.querySelectorAll('.view-supervision-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-project-id');
+                    openViewSupervisionModal(projectId);
+                });
+            });
+            
+            // 儲存督導報告按鈕點擊事件
+            document.getElementById('btnSaveSupervisionReport').addEventListener('click', function() {
+                // 模擬儲存成功
+                const supervisionModal = bootstrap.Modal.getInstance(document.getElementById('supervisionReportModal'));
+                supervisionModal.hide();
+                
+                // 顯示成功模態框
+                const successModal = new bootstrap.Modal(document.getElementById('supervisionSuccessModal'));
+                successModal.show();
+                
+                // 更新督導狀態為已登錄
+                updateSupervisionStatus();
+            });
+        });
+        
+        // 加入提選清單 - 修正後的函數
+        function addToSelectedList(projects) {
+            const selectedList = document.getElementById('selectedList');
+            
+            // 取得今天的日期作為預設值
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            
+            projects.forEach(project => {
+                // 檢查是否已經存在於清單中
+                const existingProject = document.querySelector(`#selectedList tr td:nth-child(3)`); 
+// 然後手動檢查內容
+if (existingProject && existingProject.textContent.trim() === project.id) {
+  // 存在重複項目
+}
+                if (existingProject) {
+                    alert(工程 ${project.id} 已經在提選清單中);
+                    return;
+                }
+                
+                const row = document.createElement('tr');
+                row.innerHTML = 
+                    <td><input type="checkbox" class="form-check-input"></td>
+                    <td>${project.year}</td>
+                    <td>${project.id}</td>
+                    <td>${project.name}</td>
+                    <td>${project.station}</td>
+                    <td>
+                        <input type="date" class="form-control supervision-date-input" value="${formattedDate}">
+                    </td>
+                    <td>
+                        <select class="form-select supervision-leader-select">
+                            <option value="">請選擇召集人</option>
+                            <option value="王大明">王大明</option>
+                            <option value="李小花">李小花</option>
+                            <option value="張三豐">張三豐</option>
+                            <option value="林小玉">林小玉</option>
+                        </select>
+                    </td>
+                    <td>
+                        <select class="form-select supervision-members-select" multiple>
+                            <option value="王大明">王大明</option>
+                            <option value="李小花">李小花</option>
+                            <option value="張三豐">張三豐</option>
+                            <option value="林小玉">林小玉</option>
+                            <option value="陳大華">陳大華</option>
+                            <option value="黃小玲">黃小玲</option>
+                        </select>
+                        <small class="text-muted">按住Ctrl多選</small>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger remove-btn">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                ;
+                selectedList.appendChild(row);
+                
+                // 為移除按鈕添加事件
+                row.querySelector('.remove-btn').addEventListener('click', function() {
+                    if(confirm('確定要移除此工程嗎？')) {
+                        row.remove();
+                        updateSelectedCount();
+                    }
+                });
+            });
+            
+            updateSelectedCount();
+        }
+        
+        // 加入督導清單
+        function addToSelectedList(projects) {
+  const selectedList = document.getElementById('selectedList');
+  
+  projects.forEach(project => {
+    // 檢查是否已經存在於清單中
+    const allProjectIds = Array.from(document.querySelectorAll('#selectedList td:nth-child(3)'));
+    const existingProject = allProjectIds.find(td => td.textContent.trim() === project.id);
+    
+    if (existingProject) {
+      const row = existingProject.closest('tr');
+      row.classList.add('highlight-added');
+      setTimeout(() => row.classList.remove('highlight-added'), 2000);
+      return;
+    }
+
+    // 創建新行...
+    const row = document.createElement('tr');
+    row.innerHTML = 
+      <td><input type="checkbox" class="form-check-input"></td>
+      <td>${project.year}</td>
+      <td>${project.id}</td>
+      <!-- 其他欄位... -->
+   ;
+    selectedList.appendChild(row);
+  });
+}
+// 然後手動檢查內容
+if (existingProject && existingProject.textContent.trim() === project.id) {
+  // 存在重複項目
+}
+                if (existingProject) return;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = 
+                    <td>${project.year}</td>
+                    <td>${project.id}</td>
+                    <td>${project.name}</td>
+                    <td>${project.station}</td>
+                    <td>${project.date}</td>
+                    <td>${project.leader} ${project.members ? 等${project.members.split(',').length}人 : ''}</td>
+                    <td><span class="supervision-status status-pending"><i class="bi bi-hourglass"></i> 待登錄</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary log-supervision-btn" data-project-id="${project.id}">
+                            <i class="bi bi-pencil-square"></i> 登錄結果
+                        </button>
+                    </td>
+                ;
+                supervisionList.appendChild(row);
+                
+                // 為新增的登錄按鈕添加事件
+                row.querySelector('.log-supervision-btn').addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-project-id');
+                    openSupervisionModal(projectId);
+                });
+            });
+            
+            updateSupervisionCount();
+        }
+        
+        function openSupervisionModal(projectId) {
+            // 實際應用中應根據projectId從後端獲取工程資料
+            // 這裡只是示範，使用固定資料
+            
+            // 設置模態框內容
+            document.getElementById('modal-project-id').textContent = projectId;
+            
+            // 打開模態框
+            const modal = new bootstrap.Modal(document.getElementById('supervisionReportModal'));
+            modal.show();
+            
+            // 設置為編輯模式
+            setReportReadOnly(false);
+        }
+        
+        function openViewSupervisionModal(projectId) {
+            // 實際應用中應根據projectId從後端獲取已登錄的督導資料
+            // 這裡只是示範，使用固定資料
+            
+            // 打開模態框
+            const modal = new bootstrap.Modal(document.getElementById('supervisionReportModal'));
+            modal.show();
+            
+            // 將模態框設為只讀模式
+            setReportReadOnly(true);
+        }
+        
+        function setReportReadOnly(readOnly) {
+            // 設置所有輸入框為只讀或可編輯
+            const inputs = document.querySelectorAll('#supervisionReportModal input, #supervisionReportModal textarea, #supervisionReportModal select');
+            inputs.forEach(input => {
+                input.disabled = readOnly;
+                if (readOnly) {
+                    input.classList.add('bg-light');
+                } else {
+                    input.classList.remove('bg-light');
+                }
+            });
+            
+            // 根據模式調整按鈕顯示
+            const saveBtn = document.getElementById('btnSaveSupervisionReport');
+            if (readOnly) {
+                saveBtn.style.display = 'none';
+            } else {
+                saveBtn.style.display = 'block';
+            }
+        }
+        
+        function updateSupervisionStatus() {
+            // 實際應用中應根據儲存結果更新對應的項目狀態
+            // 這裡只是示範，更新第一個項目的狀態
+            const statusElement = document.querySelector('#supervisionList tr:first-child .supervision-status');
+            if (statusElement) {
+                statusElement.className = 'supervision-status status-completed';
+                statusElement.innerHTML = '<i class="bi bi-check-circle"></i> 已登錄';
+                
+                // 更新按鈕為查看按鈕
+                const buttonCell = statusElement.closest('tr').querySelector('td:last-child');
+                buttonCell.innerHTML = 
+                    <button class="btn btn-sm btn-outline-secondary view-supervision-btn" data-project-id="ML-2023-001">
+                        <i class="bi bi-eye"></i> 查看結果
+                    </button>
+                ;
+                
+                // 為新按鈕添加事件
+                buttonCell.querySelector('.view-supervision-btn').addEventListener('click', function() {
+                    const projectId = this.getAttribute('data-project-id');
+                    openViewSupervisionModal(projectId);
+                });
+            }
+            
+            // 更新待登錄數量
+            updateSupervisionCount();
+        }
+        
+        function filterProjectsByPeriod(year, month) {
+            // 實際應用中這裡應該發送請求到後端獲取過濾後的資料
+            // 這裡只是示範，實際過濾邏輯需要根據您的資料結構實現
+            console.log(過濾條件：年度 ${year}, 月份 ${month});
+            
+            // 模擬過濾效果
+            const projects = document.querySelectorAll('#projectList tr');
+            projects.forEach(project => {
+                const projectYear = project.cells[1].textContent;
+                if (year === 'all' || projectYear === year) {
+                    project.style.display = '';
+                } else {
+                    project.style.display = 'none';
+                }
+            });
+            
+            updateProjectCount();
+        }
+        
+        function updateProjectCount() {
+            const visibleProjects = document.querySelectorAll('#projectList tr:not([style*="display: none"])');
+            document.getElementById('projectCount').textContent = visibleProjects.length;
+        }
+        
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('#selectedList tr').length;
+            document.getElementById('selectedCount').textContent = count;
+        }
+        
+        function updateSupervisionCount() {
+            const count = document.querySelectorAll('#supervisionList tr .status-pending').length;
+            document.getElementById('supervisionCount').textContent = count;
+        }
+    </script>
+</body>
+</html>

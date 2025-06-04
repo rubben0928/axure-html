@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>缺失改善追蹤表</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c7be5;
+            --secondary-color: #6c757d;
+            --success-color: #00a854;
+            --light-gray: #f8f9fa;
+            --border-color: #e1e5eb;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-top: 0;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .file-name {
+            background-color: var(--light-gray);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+        
+        tr:nth-child(even) {
+            background-color: var(--light-gray);
+        }
+        
+        tr:hover {
+            background-color: rgba(44, 123, 229, 0.05);
+        }
+        
+        .defect-item {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .analysis-section {
+            background-color: #f8fafc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .analysis-title {
+            font-weight: 500;
+            color: var(--secondary-color);
+        }
+        
+        textarea {
+            width: 100%;
+            height: 80px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.2);
+        }
+        
+        input[type="date"] {
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        .attachment-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .attach-btn {
+            flex: 1;
+            padding: 8px 12px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--secondary-color);
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .attach-btn:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .attach-btn i {
+            margin-right: 6px;
+            font-size: 14px;
+        }
+        
+        .badge {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .action-btn i {
+            margin-right: 8px;
+        }
+        
+        #saveBtn {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        #saveBtn:hover {
+            background-color: #5a6268;
+        }
+        
+        #generateBtn {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        #generateBtn:hover {
+            background-color: #008746;
+        }
+        
+        #downloadBtn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        #downloadBtn:hover {
+            background-color: #1a68c7;
+        }
+        
+        .back-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            margin-right: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>缺失改善追蹤表</h1>
+        <div class="file-name">檔案名稱：中埔鄉中崙四號橋上下游野菜清蔬工程</div>
+        
+        <table id="trackingTable">
+            <thead>
+                <tr>
+                                        <th>缺失項目</th>
+                    <th>改善對策及結果</th>
+                    <th>完成日期</th>
+                    <th>備註(未完成者請說明)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                       
+                       
+                        <div class="analysis-section">
+                            <div class="analysis-title">A0K+170新舊設施銜接處品質不佳</div>
+                           
+                        </div>
+                    </td>
+                    <td>
+                        <textarea placeholder="請輸入改善對策及結果..."></textarea>
+                    </td>
+                    <td>
+                        <input type="date" value="2024-05-28">
+                        <div class="attachment-buttons">
+                            <button class="attach-btn" onclick="uploadFile('photo', 1)">
+                                <i class="fas fa-camera"></i> 改善照片
+                                <span class="badge photo-count-1">0</span>
+                            </button>
+                           
+                        </div>
+                    </td>
+                    <td>
+                        <textarea placeholder="請輸入備註..."></textarea>
+                    </td>
+                </tr>
+            </tbody>
+              <tbody>
+                <tr>
+                    <td>
+                       
+                       
+                        <div class="analysis-section">
+                            <div class="analysis-title">A0K+125~156自拌清淤道裂縫</div>
+                           
+                        </div>
+                    </td>
+                    <td>
+                        <textarea placeholder="請輸入改善對策及結果..."></textarea>
+                    </td>
+                    <td>
+                        <input type="date" value="2024-05-28">
+                        <div class="attachment-buttons">
+                            <button class="attach-btn" onclick="uploadFile('photo', 1)">
+                                <i class="fas fa-camera"></i> 改善照片
+                                <span class="badge photo-count-1">0</span>
+                            </button>
+                           
+                        </div>
+                    </td>
+                    <td>
+                        <textarea placeholder="請輸入備註..."></textarea>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="button-container">
+            <button class="action-btn back-btn" onclick="window.history.back()">
+                <i class="fas fa-arrow-left"></i> 返回督導記錄歷程
+            </button>
+            <button id="saveBtn" class="action-btn">
+                <i class="fas fa-save"></i> 儲存資料
+            </button>
+            <button id="generateBtn" class="action-btn">
+                <i class="fas fa-file-export"></i> 產出缺失改善追蹤表
+           
+        </div>
+    </div>
+
+    <script>
+        // 從URL獲取督導記錄ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const supervisionId = urlParams.get('supervisionId');
+        
+        // 根據ID加載對應的督導記錄數據
+        if(supervisionId) {
+            console.log(`正在加載督導記錄ID: ${supervisionId} 的缺失改善追蹤表`);
+            // 這裡可以添加根據ID加載具體數據的邏輯
+        }
+
+        // 模擬檔案上傳功能
+        function uploadFile(type, rowNum) {
+            const badgeClass = `${type}-count-${rowNum}`;
+            const badge = document.querySelector(`.${badgeClass}`);
+            const currentCount = parseInt(badge.textContent);
+            badge.textContent = currentCount + 1;
+            
+            const fileTypeName = type === 'photo' ? '改善照片' : '佐證文件';
+            alert(`已上傳${fileTypeName}，系統已自動產生檔案編號: ${type.toUpperCase()}${rowNum}-${currentCount + 1}`);
+        }
+
+        // 儲存資料功能
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            showNotification('資料已成功儲存！', 'success');
+        });
+
+        // 產出缺失改善追蹤表功能
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            showNotification('缺失改善追蹤表已產出！', 'success');
+        });
+
+        // 下載附件檔案功能
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            showNotification('附件檔案已開始下載！', 'success');
+        });
+
+        // 顯示通知
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+
+    <style>
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程督導報告 - 大湖鄉雅悠圳路二期改善工程</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #4CAF50;
+        }
+        .report-title {
+            color: #2E7D32;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .info-table th, .info-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .info-table th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            width: 20%;
+        }
+        .info-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .info-table tr:hover {
+            background-color: #e9f7ef;
+        }
+        .progress-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .progress-box {
+            width: 48%;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .progress-title {
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .progress-value {
+            font-size: 18px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .inspection-item {
+            margin-bottom: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .item-title {
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .item-title .issue-checkbox {
+            margin-left: 10px;
+        }
+        .item-content {
+            padding-left: 15px;
+            color: #555;
+        }
+        .no-issue {
+            color: #888;
+            font-style: italic;
+        }
+        .instruction-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+        }
+        .instruction-box {
+            width: 48%;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .instruction-title {
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .instruction-content {
+            color: #555;
+            padding-left: 10px;
+        }
+        .deadline {
+            color: #D32F2F;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .photo-section {
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .photo-title {
+            font-weight: bold;
+            color: #2E7D32;
+            margin-bottom: 15px;
+        }
+        .photo-upload {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .photo-upload:hover {
+            border-color: #4CAF50;
+        }
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .photo-item {
+            width: calc(33.333% - 10px);
+            position: relative;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .photo-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 3px;
+        }
+        .photo-desc {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+        .photo-remove {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255,0,0,0.7);
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .add-photo-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .add-photo-btn:hover {
+            background-color: #3e8e41;
+        }
+        .location-issue {
+            color: #D32F2F;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .footer {
+            text-align: right;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        /* 新增輸入框樣式 */
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin-bottom: 5px;
+        }
+        .textarea-field {
+            width: 100%;
+            height: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            resize: vertical;
+        }
+        .date-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+        }
+        /* 新增缺失勾選框樣式 */
+        .issue-checkbox {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+        .issue-label {
+            margin-left: 5px;
+            color: #D32F2F;
+            font-weight: normal;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-header">
+        <div class="report-title">(管理處)工程督導結果</div>
+    </div>
+
+    <table class="info-table">
+        <tr>
+            <th>工程名稱</th>
+            <td colspan="3">大湖鄉雅悠圳路二期改善工程</td>
+        </tr>
+        <tr>
+            <th>主辦機關</th>
+            <td>農業部農田水利署苗栗管理處</td>
+            <th>監造廠商</th>
+            <td>新禹工程技術顧問有限公司</td>
+        </tr>
+        <tr>
+            <th>承攬廠商</th>
+            <td>營豐營造有限公司</td>
+            <th>相關廠商</th>
+            <td></td>
+        </tr>
+        <tr>
+            <th>督導人員</th>
+            <td>吳長錦</td>
+            <th>督導日期</th>
+            <td>113年1月29日</td>
+        </tr>
+    </table>
+
+    <div class="progress-section">
+        <div class="progress-box">
+            <div class="progress-title">預定進度</div>
+            <div class="progress-value">10.5%</div>
+        </div>
+        <div class="progress-box">
+            <div class="progress-title">實際進度</div>
+            <div class="progress-value">10.96%</div>
+        </div>
+    </div>
+
+    <div class="inspection-item">
+        <div class="item-title">一、承攬廠商及監造單位到場人員（如出勤簽到紀錄等）
+            <input type="checkbox" class="issue-checkbox" id="issue-1">
+            <label for="issue-1" class="issue-label">有缺失</label>
+        </div>
+        <div class="item-content">
+            督導情形：<br>
+            <textarea class="textarea-field" placeholder="請輸入督導情形...">查詢現場。</textarea>
+        </div>
+    </div>
+
+    <div class="inspection-item">
+        <div class="item-title">二、承攬廠商及監造單位品質文件記錄管理（如材料試驗、自主檢查、監造日誌、缺失改善等）
+            <input type="checkbox" class="issue-checkbox" id="issue-2">
+            <label for="issue-2" class="issue-label">有缺失</label>
+        </div>
+        <div class="item-content">
+            督導情形：<br>
+            <textarea class="textarea-field" placeholder="請輸入督導情形..."></textarea>
+        </div>
+    </div>
+
+    <div class="inspection-item">
+        <div class="item-title">三、安衛環境管理（如告示牌、圍籬、警示燈帶、鷹架、開口警示、衛生設備、道路清潔等）
+            <input type="checkbox" class="issue-checkbox" id="issue-3">
+            <label for="issue-3" class="issue-label">有缺失</label>
+        </div>
+        <div class="item-content">
+            督導情形：<br>
+            <textarea class="textarea-field" placeholder="請輸入督導情形..."></textarea>
+        </div>
+    </div>
+
+    <div class="inspection-item">
+        <div class="item-title">四、結構設備施工品質（如混凝土鋼筋模板品質及完成面平整度及美觀性等）
+            <input type="checkbox" class="issue-checkbox" id="issue-4">
+            <label for="issue-4" class="issue-label">有缺失</label>
+        </div>
+        <div class="item-content">
+            督導情形：<br>
+            <textarea class="textarea-field" placeholder="請輸入督導情形..."></textarea>
+        </div>
+    </div>
+
+    <div class="inspection-item">
+        <div class="item-title">五、其他（如居民反映、鄰居處理、變更設計需求等）
+            <input type="checkbox" class="issue-checkbox" id="issue-5">
+            <label for="issue-5" class="issue-label">有缺失</label>
+        </div>
+        <div class="item-content">
+            督導情形：<br>
+            <textarea class="textarea-field" placeholder="請輸入督導情形...">無</textarea>
+        </div>
+    </div>
+
+    <div class="instruction-section">
+        <div class="instruction-box">
+            <div class="instruction-title">對承攬廠商指示事項</div>
+            <div class="instruction-content">
+                <p>指示事項：</p>
+                <textarea class="textarea-field" placeholder="請輸入指示事項...">請依欽失證行改善。</textarea>
+                <p class="deadline">缺失改善期限：
+                    <input type="date" class="date-input" value="2024-02-16"> 提報
+                </p>
+            </div>
+        </div>
+        <div class="instruction-box">
+            <div class="instruction-title">對監造單位指示事項</div>
+            <div class="instruction-content">
+                <p>指示事項：</p>
+                <textarea class="textarea-field" placeholder="請輸入指示事項...">請督促承商改善。</textarea>
+                <p class="deadline">缺失改善期限：
+                    <input type="date" class="date-input"> 提報
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 照片區塊移動到這裡 -->
+    <div class="photo-section">
+        <div class="photo-title">缺失項目</div>
+        <div class="location-issue">請上傳照片及缺失項目說明</div>
+        
+        <div class="photo-upload">
+            <input type="file" id="photo-upload-input" accept="image/*" multiple style="display: none;">
+            <button onclick="document.getElementById('photo-upload-input').click()">選擇照片上傳</button>
+            <p>可一次選擇多張照片（按住Ctrl鍵可多選）</p>
+        </div>
+        
+        <div class="photo-preview" id="photo-preview-container">
+            <!-- 照片預覽區 -->
+            <div class="photo-item">
+                <button class="photo-remove" onclick="removePhoto(this)">×</button>
+                <img src="https://via.placeholder.com/300x200?text=範例照片" class="photo-img">
+                <textarea class="photo-desc" placeholder="輸入照片說明..."></textarea>
+            </div>
+        </div>
+        
+        <button class="add-photo-btn" onclick="addPhotoField()">+ 新增照片欄位</button>
+    </div>
+
+    <div class="footer">
+        
+    </div>
+
+    <script>
+        // 照片上傳預覽功能
+        document.getElementById('photo-upload-input').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('photo-preview-container');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.match('image.*')) continue;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoItem = document.createElement('div');
+                    photoItem.className = 'photo-item';
+                    photoItem.innerHTML = `
+                        <button class="photo-remove" onclick="removePhoto(this)">×</button>
+                        <img src="${e.target.result}" class="photo-img">
+                        <textarea class="photo-desc" placeholder="輸入照片說明..."></textarea>
+                    `;
+                    previewContainer.appendChild(photoItem);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 新增照片欄位
+        function addPhotoField() {
+            const previewContainer = document.getElementById('photo-preview-container');
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.innerHTML = `
+                <button class="photo-remove" onclick="removePhoto(this)">×</button>
+                <input type="file" accept="image/*" class="photo-upload-single" style="margin-bottom: 8px;">
+                <div class="photo-img-preview" style="width: 100%; height: 150px; background-color: #f5f5f5; display: none;"></div>
+                <textarea class="photo-desc" placeholder="輸入照片說明..."></textarea>
+            `;
+            previewContainer.appendChild(photoItem);
+            
+            // 為新增的單一照片上傳按鈕添加事件
+            const uploadInput = photoItem.querySelector('.photo-upload-single');
+            uploadInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file.type.match('image.*')) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgPreview = photoItem.querySelector('.photo-img-preview');
+                    imgPreview.style.display = 'block';
+                    imgPreview.style.backgroundImage = `url(${e.target.result})`;
+                    imgPreview.style.backgroundSize = 'cover';
+                    imgPreview.style.backgroundPosition = 'center';
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 移除照片
+        function removePhoto(button) {
+            const photoItem = button.parentElement;
+            photoItem.remove();
+        }
+    </script>
+</body>
+</html>
