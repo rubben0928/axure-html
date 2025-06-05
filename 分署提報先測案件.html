@@ -65,6 +65,40 @@
     .tab-content.active {
       display: block;
     }
+    /* 新增元素的樣式調整 */
+    #generateSerial {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+    }
+    #generateSerial:hover {
+      background-color: #5a6268;
+    }
+    .custom-table input[type="text"] {
+      width: 120px;
+      padding: 5px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .status-uploaded {
+      color: #28a745;
+      font-weight: 500;
+    }
+    .status-not-uploaded {
+      color: #dc3545;
+      font-weight: 500;
+    }
+    .serial-input {
+      font-weight: bold;
+      color: #007bff;
+      width: 120px;
+    }
+    .batch-controls {
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -218,21 +252,31 @@
 
     <!-- Tab 2: 已選取工程 -->
     <div id="tab2" class="tab-content">
-      <h4 class="mb-3">預定轉為核定工程清單</h4>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>預定轉為核定工程清單</h4>
+        <div class="batch-controls">
+          <button class="btn btn-secondary me-2" id="generateSerial">自動產生序號</button>
+          <button class="btn btn-outline-secondary" id="resetSerial">重設序號</button>
+        </div>
+      </div>
       <div class="table-responsive">
         <table class="custom-table">
           <thead>
             <tr>
               <th><input type="checkbox" id="selectAll"></th>
               <th>工程名稱</th>
+              <th>工程序號<br>(格式:114-RFR-01-001)</th>
               <th>工作項目</th>
               <th>執行單位</th>
               <th>縣市</th>
               <th>鄉鎮市區</th>
               <th>概估經費(仟元)</th>
+              <th>碳排量</th>
               <th>坐標X</th>
               <th>坐標Y</th>
               <th>生態檢核分級</th>
+              <th>核章版</th>
+              <th>生態成果表</th>
               <th>移除</th>
             </tr>
           </thead>
@@ -240,33 +284,59 @@
             <tr>
               <td><input type="checkbox" class="row-checkbox"></td>
               <td><a href="#">三層坪農塘設施改善三期工程</a></td>
+              <td><input type="text" class="form-control serial-input" placeholder="114-RFR-01-001"></td>
               <td>主委藍單</td>
               <td>臺北分署</td>
               <td>宜蘭縣</td>
               <td>員山鄉</td>
               <td>4,000</td>
+              <td><input type="text" class="form-control form-control-sm" value="1200"></td>
               <td>318849</td>
               <td>2741982</td>
               <td>2</td>
+              <td class="status-uploaded">已上傳</td>
+              <td class="status-uploaded">已附</td>
               <td><a href="#">移除</a></td>
             </tr>
             <tr>
               <td><input type="checkbox" class="row-checkbox"></td>
               <td><a href="#">小錦屏野溪溫泉道路坍塌坡場防治工程</a></td>
+              <td><input type="text" class="form-control serial-input" placeholder="114-RFR-01-002"></td>
               <td>主委藍單</td>
               <td>臺北分署</td>
               <td>新竹縣</td>
               <td>尖石鄉</td>
               <td>4,500</td>
+              <td><input type="text" class="form-control form-control-sm" value="1500"></td>
               <td>271052</td>
               <td>2726873</td>
               <td>2</td>
+              <td class="status-not-uploaded">未上傳</td>
+              <td class="status-not-uploaded">未附</td>
+              <td><a href="#">移除</a></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox" class="row-checkbox"></td>
+              <td><a href="#">大安溪上游護岸修復工程</a></td>
+              <td><input type="text" class="form-control serial-input" placeholder="114-RFR-01-003"></td>
+              <td>護岸</td>
+              <td>臺中分署</td>
+              <td>臺中市</td>
+              <td>和平區</td>
+              <td>3,800</td>
+              <td><input type="text" class="form-control form-control-sm" value="1100"></td>
+              <td>234567</td>
+              <td>2654321</td>
+              <td>3</td>
+              <td class="status-uploaded">已上傳</td>
+              <td class="status-not-uploaded">未附</td>
               <td><a href="#">移除</a></td>
             </tr>
           </tbody>
         </table>
       </div>
       <div class="text-center search-btn mt-4">
+        <button class="btn btn-primary btn-lg me-3">報表匯出</button>
         <button class="btn btn-success btn-lg">傳送農村水保署</button>
       </div>
     </div>
@@ -296,6 +366,33 @@
     document.getElementById('selectAll').addEventListener('change', function () {
       const checkboxes = document.querySelectorAll('.row-checkbox');
       checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // 自動產生序號功能
+    document.getElementById('generateSerial').addEventListener('click', function() {
+      const year = document.getElementById('year').value;
+      const serialInputs = document.querySelectorAll('.serial-input');
+      let counter = 1;
+      
+      serialInputs.forEach(input => {
+        const serialNumber = `${year}-RFR-01-${counter.toString().padStart(3, '0')}`;
+        input.value = serialNumber;
+        counter++;
+      });
+      
+      // 顯示提示訊息
+      alert('序號已按照格式自動產生！');
+    });
+
+    // 重設序號功能
+    document.getElementById('resetSerial').addEventListener('click', function() {
+      const serialInputs = document.querySelectorAll('.serial-input');
+      
+      serialInputs.forEach(input => {
+        input.value = '';
+      });
+      
+      alert('所有序號已重設！');
     });
   </script>
 </body>
