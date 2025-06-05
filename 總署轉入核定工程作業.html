@@ -173,6 +173,16 @@
             color: var(--primary-color);
         }
         
+        .status-badge.uploaded {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-badge.not-uploaded {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
         .summary-card {
             background: var(--light-gray);
             border-radius: 6px;
@@ -241,6 +251,31 @@
             align-items: center;
             margin-bottom: 20px;
         }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-right: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .checkbox-item input {
+            margin: 0;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -267,6 +302,36 @@
             </select>
         </div>
         
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="branch-taipei">
+                <label for="branch-taipei">臺北分署</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="branch-taichung">
+                <label for="branch-taichung">臺中分署</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="branch-nantou">
+                <label for="branch-nantou">南投分署</label>
+            </div>
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="local-north">
+                <label for="local-north">北部</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="local-central">
+                <label for="local-central">中部</label>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="local-south">
+                <label for="local-south">南部</label>
+            </div>
+        </div>
+        
         <button onclick="filterData()">查詢</button>
     </div>
     
@@ -276,9 +341,28 @@
             <button class="tab-button" onclick="openTab(event, 'approved-stats')">已核定統計</button>
         </div>
         
-        <!-- 核定作業頁籤內容 - 已替換為新的內容 -->
+        <!-- 核定作業頁籤內容 -->
         <div id="approval-process" class="tab-content active">
-           
+            <!-- 新增的年度和計畫下拉選項控制項 -->
+            <div class="form-section">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+                    <div>
+                        <label class="form-label-required">年度</label>
+                        <select class="form-control">
+                            <option>114</option>
+                            <option>113</option>
+                            <option>112</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label-required">計畫</label>
+                        <select class="form-control">
+                            <option>整體性治山防災</option>
+                            <option>其他計畫</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
             
             <h4 style="margin-bottom: 15px;">可轉為核定工程清單</h4>
             
@@ -302,9 +386,12 @@
                         <th>縣市</th>
                         <th>鄉鎮市區</th>
                         <th>概估經費(千元)</th>
+                        <th>碳排值</th>
                         <th>坐標X</th>
                         <th>坐標Y</th>
                         <th>檢核分級</th>
+                        <th>核章版</th>
+                        <th>生態成果表</th>
                         <th>狀態</th>
                     </tr>
                 </thead>
@@ -318,9 +405,12 @@
                         <td>宜蘭縣</td>
                         <td>員山鄉</td>
                         <td>4,000</td>
+                        <td><input type="text" class="editable-input" placeholder="輸入碳排值"></td>
                         <td>318,849</td>
                         <td>2,741,982</td>
                         <td><span class="status-badge level-2">2級</span></td>
+                        <td><span class="status-badge uploaded">已上傳</span></td>
+                        <td><span class="status-badge not-uploaded">未附</span></td>
                         <td><span class="status-badge remove">移除</span></td>
                     </tr>
                     <tr>
@@ -332,9 +422,12 @@
                         <td>新竹縣</td>
                         <td>尖石鄉</td>
                         <td>4,500</td>
+                        <td><input type="text" class="editable-input" placeholder="輸入碳排值"></td>
                         <td>271,052</td>
                         <td>2,726,873</td>
                         <td><span class="status-badge level-2">2級</span></td>
+                        <td><span class="status-badge not-uploaded">未上傳</span></td>
+                        <td><span class="status-badge uploaded">已附</span></td>
                         <td><span class="status-badge remove">移除</span></td>
                     </tr>
                 </tbody>
@@ -381,7 +474,7 @@
             </div>
         </div>
         
-        <!-- 已核定統計頁籤內容 - 保持不變 -->
+        <!-- 已核定統計頁籤內容 -->
         <div id="approved-stats" class="tab-content">
             <h3>已核定工程統計</h3>
             <table>
