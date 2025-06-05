@@ -276,6 +276,47 @@
             border-radius: 4px;
             font-size: 14px;
         }
+
+        /* 已核定統計表格樣式 */
+        #approved-stats h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #approved-stats table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #approved-stats th, 
+        #approved-stats td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        #approved-stats th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        #approved-stats tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        #approved-stats .total-row {
+            font-weight: bold;
+            background-color: #e6f7ff;
+        }
+        #approved-stats .sub-header {
+            background-color: #45a049;
+        }
+        #approved-stats .money {
+            text-align: right;
+            padding-right: 20px;
+        }
+        #approved-stats .nowrap {
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -459,40 +500,178 @@
         
         <!-- 已核定統計頁籤內容 -->
         <div id="approved-stats" class="tab-content">
-            <h3>已核定工程統計</h3>
+            <h2>工程核定統計表</h2>
             <table>
                 <thead>
                     <tr>
-                        <th style="background-color: #4CAF50; color: white;">統計項目</th>
-                        <th style="background-color: #4CAF50; color: white;">臺北分署</th>
-                        <th style="background-color: #4CAF50; color: white;">臺中分署</th>
-                        <th style="background-color: #4CAF50; color: white;">南投分署</th>
-                        <th style="background-color: #4CAF50; color: white;">臺南分署</th>
-                        <th style="background-color: #4CAF50; color: white;">臺東分署</th>
-                        <th style="background-color: #4CAF50; color: white;">花蓮分署</th>
-                        <th style="background-color: #4CAF50; color: white;">合計</th>
+                        <th rowspan="2">統計項目</th>
+                        <th colspan="2">臺北分署</th>
+                        <th colspan="2">臺中分署</th>
+                        <th colspan="2">南投分署</th>
+                        <th colspan="2">臺南分署</th>
+                        <th colspan="2">花蓮分署</th>
+                        <th colspan="2">臺東分署</th>
+                        <th rowspan="2">總計</th>
+                    </tr>
+                    <tr class="sub-header">
+                        <!-- 臺北分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
+                        <!-- 臺中分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
+                        <!-- 南投分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
+                        <!-- 臺南分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
+                        <!-- 花蓮分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
+                        <!-- 臺東分署 -->
+                        <th>分署</th>
+                        <th>地方</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>核定件數</td>
+                        <!-- 臺北分署 -->
                         <td>25</td>
-                        <td>18</td>
                         <td>12</td>
-                        <td>20</td>
+                        <!-- 臺中分署 -->
+                        <td>18</td>
                         <td>8</td>
+                        <!-- 南投分署 -->
+                        <td>10</td>
+                        <td>5</td>
+                        <!-- 臺南分署 -->
                         <td>15</td>
-                        <td style="font-weight: bold; background-color: #e6f7ff;">98</td>
+                        <td>7</td>
+                        <!-- 花蓮分署 -->
+                        <td>12</td>
+                        <td>6</td>
+                        <!-- 臺東分署 -->
+                        <td>8</td>
+                        <td>4</td>
+                        <!-- 總計 -->
+                        <td>110</td>
                     </tr>
                     <tr>
-                        <td>核定經費(千元)</td>
-                        <td>12,500</td>
-                        <td>9,200</td>
-                        <td>6,800</td>
-                        <td>10,750</td>
-                        <td>4,200</td>
-                        <td>7,850</td>
-                        <td style="font-weight: bold; background-color: #e6f7ff;">51,300</td>
+                        <td>核定經費</td>
+                        <!-- 臺北分署 -->
+                        <td class="money">12,500</td>
+                        <td class="money">6,800</td>
+                        <!-- 臺中分署 -->
+                        <td class="money">9,200</td>
+                        <td class="money">4,200</td>
+                        <!-- 南投分署 -->
+                        <td class="money">5,500</td>
+                        <td class="money">2,800</td>
+                        <!-- 臺南分署 -->
+                        <td class="money">7,800</td>
+                        <td class="money">3,500</td>
+                        <!-- 花蓮分署 -->
+                        <td class="money">6,200</td>
+                        <td class="money">3,100</td>
+                        <!-- 臺東分署 -->
+                        <td class="money">4,500</td>
+                        <td class="money">2,200</td>
+                        <!-- 總計 -->
+                        <td class="money">58,300</td>
+                    </tr>
+                    <tr>
+                        <td>尚未核定件數</td>
+                        <!-- 臺北分署 -->
+                        <td>8</td>
+                        <td>4</td>
+                        <!-- 臺中分署 -->
+                        <td>6</td>
+                        <td>3</td>
+                        <!-- 南投分署 -->
+                        <td>5</td>
+                        <td>2</td>
+                        <!-- 臺南分署 -->
+                        <td>7</td>
+                        <td>3</td>
+                        <!-- 花蓮分署 -->
+                        <td>4</td>
+                        <td>2</td>
+                        <!-- 臺東分署 -->
+                        <td>3</td>
+                        <td>1</td>
+                        <!-- 總計 -->
+                        <td>45</td>
+                    </tr>
+                    <tr>
+                        <td>尚未核定經費</td>
+                        <!-- 臺北分署 -->
+                        <td class="money">4,200</td>
+                        <td class="money">2,100</td>
+                        <!-- 臺中分署 -->
+                        <td class="money">3,500</td>
+                        <td class="money">1,800</td>
+                        <!-- 南投分署 -->
+                        <td class="money">2,800</td>
+                        <td class="money">1,400</td>
+                        <!-- 臺南分署 -->
+                        <td class="money">3,200</td>
+                        <td class="money">1,600</td>
+                        <!-- 花蓮分署 -->
+                        <td class="money">2,500</td>
+                        <td class="money">1,300</td>
+                        <!-- 臺東分署 -->
+                        <td class="money">1,800</td>
+                        <td class="money">900</td>
+                        <!-- 總計 -->
+                        <td class="money">23,200</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>合計件數</td>
+                        <!-- 臺北分署 -->
+                        <td>33</td>
+                        <td>16</td>
+                        <!-- 臺中分署 -->
+                        <td>24</td>
+                        <td>11</td>
+                        <!-- 南投分署 -->
+                        <td>15</td>
+                        <td>7</td>
+                        <!-- 臺南分署 -->
+                        <td>22</td>
+                        <td>10</td>
+                        <!-- 花蓮分署 -->
+                        <td>16</td>
+                        <td>8</td>
+                        <!-- 臺東分署 -->
+                        <td>11</td>
+                        <td>5</td>
+                        <!-- 總計 -->
+                        <td>155</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>經費合計</td>
+                        <!-- 臺北分署 -->
+                        <td class="money">16,700</td>
+                        <td class="money">8,900</td>
+                        <!-- 臺中分署 -->
+                        <td class="money">12,700</td>
+                        <td class="money">6,000</td>
+                        <!-- 南投分署 -->
+                        <td class="money">8,300</td>
+                        <td class="money">4,200</td>
+                        <!-- 臺南分署 -->
+                        <td class="money">11,000</td>
+                        <td class="money">5,100</td>
+                        <!-- 花蓮分署 -->
+                        <td class="money">8,700</td>
+                        <td class="money">4,400</td>
+                        <!-- 臺東分署 -->
+                        <td class="money">6,300</td>
+                        <td class="money">3,100</td>
+                        <!-- 總計 -->
+                        <td class="money">81,500</td>
                     </tr>
                 </tbody>
             </table>
