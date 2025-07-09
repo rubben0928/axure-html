@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程檢核流程系統</title>
+    <style>
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .status-bar:before {
+            content: "";
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+        .status-step {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            width: 16%;
+        }
+        .status-step .circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-step.active .circle {
+            background: #3498db;
+            transform: scale(1.1);
+        }
+        .status-step.completed .circle {
+            background: #2ecc71;
+        }
+        .status-step.rejected .circle {
+            background: #e74c3c;
+        }
+        .status-step .step-label {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+        .status-step .step-status {
+            font-size: 12px;
+            color: #777;
+        }
+        .review-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+        .review-section h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #3498db;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            height: 120px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-right: 10px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .action-buttons {
+            margin-top: 25px;
+            text-align: right;
+        }
+        .history-section {
+            margin-top: 40px;
+        }
+        .history-section h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #444;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .status-approved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-submitted {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .time-column {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>工程估驗內容檢核流程</h1>
+        
+        <!-- 檢核狀態進度條 -->
+        <div class="status-bar">
+            <div class="status-step completed">
+                <div class="circle">1</div>
+                <div class="step-label">施工廠商</div>
+                <div class="step-status">2023-05-15</div>
+            </div>
+            <div class="status-step active">
+                <div class="circle">2</div>
+                <div class="step-label">監造單位</div>
+                <div class="step-status">檢核中</div>
+            </div>
+            <div class="status-step">
+                <div class="circle">3</div>
+                <div class="step-label">專管單位</div>
+                <div class="step-status">待處理</div>
+            </div>
+            <div class="status-step">
+                <div class="circle">4</div>
+                <div class="step-label">主辦單位</div>
+                <div class="step-status">待處理</div>
+            </div>
+            <div class="status-step">
+                <div class="circle">5</div>
+                <div class="step-label">主計室</div>
+                <div class="step-status">待處理</div>
+            </div>
+            <div class="status-step">
+                <div class="circle"><i class="fas fa-check"></i></div>
+                <div class="step-label">核准完成</div>
+                <div class="step-status">-</div>
+            </div>
+        </div>
+        
+        <!-- 當前檢核階段 -->
+        <div class="review-section">
+            <h2>監造單位檢核</h2>
+            
+            <div class="form-group">
+                <label for="review-comment">檢核意見</label>
+                <textarea id="review-comment" placeholder="請輸入檢核意見..."></textarea>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-danger">退回修正</button>
+                <button class="btn btn-success">同意並提交至專管單位</button>
+            </div>
+        </div>
+        
+        <!-- 檢核歷程 -->
+        <div class="history-section">
+            <h2>檢核歷程</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>項次</th>
+                        <th>提交單位</th>
+                        <th>提交人員</th>
+                        <th class="time-column">提交時間</th>
+                        <th>提交結果</th>
+                        <th>檢核意見</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>施工廠商</td>
+                        <td>永興營造 張工程師</td>
+                        <td class="time-column">2023-05-15 14:30</td>
+                        <td><span class="status-badge status-submitted">已提交</span></td>
+                        <td>-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
