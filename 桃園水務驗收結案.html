@@ -309,12 +309,27 @@
             margin: 20px 0;
             text-align: center;
         }
+
+        /* 新增的樣式 */
+        .flex-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .flex-container select {
+            flex: 1;
+        }
+        
+        .flex-container input {
+            flex: 2;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>結算保固系統</h1>
-        <p>工程專案結算與保固管理平台</p>
+        <h1>結算保固作業</h1>
+      
     </div>
 
     <div class="container">
@@ -322,25 +337,29 @@
         <div class="progress-bar">
             <div>
                 <div class="progress-step active" id="step1" onclick="showStep(1)">1</div>
-                <div class="step-label">確認驗收完成資料</div>
+                <div class="step-label">確認驗收後應上傳資料
+                <br>(施工廠商、監造單位)</br></div>
             </div>
             <div>
                 <div class="progress-step" id="step2" onclick="showStep(2)">2</div>
-                <div class="step-label">產出工程結算驗收證明</div>
+                <div class="step-label">登錄及產製工程結算驗收證明
+                <br>(工程主辦機關、會計室)</br></div>
+             
             </div>
             <div>
                 <div class="progress-step" id="step3" onclick="showStep(3)">3</div>
-                <div class="step-label">保固作業</div>
+                <div class="step-label">保固作業
+                <br>(施工廠商、監造單位)</br></div>
             </div>
         </div>
 
         <!-- 步驟1：確認驗收完成資料 -->
         <div class="step-content" id="content1">
-            <h2>步驟1：確認驗收完成資料</h2>
+            <h2>步驟1：確認驗收後應上傳資料</h2>
             <p style="color: #666; margin-bottom: 20px;">請檢核竣工圖說與工程結算明細表是否已正確上傳</p>
             
             <div class="document-item">
-                <h3>竣工圖說</h3>
+                <h3>竣工圖說<p style="color: red;">(若有辦理變更，亦須上傳變更設計圖說)</p></h3>
                 <div class="status-row">
                     <div class="status-left">
                         <label>上傳狀態：</label>
@@ -352,17 +371,17 @@
                     <div class="file-upload" onclick="document.getElementById('completionDrawings').click()">
                         <input type="file" id="completionDrawings" style="display: none;" multiple accept=".pdf,.dwg,.jpg,.png">
                         <p>📁 點擊上傳竣工圖說檔案</p>
-                        <small>支援格式：PDF, DWG, JPG, PNG</small>
+                        <small>支援格式：pdf、dwg、dxf</small>
                     </div>
                 </div>
             </div>
 
             <div class="document-item">
-                <h3>工程結算明細表</h3>
+                <h3>工程結算明細表<p style="color: red;">(內容應含工程概述、工程主要工項內容及實作數量)</p></h3>
                 <div class="status-row">
                     <div class="status-left">
                         <label>上傳狀態：</label>
-                        <span class="status-badge status-pending">待審核</span>
+                        <span class="status-badge status-pending">未上傳</span>
                     </div>
                     <button class="btn btn-primary">檢視檔案</button>
                 </div>
@@ -376,11 +395,15 @@
             </div>
 
             <div class="form-group">
+            <div class="save-section">
+                   
+                <button class="btn btn-info" onclick="saveData()">提送至監造單位</button>
+            </div>
                 <label for="reviewComments">監造單位審核意見</label>
                 <textarea id="reviewComments" rows="4" placeholder="請輸入審核意見..."></textarea>
                 <div class="review-actions">
-                    <button class="btn btn-success">核准</button>
-                    <button class="btn btn-danger">退回</button>
+                    <button class="btn btn-success">同意</button>
+                    <button class="btn btn-danger">退回修正</button>
                 </div>
             </div>
 
@@ -396,7 +419,7 @@
             
             <div class="grid">
                 <div class="form-group">
-                    <label for="contractNo">契約號</label>
+                    <label for="contractNo">案號及契約號</label>
                     <input type="text" id="contractNo" value="CTR-2024-001" readonly>
                 </div>
                 <div class="form-group">
@@ -407,7 +430,7 @@
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="projectName">工程名稱</label>
+                    <label for="projectName">標的名稱</label>
                     <input type="text" id="projectName" value="市政大樓改建工程" readonly>
                 </div>
                 <div class="form-group">
@@ -417,9 +440,17 @@
                             <input type="radio" id="amountBelow" name="amountCategory" checked>
                             <label for="amountBelow">未達公告金額</label>
                         </div>
+                           <div class="checkbox-item">
+                            <input type="radio" id="amountBelow" name="amountCategory" checked>
+                            <label for="amountBelow">公告金額以上未達查核金額</label>
+                        </div>
+                           <div class="checkbox-item">
+                            <input type="radio" id="amountBelow" name="amountCategory" checked>
+                            <label for="amountBelow">查核金額以上未達巨額</label>
+                        </div>
                         <div class="checkbox-item">
                             <input type="radio" id="amountLarge" name="amountCategory">
-                            <label for="amountLarge">巨額採購</label>
+                            <label for="amountLarge">巨額</label>
                         </div>
                     </div>
                 </div>
@@ -465,7 +496,7 @@
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="acceptanceDate">驗收合格日期</label>
+                    <label for="acceptanceDate">驗收完畢/驗收合格日期</label>
                     <input type="date" id="acceptanceDate" placeholder="請選擇驗收合格日期">
                 </div>
                 <div class="form-group">
@@ -508,12 +539,21 @@
                         <h4>第1次增減</h4>
                         <div class="grid">
                             <div class="form-group">
-                                <label>增減金額</label>
-                                <input type="number" placeholder="請輸入金額">
+                                <label>增減或減少/金額</label>
+                                <div class="flex-container">
+                                    <select>
+                                        <option value="increase">增加</option>
+                                        <option value="decrease">減少</option>
+                                    </select>
+                                    <input type="number" placeholder="請輸入金額">
+                                </div>
                             </div>
                             <div class="form-group">
-                                <label>簽准/核准日期</label>
-                                <input type="date">
+                                <label>簽准日期/核准文號</label>
+                                <div class="flex-container">
+                                    <input type="date">
+                                    <input type="text" placeholder="輸入核准文號">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -522,7 +562,7 @@
             </div>
 
             <div class="form-group">
-                <h3>驗收扣款</h3>
+                <h3>驗收扣款(不包括逾期違約金及其他違約金)</h3>
                 <div class="grid">
                     <div class="form-group">
                         <label>扣款說明</label>
@@ -561,8 +601,7 @@
 
             <!-- 儲存資料區塊移到驗收意見下方 -->
             <div class="save-section">
-                <h3>💾 儲存資料</h3>
-                <p>儲存當前填寫的所有資料，確保資料不會遺失</p>
+                   
                 <button class="btn btn-info" onclick="saveData()">儲存資料</button>
             </div>
 
@@ -574,11 +613,11 @@
             </div>
 
             <div class="form-group">
-                <h3>上傳已簽署的工程結算驗收證明書</h3>
+                <h3>上傳已簽核之工程結算驗收證明書</h3>
                 <div class="file-upload" onclick="document.getElementById('signedCertificate').click()">
                     <input type="file" id="signedCertificate" style="display: none;" accept=".pdf">
-                    <p>📄 點擊上傳已簽署的驗收證明書</p>
-                    <small>支援格式：PDF</small>
+                    <p>📄 點擊上傳已簽核之驗收證明書</p>
+                    <small>支援格式：pdf、word</small>
                 </div>
             </div>
 
@@ -645,25 +684,29 @@
                 <div class="file-upload" onclick="document.getElementById('warrantyFiles').click()">
                     <input type="file" id="warrantyFiles" style="display: none;" multiple accept=".pdf,.jpg,.png">
                     <p>💰 點擊上傳保固金相關檔案</p>
-                    <small>支援格式：PDF, JPG, PNG</small>
+                    <small>支援格式：pdf , excel , word</small>
                 </div>
             </div>
 
             <div class="form-group">
+            <div class="save-section">
+                   
+                <button class="btn btn-info" onclick="saveData()">提送至監造單位</button>
+            </div>
                 <h3>監造單位確認</h3>
                 <div class="form-group">
                     <label for="supervisorWarrantyComments">監造單位審核意見</label>
                     <textarea id="supervisorWarrantyComments" rows="4" placeholder="請輸入監造審核意見..."></textarea>
                     <div class="review-actions">
-                        <button class="btn btn-success" onclick="approveWarranty()">核准</button>
-                        <button class="btn btn-danger" onclick="rejectWarranty()">退回</button>
+                        <button class="btn btn-success" onclick="approveWarranty()">同意</button>
+                        <button class="btn btn-danger" onclick="rejectWarranty()">退回修正</button>
                     </div>
                 </div>
             </div>
 
             <div style="text-align: right; margin-top: 30px;">
                 <button class="btn btn-warning" onclick="showStep(2)">返回上一步</button>
-                <button class="btn btn-success" onclick="completeProcess()">完成保固設定</button>
+                <button class="btn btn-success" onclick="completeProcess()">完成保固金退還作業</button>
             </div>
         </div>
     </div>
@@ -705,12 +748,21 @@
                 <h4>第${priceAdjustmentCount}次增減</h4>
                 <div class="grid">
                     <div class="form-group">
-                        <label>增減金額</label>
-                        <input type="number" placeholder="請輸入金額">
+                        <label>增減或減少/金額</label>
+                        <div class="flex-container">
+                            <select>
+                                <option value="increase">增加</option>
+                                <option value="decrease">減少</option>
+                            </select>
+                            <input type="number" placeholder="請輸入金額">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>簽准/核准日期</label>
-                        <input type="date">
+                        <label>簽准日期/核准文號</label>
+                        <div class="flex-container">
+                            <input type="date">
+                            <input type="text" placeholder="輸入核准文號">
+                        </div>
                     </div>
                 </div>
                 <button class="btn btn-danger" onclick="removePriceAdjustment(this)">移除</button>
