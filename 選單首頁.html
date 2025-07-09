@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            padding: 20px 0;
+        }
+
+        .sidebar-item {
+            padding: 10px 20px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .sidebar-item.active {
+            background-color: #e3f2fd;
+            border-right: 3px solid #2196f3;
+        }
+
+        .sidebar-item .icon {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .sub-menu {
+            margin-left: 20px;
+            padding: 8px 20px;
+            font-size: 14px;
+            color: #666;
+            border-left: 2px solid #eee;
+        }
+
+        .sub-menu:hover {
+            background-color: #f8f9fa;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #666;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #7b68ee, #9370db);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(45deg, #6a5acd, #8b7bd8);
+        }
+
+        .data-table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .table-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table-header h3 {
+            color: #333;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #fafafa;
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+
+        td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-completed {
+            background-color: #e8f5e8;
+            color: #4caf50;
+        }
+
+        .status-pending {
+            background-color: #fff3e0;
+            color: #ff9800;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .expandable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .expandable:hover {
+            background-color: #f8f9fa;
+        }
+
+        .collapsed {
+            display: none;
+        }
+
+        /* 模態框樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .close {
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #666;
+            margin-top: -5px;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .alert {
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            text-align: right;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+
+        .date-range {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .partial-acceptance-section {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左側選單 -->
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <span>工程資料管理</span>
+                <span class="icon">−</span>
+            </div>
+            <div class="sub-menu">▸ 工程基本資料</div>
+            <div class="sub-menu">▸ 品管文件管理</div>
+            
+            <div class="sidebar-item expandable" onclick="toggleMenu('contract')">
+                <span>契約工項管理</span>
+                <span class="icon">+</span>
+            </div>
+            
+            <div class="sidebar-item expandable" onclick="toggleMenu('material')">
+                <span>材料及施工檢驗</span>
+                <span class="icon">+</span>
+            </div>
+            
+            <div class="sidebar-item expandable" onclick="toggleMenu('diary')">
+                <span>施工/監造日誌</span>
+                <span class="icon">+</span>
+            </div>
+            
+            <div class="sidebar-item expandable" onclick="toggleMenu('estimate')">
+                <span>工程估驗計價</span>
+                <span class="icon">+</span>
+            </div>
+            
+            <div class="sidebar-item expandable active" onclick="toggleMenu('settlement')">
+                <span>結算保固</span>
+                <span class="icon">−</span>
+            </div>
+            
+            <div class="sidebar-item expandable" onclick="toggleMenu('report')">
+                <span>報表及統計資訊</span>
+                <span class="icon">+</span>
+            </div>
+        </div>
+
+        <!-- 主要內容區域 -->
+        <div class="main-content">
+            <div class="header">
+                <h1>結算保固作業</h1>
+                <button class="start-button">
+                    <span>🚀</span>
+                    開始辦理結算保固作業
+                </button>
+            </div>
+
+            <!-- 結算保固清單 -->
+            <div class="data-table">
+                <div class="table-header">
+                    <h3>結算保固清單</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>項次</th>
+                            <th>驗收方式</th>
+                            <th>契約金額</th>
+                            <th>結算金額</th>
+                            <th>保固開始日</th>
+                            <th>保固到期日</th>
+                            <th>是否已過保固</th>
+                            <th>管理</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>全部驗收</td>
+                            <td>6,000,000元</td>
+                            <td>6,000,000元</td>
+                            <td>2024-01-15</td>
+                            <td>2025-01-14</td>
+                            <td><span class="status-badge status-pending">尚未屆期</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-info">📋</button>
+                                    <button class="btn btn-danger">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>部分驗收</td>
+                            <td>7,000,000元</td>
+                            <td>3,500,000元</td>
+                            <td>2024-03-01</td>
+                            <td>2025-02-28</td>
+                            <td><span class="status-badge status-completed">已過期</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-info">📋</button>
+                                    <button class="btn btn-danger">🗑️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結算保固作業模態框 -->
+    <div id="settlementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>結算保固作業</h3>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="cannotSubmit" class="alert alert-warning">
+                    ⚠️ 無法提送結案：尚未於估驗請款作業點選結案，或可勾選辦理部分驗收
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="partialAcceptance" onchange="togglePartialAcceptance()">
+                    <label for="partialAcceptance">辦理部分驗收</label>
+                </div>
+
+                <div id="partialAcceptanceSection" class="partial-acceptance-section">
+                    <div class="alert alert-info">
+                        📋 請選擇部分驗收的施作日期
+                    </div>
+                    
+                    <div class="date-range">
+                        <div class="form-group">
+                            <label for="startDate">施作日期(起)</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">施作日期(迄)</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>辦理部分驗收說明</label>
+                        <textarea id="partialDescription" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="請輸入辦理部分驗收的具體說明..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <a class="btn btn-primary" href="https://rubben0928.github.io/axure-html/%E6%A1%83%E5%9C%92%E6%B0%B4%E5%8B%99%E9%A9%97%E6%94%B6%E7%B5%90%E6%A1%88.html" target="_blank">開始辦理</a>
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMenu(menuId) {
+            const menuItems = document.querySelectorAll('.sidebar-item');
+            menuItems.forEach(item => {
+                if (item.textContent.trim().includes('結算保固')) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+
+            // 切換展開/收合圖示
+            const clickedItem = event.currentTarget;
+            const icon = clickedItem.querySelector('.icon');
+            if (icon.textContent === '+') {
+                icon.textContent = '−';
+            } else {
+                icon.textContent = '+';
+            }
+        }
+
+        // 為按鈕添加點擊事件
+        document.addEventListener('DOMContentLoaded', function() {
+            const startButton = document.querySelector('.start-button');
+            startButton.addEventListener('click', function() {
+                openSettlementModal();
+            });
+
+            // 為操作按鈕添加事件
+            const infoButtons = document.querySelectorAll('.btn-info');
+            const deleteButtons = document.querySelectorAll('.btn-danger');
+
+            infoButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    alert('查看詳細資訊');
+                });
+            });
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (confirm('確定要刪除此項目嗎？')) {
+                        alert('項目已刪除');
+                    }
+                });
+            });
+        });
+
+        // 開啟結算保固作業模態框
+        function openSettlementModal() {
+            const modal = document.getElementById('settlementModal');
+            const canSubmit = checkCanSubmitFinalSettlement();
+            
+            if (canSubmit) {
+                // 如果可以提送結案，直接進行結案程序
+                if (confirm('工程已完成，可以提送結案。是否確認進行結案作業？')) {
+                    processFinalSettlement();
+                }
+            } else {
+                // 如果不能提送結案，顯示模態框
+                modal.style.display = 'block';
+                
+                // 設置今天的日期為預設值
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('startDate').value = today;
+                document.getElementById('endDate').value = today;
+            }
+        }
+
+        // 檢查是否可以提送結案
+        function checkCanSubmitFinalSettlement() {
+            // 這裡可以加入實際的檢查邏輯
+            // 例如：工程進度是否達到100%、是否有未完成項目等
+            const progress = 85; // 假設目前進度85%
+            const hasUnfinishedItems = true; // 假設有未完成項目
+            
+            return progress >= 100 && !hasUnfinishedItems;
+        }
+
+        // 切換部分驗收選項
+        function togglePartialAcceptance() {
+            const checkbox = document.getElementById('partialAcceptance');
+            const section = document.getElementById('partialAcceptanceSection');
+            
+            if (checkbox.checked) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        // 關閉模態框
+        function closeModal() {
+            const modal = document.getElementById('settlementModal');
+            modal.style.display = 'none';
+            
+            // 重置表單
+            document.getElementById('partialAcceptance').checked = false;
+            document.getElementById('partialAcceptanceSection').style.display = 'none';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('partialDescription').value = '';
+        }
+
+        // 提交結算作業
+        function submitSettlement() {
+            const partialAcceptance = document.getElementById('partialAcceptance').checked;
+            
+            if (partialAcceptance) {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const description = document.getElementById('partialDescription').value;
+                
+                if (!startDate || !endDate) {
+                    alert('請選擇施作日期起訖');
+                    return;
+                }
+                
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert('起始日期不能晚於結束日期');
+                    return;
+                }
+                
+                // 處理部分驗收
+                processPartialAcceptance(startDate, endDate, description);
+            } else {
+                alert('請勾選辦理部分驗收選項');
+            }
+        }
+
+        // 處理部分驗收
+        function processPartialAcceptance(startDate, endDate, description) {
+            // 這裡可以加入實際的部分驗收處理邏輯
+            alert(`部分驗收已送出：\n起始日期：${startDate}\n結束日期：${endDate}\n說明：${description || '無'}`);
+            
+            // 關閉模態框
+            closeModal();
+            
+            // 跳轉到指定網址
+            window.location.href = 'https://rubben0928.github.io/axure-html/%E6%A1%83%E5%9C%92%E6%B0%B4%E5%8B%99%E9%A9%97%E6%94%B6%E7%B5%90%E6%A1%88.html';
+        }
+
+        // 處理最終結案
+        function processFinalSettlement() {
+            // 這裡可以加入實際的最終結案處理邏輯
+            alert('最終結案作業已開始處理');
+            
+            // 可以在這裡更新表格或重新載入資料
+            updateSettlementTable();
+        }
+
+        // 更新結算表格
+        function updateSettlementTable() {
+            // 這裡可以加入實際的表格更新邏輯
+            console.log('更新結算保固清單');
+        }
+
+        // 點擊模態框外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('settlementModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
