@@ -274,19 +274,19 @@
             font-size: 14px;
         }
 
-        .checkbox-group {
+        .radio-group {
             display: flex;
             align-items: center;
             gap: 8px;
             margin-bottom: 15px;
         }
 
-        .checkbox-group input[type="checkbox"] {
+        .radio-group input[type="radio"] {
             width: 16px;
             height: 16px;
         }
 
-        .checkbox-group label {
+        .radio-group label {
             margin: 0;
             font-weight: normal;
             cursor: pointer;
@@ -348,19 +348,35 @@
             background-color: #545b62;
         }
 
-        .date-range {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .partial-acceptance-section {
-            display: none;
+        .acceptance-section {
             margin-top: 15px;
             padding: 15px;
             background-color: #f8f9fa;
             border-radius: 4px;
             border: 1px solid #dee2e6;
+        }
+
+        .acceptance-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .acceptance-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .acceptance-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+        }
+
+        .acceptance-option label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -480,41 +496,35 @@
             </div>
             <div class="modal-body">
                 <div id="cannotSubmit" class="alert alert-warning">
-                    ⚠️ 無法提送結案：尚未於估驗請款作業點選結案，或可勾選辦理部分驗收
+                    ⚠️ 若屬最後一次估驗請款請勾選(辦理全部驗收);若為部分驗收，請勾選(辦理部分驗收)，並簡述驗收說明。
                 </div>
                 
-                <div class="checkbox-group">
-                    <input type="checkbox" id="partialAcceptance" onchange="togglePartialAcceptance()">
-                    <label for="partialAcceptance">辦理部分驗收</label>
-                </div>
-
-                <div id="partialAcceptanceSection" class="partial-acceptance-section">
+                <div class="acceptance-section">
                     <div class="alert alert-info">
-                        📋 請選擇部分驗收的施作日期
+                        📋 請選擇驗收方式
                     </div>
                     
-                    <div class="date-range">
-                        <div class="form-group">
-                            <label for="startDate">施作日期(起)</label>
-                            <input type="date" id="startDate" required>
+                    <div class="acceptance-options">
+                        <div class="acceptance-option">
+                            <input type="radio" id="partialAcceptance" name="acceptanceType" value="partial">
+                            <label for="partialAcceptance">辦理部分驗收</label>
                         </div>
-                        <div class="form-group">
-                            <label for="endDate">施作日期(迄)</label>
-                            <input type="date" id="endDate" required>
+                        
+                        <div class="acceptance-option">
+                            <input type="radio" id="fullAcceptance" name="acceptanceType" value="full">
+                            <label for="fullAcceptance">辦理全部驗收</label>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label>辦理部分驗收說明</label>
-                        <textarea id="partialDescription" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="請輸入辦理部分驗收的具體說明..."></textarea>
+                        <label>驗收說明</label>
+                        <textarea id="acceptanceDescription" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="請輸入驗收的具體說明..."></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal()">取消</button>
                 <a class="btn btn-primary" href="https://rubben0928.github.io/axure-html/%E6%A1%83%E5%9C%92%E6%B0%B4%E5%8B%99%E9%A9%97%E6%94%B6%E7%B5%90%E6%A1%88.html" target="_blank">開始辦理</a>
-
-
             </div>
         </div>
     </div>
@@ -579,11 +589,6 @@
             } else {
                 // 如果不能提送結案，顯示模態框
                 modal.style.display = 'block';
-                
-                // 設置今天的日期為預設值
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('startDate').value = today;
-                document.getElementById('endDate').value = today;
             }
         }
 
@@ -597,18 +602,6 @@
             return progress >= 100 && !hasUnfinishedItems;
         }
 
-        // 切換部分驗收選項
-        function togglePartialAcceptance() {
-            const checkbox = document.getElementById('partialAcceptance');
-            const section = document.getElementById('partialAcceptanceSection');
-            
-            if (checkbox.checked) {
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
-            }
-        }
-
         // 關閉模態框
         function closeModal() {
             const modal = document.getElementById('settlementModal');
@@ -616,42 +609,31 @@
             
             // 重置表單
             document.getElementById('partialAcceptance').checked = false;
-            document.getElementById('partialAcceptanceSection').style.display = 'none';
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            document.getElementById('partialDescription').value = '';
+            document.getElementById('fullAcceptance').checked = false;
+            document.getElementById('acceptanceDescription').value = '';
         }
 
         // 提交結算作業
         function submitSettlement() {
             const partialAcceptance = document.getElementById('partialAcceptance').checked;
+            const fullAcceptance = document.getElementById('fullAcceptance').checked;
+            const description = document.getElementById('acceptanceDescription').value;
             
-            if (partialAcceptance) {
-                const startDate = document.getElementById('startDate').value;
-                const endDate = document.getElementById('endDate').value;
-                const description = document.getElementById('partialDescription').value;
-                
-                if (!startDate || !endDate) {
-                    alert('請選擇施作日期起訖');
-                    return;
-                }
-                
-                if (new Date(startDate) > new Date(endDate)) {
-                    alert('起始日期不能晚於結束日期');
-                    return;
-                }
-                
-                // 處理部分驗收
-                processPartialAcceptance(startDate, endDate, description);
-            } else {
-                alert('請勾選辦理部分驗收選項');
+            if (!partialAcceptance && !fullAcceptance) {
+                alert('請選擇驗收方式');
+                return;
             }
+            
+            const acceptanceType = partialAcceptance ? '部分驗收' : '全部驗收';
+            
+            // 處理驗收作業
+            processAcceptance(acceptanceType, description);
         }
 
-        // 處理部分驗收
-        function processPartialAcceptance(startDate, endDate, description) {
-            // 這裡可以加入實際的部分驗收處理邏輯
-            alert(`部分驗收已送出：\n起始日期：${startDate}\n結束日期：${endDate}\n說明：${description || '無'}`);
+        // 處理驗收作業
+        function processAcceptance(acceptanceType, description) {
+            // 這裡可以加入實際的驗收處理邏輯
+            alert(`${acceptanceType}已送出：\n說明：${description || '無'}`);
             
             // 關閉模態框
             closeModal();
