@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>結算保固系統</title>
+    <title>工程結算保固系統</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
         }
         
         body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
             background-color: #f5f7fa;
             color: #333;
+            line-height: 1.6;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a3a8f 0%, #4a148c 100%);
             color: white;
-            padding: 20px;
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px;
+        }
+        
+        .progress-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
         }
         
         .progress-bar {
@@ -48,14 +58,15 @@
             height: 4px;
             background: #e0e6ed;
             z-index: 1;
+            transform: translateY(-50%);
         }
         
         .progress-step {
             background: white;
             border: 4px solid #e0e6ed;
             border-radius: 50%;
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -67,8 +78,8 @@
         }
         
         .progress-step.active {
-            border-color: #667eea;
-            background: #667eea;
+            border-color: #1a3a8f;
+            background: #1a3a8f;
             color: white;
             transform: scale(1.1);
         }
@@ -83,80 +94,171 @@
             text-align: center;
             margin-top: 10px;
             font-weight: bold;
-            color: #666;
+            color: #555;
+            font-size: 14px;
+            line-height: 1.4;
         }
         
         .step-content {
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.08);
             padding: 30px;
-            margin: 30px 0;
+            margin-bottom: 40px;
+        }
+        
+        .step-title {
+            color: #1a3a8f;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .step-description {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 15px;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #555;
+            color: #444;
         }
         
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group .form-control {
             width: 100%;
-            padding: 12px;
+            padding: 12px 15px;
             border: 2px solid #e0e6ed;
             border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
+            font-size: 15px;
+            transition: all 0.3s;
         }
         
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-group .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #1a3a8f;
+            box-shadow: 0 0 0 3px rgba(26, 58, 143, 0.1);
+        }
+        
+        .form-group textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .document-section {
+            background: #f8f9fa;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .document-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .document-section .required {
+            color: #dc3545;
+            font-size: 14px;
+        }
+        
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-inprogress {
+            background: #bee5eb;
+            color: #0c5460;
         }
         
         .file-upload {
-            border: 2px dashed #667eea;
+            border: 2px dashed #1a3a8f;
             border-radius: 8px;
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             background: #f8f9ff;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
         
         .file-upload:hover {
             background: #f0f2ff;
-            border-color: #5a67d8;
+            border-color: #142d6e;
+        }
+        
+        .file-upload p {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .file-upload small {
+            color: #666;
+            font-size: 13px;
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 0 5px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn i {
+            font-size: 16px;
         }
         
         .btn-primary {
-            background: #667eea;
+            background: #1a3a8f;
             color: white;
         }
         
         .btn-primary:hover {
-            background: #5a67d8;
+            background: #142d6e;
             transform: translateY(-2px);
         }
         
@@ -196,41 +298,20 @@
             background: #138496;
         }
         
+        .btn-sm {
+            padding: 8px 15px;
+            font-size: 13px;
+        }
+        
+        .btn-lg {
+            padding: 12px 25px;
+            font-size: 16px;
+        }
+        
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        
-        .status-approved {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .document-item {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
         }
         
         .warranty-item {
@@ -238,8 +319,14 @@
             border: 1px solid #e0e6ed;
             border-radius: 8px;
             padding: 20px;
-            margin: 15px 0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .warranty-item h4 {
+            margin-bottom: 15px;
+            color: #333;
         }
         
         .add-item-btn {
@@ -251,6 +338,7 @@
             cursor: pointer;
             font-size: 14px;
             margin: 10px 0;
+            transition: all 0.3s;
         }
         
         .add-item-btn:hover {
@@ -263,7 +351,7 @@
         
         .checkbox-group {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
             margin: 10px 0;
         }
@@ -279,174 +367,233 @@
             border: 1px solid #bee5eb;
             border-radius: 8px;
             padding: 20px;
-            margin: 20px 0;
+            margin: 25px 0;
         }
-
-        .status-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-
-        .status-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .review-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .save-section {
+        
+        .review-section {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             padding: 20px;
-            margin: 20px 0;
-            text-align: center;
+            margin: 25px 0;
         }
-
-        /* 新增的樣式 */
-        .flex-container {
+        
+        .review-actions {
             display: flex;
             gap: 10px;
-            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
         }
         
-        .flex-container select {
-            flex: 1;
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
         }
         
-        .flex-container input {
-            flex: 2;
+        .no-warranty-checkbox {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .remarks {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .warranty-amount-fields {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e6ed;
+        }
+        
+        .warranty-amount-fields .grid {
+            gap: 15px;
+        }
+        
+        .warranty-amount-fields .form-group {
+            margin-bottom: 0;
+        }
+        
+        .payment-remarks {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .warranty-main-fields {
+            margin-top: 20px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
+        .form-note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="header">
-        <h1>結算保固作業</h1>
-      
+        <h1><i class="fas fa-file-contract"></i> 結算保固作業</h1>
+       
     </div>
 
     <div class="container">
-        <!-- 進度條 -->
-        <div class="progress-bar">
-            <div>
-                <div class="progress-step active" id="step1" onclick="showStep(1)">1</div>
-                <div class="step-label">確認驗收後應上傳資料
-                <br>(施工廠商、監造單位)</br></div>
-            </div>
-            <div>
-                <div class="progress-step" id="step2" onclick="showStep(2)">2</div>
-                <div class="step-label">登錄及產製工程結算驗收證明
-                <br>(工程主辦機關、會計室)</br></div>
-             
-            </div>
-            <div>
-                <div class="progress-step" id="step3" onclick="showStep(3)">3</div>
-                <div class="step-label">保固作業
-                <br>(施工廠商、監造單位)</br></div>
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div>
+                    <div class="progress-step active" id="step1" onclick="showStep(1)">1</div>
+                    <div class="step-label">驗收後資料確認<br>(施工廠商/監造單位/工程主辦機關)</div>
+                </div>
+                <div>
+                    <div class="progress-step" id="step2" onclick="showStep(2)">2</div>
+                    <div class="step-label">登錄結算驗收證明書<br>(工程主辦機關)</div>
+                </div>
+                <div>
+                    <div class="progress-step" id="step3" onclick="showStep(3)">3</div>
+                    <div class="step-label">保固作業管理<br>(施工廠商/監造單位/工程主辦機關)</div>
+                </div>
             </div>
         </div>
 
-        <!-- 步驟1：確認驗收完成資料 -->
+        <!-- Step 1: Confirm Completion Documents -->
         <div class="step-content" id="content1">
-            <h2>步驟1：確認驗收後應上傳資料</h2>
-            <p style="color: #666; margin-bottom: 20px;">請檢核竣工圖說與工程結算明細表是否已正確上傳</p>
+            <h2 class="step-title"><i class="fas fa-check-circle"></i> 步驟1：驗收後資料確認</h2>
+            <p class="step-description">請檢核圖說與工程結算資料是否正確，並上傳必要文件</p>
             
-            <div class="document-item">
-                <h3>竣工圖說<p style="color: red;">(若有辦理變更，亦須上傳變更設計圖說)</p></h3>
-                <div class="status-row">
-                    <div class="status-left">
+            
+            <div class="document-section">
+                <h3><i class="fas fa-drafting-compass"></i> 圖說資料 <span class="required">(若有辦理變更，需上傳變更設計圖說)</span></h3>
+                <div class="status-container">
+                    <div class="status-info">
                         <label>上傳狀態：</label>
-                        <span class="status-badge status-approved">已上傳</span>
+                        <span class="status-badge status-approved"><i class="fas fa-check"></i> 已上傳</span>
                     </div>
-                    <button class="btn btn-primary">檢視檔案</button>
+                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> 檢視檔案</button>
                 </div>
                 <div class="form-group">
                     <div class="file-upload" onclick="document.getElementById('completionDrawings').click()">
                         <input type="file" id="completionDrawings" style="display: none;" multiple accept=".pdf,.dwg,.jpg,.png">
-                        <p>📁 點擊上傳竣工圖說檔案</p>
-                        <small>支援格式：pdf、dwg、dxf</small>
+                        <p><i class="fas fa-cloud-upload-alt"></i> 點擊上傳圖說檔案</p>
+                        <small>支援格式：PDF、DWG、DXF(單檔最大限100MB)</small>
                     </div>
-                </div>
-            </div>
-
-            <div class="document-item">
-                <h3>工程結算明細表<p style="color: red;">(內容應含工程概述、工程主要工項內容及實作數量)</p></h3>
-                <div class="status-row">
-                    <div class="status-left">
-                        <label>上傳狀態：</label>
-                        <span class="status-badge status-pending">未上傳</span>
-                    </div>
-                    <button class="btn btn-primary">檢視檔案</button>
-                </div>
-                <div class="form-group">
-                    <div class="file-upload" onclick="document.getElementById('settlementDetails').click()">
-                        <input type="file" id="settlementDetails" style="display: none;" multiple accept=".xlsx,.xls,.pdf">
-                        <p>📊 點擊上傳工程結算明細表</p>
-                        <small>支援格式：Excel, PDF</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-group">
-            <div class="save-section">
                    
-                <button class="btn btn-info" onclick="saveData()">提送至監造單位</button>
-            </div>
-                <label for="reviewComments">監造單位審核意見</label>
-                <textarea id="reviewComments" rows="4" placeholder="請輸入審核意見..."></textarea>
-                <div class="review-actions">
-                    <button class="btn btn-success">同意</button>
-                    <button class="btn btn-danger">退回修正</button>
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 30px;">
-                <button class="btn btn-primary" onclick="nextStep(2)">確認完成，進入下一步</button>
+            <div class="document-section">
+                <h3><i class="fas fa-calculator"></i> 工程結算資料</h3>
+                <div class="status-container">
+                    <div class="status-info">
+                        <label>最後一次估驗請款填寫狀態：</label>
+                        <span class="status-badge status-inprogress"><i class="fas fa-pencil-alt"></i> (尚未新增、填寫中、審核中、已同意核可)</span>
+                    </div>
+                    <a href="#" class="btn btn-primary btn-sm"><i class="fas fa-external-link-alt"></i> 前往工程估驗計價功能頁面</a>
+                </div>
+                <div class="remarks">
+                    <i class="fas fa-info-circle"></i> 驗收完成後，若需變更估驗計價內容，請至工程估驗計價修改;若已提送或已同意核可，請洽本案承辦人線上退回修正!
+                </div>
+            </div>
+            
+            <button class="btn btn-success"><i class="fas fa-check"></i> 儲存資料</button>
+            <button class="btn btn-info"><i class="fas fa-paper-plane"></i> 提送監造單位</button>
+
+            <div class="review-section">
+                <h3><i class="fas fa-user-shield"></i> 監造單位審核</h3>
+                <div class="form-group">
+                    <label for="reviewComments">審核意見</label>
+                    <textarea id="reviewComments" class="form-control" rows="4" placeholder="請輸入審核意見..."></textarea>
+                </div>
+                <div class="review-actions">
+                    <button class="btn btn-success"><i class="fas fa-check"></i> 同意</button>
+                    <button class="btn btn-danger"><i class="fas fa-times"></i> 退回修正</button>
+                    <button class="btn btn-info"><i class="fas fa-paper-plane"></i> 提送主辦機關</button>
+                </div>
+            </div>
+            
+            <div class="review-section">
+                <h3><i class="fas fa-building"></i> 主辦機關確認</h3>
+                <div class="form-group">
+                    <label for="hostOrgComments">審核意見</label>
+                    <textarea id="hostOrgComments" class="form-control" rows="4" placeholder="請輸入主辦機關審核意見..."></textarea>
+                </div>
+                <div class="review-actions">
+                    <button class="btn btn-success"><i class="fas fa-check"></i> 同意</button>
+                    <button class="btn btn-danger"><i class="fas fa-times"></i> 退回修正</button>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+         
+                <button class="btn btn-primary btn-lg" onclick="validateStep1()"><i class="fas fa-arrow-right"></i> 確認完成，進入下一步</button>
             </div>
         </div>
 
-        <!-- 步驟2：產出工程結算驗收證明 -->
+        <!-- Step 2: Generate Settlement Certificate -->
         <div class="step-content hidden" id="content2">
-            <h2>步驟2：產出工程結算驗收證明</h2>
-            <p style="color: #666; margin-bottom: 20px;">檢核基本資料並產出驗收證明書</p>
+            <h2 class="step-title"><i class="fas fa-file-certificate"></i> 步驟2：登錄結算驗收證明書</h2>
+            <p class="step-description">請填寫結算驗收相關資料並產出驗收證明書</p>
             
             <div class="grid">
                 <div class="form-group">
-                    <label for="contractNo">案號及契約號</label>
-                    <input type="text" id="contractNo" value="CTR-2024-001" readonly>
+                    <label for="contractNo" class="required-field">案號及契約號</label>
+                    <input type="text" id="contractNo" class="form-control" value="CTR-2024-001" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="vendorName">廠商名稱</label>
-                    <input type="text" id="vendorName" value="XX建設股份有限公司" readonly>
+                    <label for="vendorName" class="required-field">廠商名稱</label>
+                    <input type="text" id="vendorName" class="form-control" value="XX建設股份有限公司" readonly>
                 </div>
             </div>
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="projectName">標的名稱</label>
-                    <input type="text" id="projectName" value="市政大樓改建工程" readonly>
+                    <label for="projectName" class="required-field">標的名稱</label>
+                    <input type="text" id="projectName" class="form-control" value="市政大樓改建工程" readonly>
                 </div>
                 <div class="form-group">
-                    <label>採購金額</label>
+                    <label class="required-field">採購金額級距</label>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
                             <input type="radio" id="amountBelow" name="amountCategory" checked>
                             <label for="amountBelow">未達公告金額</label>
                         </div>
-                           <div class="checkbox-item">
-                            <input type="radio" id="amountBelow" name="amountCategory" checked>
-                            <label for="amountBelow">公告金額以上未達查核金額</label>
+                        <div class="checkbox-item">
+                            <input type="radio" id="amountBelow2" name="amountCategory">
+                            <label for="amountBelow2">公告金額以上未達查核金額</label>
                         </div>
-                           <div class="checkbox-item">
-                            <input type="radio" id="amountBelow" name="amountCategory" checked>
-                            <label for="amountBelow">查核金額以上未達巨額</label>
+                        <div class="checkbox-item">
+                            <input type="radio" id="amountBelow3" name="amountCategory">
+                            <label for="amountBelow3">查核金額以上未達巨額</label>
                         </div>
                         <div class="checkbox-item">
                             <input type="radio" id="amountLarge" name="amountCategory">
@@ -458,287 +605,404 @@
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="performancePeriod">履約期限</label>
-                    <input type="text" id="performancePeriod" value="365天" readonly>
+                    <label for="performancePeriod" class="required-field">履約期限</label>
+                    <input type="text" id="performancePeriod" class="form-control" value="365天" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="performanceLocation">履約地點</label>
-                    <input type="text" id="performanceLocation" value="台中市西屯區" readonly>
+                    <label for="performanceLocation" class="required-field">履約地點</label>
+                    <input type="text" id="performanceLocation" class="form-control" value="台中市西屯區" readonly>
                 </div>
             </div>
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="startDate">開工日期</label>
-                    <input type="date" id="startDate" value="2024-01-15" readonly>
+                    <label for="startDate" class="required-field">開工日期</label>
+                    <input type="date" id="startDate" class="form-control" value="2024-01-15" readonly>
                 </div>
                 <div class="form-group">
-                    <label for="expectedCompletionDate">預定竣工日期</label>
-                    <input type="date" id="expectedCompletionDate" value="2025-01-14" readonly>
+                    <label for="expectedCompletionDate" class="required-field">預定竣工日期</label>
+                    <input type="date" id="expectedCompletionDate" class="form-control" value="2025-01-14" readonly>
                 </div>
             </div>
 
             <div class="grid">
                 <div class="form-group">
                     <label for="nonCountDays">不(免)計入工期天數</label>
-                    <input type="number" id="nonCountDays" placeholder="請輸入不計入工期天數" min="0">
+                    <input type="number" id="nonCountDays" class="form-control" placeholder="請輸入天數" min="0">
+                    <div class="form-note">如颱風假、國定假日等不計工期天數</div>
                 </div>
                 <div class="form-group">
-                    <label for="actualCompletionDate">實際竣工日期</label>
-                    <input type="date" id="actualCompletionDate" placeholder="請選擇實際竣工日期">
+                    <label for="actualCompletionDate" class="required-field">實際竣工日期</label>
+                    <input type="date" id="actualCompletionDate" class="form-control" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="acceptanceStartDate">開始驗收日期</label>
-                <input type="date" id="acceptanceStartDate" placeholder="請選擇開始驗收日期">
+                <label for="acceptanceStartDate" class="required-field">開始驗收日期</label>
+                <input type="date" id="acceptanceStartDate" class="form-control" required>
             </div>
 
             <div class="grid">
                 <div class="form-group">
-                    <label for="acceptanceDate">驗收完畢/驗收合格日期</label>
-                    <input type="date" id="acceptanceDate" placeholder="請選擇驗收合格日期">
+                    <label for="acceptanceDate" class="required-field">驗收完畢/驗收合格日期</label>
+                    <input type="date" id="acceptanceDate" class="form-control" required>
                 </div>
                 <div class="form-group">
                     <label for="totalOverdueDays">履約逾期總天數</label>
-                    <input type="number" id="totalOverdueDays" placeholder="請輸入履約逾期總天數" min="0">
+                    <input type="number" id="totalOverdueDays" class="form-control" placeholder="請輸入天數" min="0">
+                    
                 </div>
             </div>
 
             <div class="grid">
                 <div class="form-group">
                     <label for="exemptViolationDays">不計違約金天數</label>
-                    <input type="number" id="exemptViolationDays" placeholder="請輸入不計違約金天數" min="0">
+                    <input type="number" id="exemptViolationDays" class="form-control" placeholder="請輸入天數" min="0">
                 </div>
                 <div class="form-group">
                     <label for="calculatedViolationDays">應計違約金天數</label>
-                    <input type="number" id="calculatedViolationDays" placeholder="請輸入應計違約金天數" min="0">
+                    <input type="number" id="calculatedViolationDays" class="form-control" placeholder="請輸入天數" min="0">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="overdueViolationAmount">逾期違約金</label>
-                <input type="number" id="overdueViolationAmount" placeholder="請輸入逾期違約金" min="0">
+                <input type="number" id="overdueViolationAmount" class="form-control" placeholder="請輸入金額" min="0">
+               
             </div>
 
             <div class="grid">
                 <div class="form-group">
                     <label for="otherViolationAmount">其他違約金</label>
-                    <input type="number" id="otherViolationAmount" placeholder="請輸入其他違約金" min="0">
+                    <input type="number" id="otherViolationAmount" class="form-control" placeholder="請輸入金額" min="0">
                 </div>
                 <div class="form-group">
-                    <label for="finalContractAmount">契約金額</label>
-                    <input type="number" id="finalContractAmount" placeholder="請輸入契約金額" min="0">
+                    <label for="finalContractAmount" class="required-field">契約金額</label>
+                    <input type="number" id="finalContractAmount" class="form-control" placeholder="請輸入金額" min="0" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <h3>增減價款</h3>
+                <h3><i class="fas fa-exchange-alt"></i> 增減價款</h3>
                 <div id="priceAdjustments">
                     <div class="warranty-item">
                         <h4>第1次增減</h4>
                         <div class="grid">
                             <div class="form-group">
                                 <label>增減或減少/金額</label>
-                                <div class="flex-container">
-                                    <select>
+                                <div style="display: flex; gap: 10px;">
+                                    <select class="form-control" style="flex: 1;">
                                         <option value="increase">增加</option>
                                         <option value="decrease">減少</option>
                                     </select>
-                                    <input type="number" placeholder="請輸入金額">
+                                    <input type="number" class="form-control" style="flex: 2;" placeholder="請輸入金額">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>簽准日期/核准文號</label>
-                                <div class="flex-container">
-                                    <input type="date">
-                                    <input type="text" placeholder="輸入核准文號">
+                                <label>簽准日期/核准文號(選填)</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="date" class="form-control" style="flex: 1;">
+                                    <input type="text" class="form-control" style="flex: 2;" placeholder="輸入核准文號">
                                 </div>
                             </div>
                         </div>
+                        <button class="btn btn-danger btn-sm" onclick="removePriceAdjustment(this)"><i class="fas fa-trash"></i> 移除</button>
                     </div>
                 </div>
-                <button class="add-item-btn" onclick="addPriceAdjustment()">+ 新增增減價款</button>
+                <button class="add-item-btn" onclick="addPriceAdjustment()"><i class="fas fa-plus"></i> 新增增減價款</button>
             </div>
 
             <div class="form-group">
-                <h3>驗收扣款(不包括逾期違約金及其他違約金)</h3>
+                <h3><i class="fas fa-minus-circle"></i> 驗收扣款(不包括逾期違約金及其他違約金)</h3>
                 <div class="grid">
                     <div class="form-group">
                         <label>扣款說明</label>
-                        <textarea rows="3" placeholder="請說明扣款原因或項目..."></textarea>
+                        <textarea class="form-control" rows="3" placeholder="請說明扣款原因或項目..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>扣款金額</label>
-                        <input type="number" placeholder="請輸入扣款金額" min="0">
+                        <input type="number" class="form-control" placeholder="請輸入金額" min="0">
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <h3>有價廢料繳納總額</h3>
+                <h3><i class="fas fa-recycle"></i> 有價廢料繳納總額</h3>
                 <div class="grid">
                     <div class="form-group">
                         <label>廢料項目說明</label>
-                        <textarea rows="3" placeholder="請說明有價廢料項目內容..."></textarea>
+                        <textarea class="form-control" rows="3" placeholder="請說明有價廢料項目內容..."></textarea>
                     </div>
                     <div class="form-group">
                         <label>繳納總額</label>
-                        <input type="number" placeholder="請輸入繳納總額" min="0">
+                        <input type="number" class="form-control" placeholder="請輸入繳納總額" min="0">
+                        <div class="payment-remarks">
+                            <textarea class="form-control" placeholder="可輸入計算式 (例如: 1000*0.8+500)" rows="2"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="form-group">
-                <h3>結算總價</h3>
-                <input type="number" id="settlementTotalAmount" placeholder="請輸入結算總價" min="0">
+                <h3><i class="fas fa-calculator"></i> 結算總價</h3>
+                <input type="number" id="settlementTotalAmount" class="form-control" placeholder="請輸入結算總價" min="0" required>
+                <div class="form-note">系統將自動計算：契約金額 + 物調款 + 增價 - 減價 - 扣款金額</div>
             </div>
 
             <div class="form-group">
-                <h3>驗收意見</h3>
-                <textarea id="acceptanceOpinion" rows="4" placeholder="請輸入驗收意見..."></textarea>
+                <h3><i class="fas fa-comment"></i> 驗收意見</h3>
+                <textarea id="acceptanceOpinion" class="form-control" rows="4" placeholder="請輸入驗收意見..." required></textarea>
             </div>
 
-            <!-- 儲存資料區塊移到驗收意見下方 -->
-            <div class="save-section">
-                   
-                <button class="btn btn-info" onclick="saveData()">儲存資料</button>
-            </div>
+<button class="btn btn-success"><i class="fas fa-check"></i> 儲存資料</button>
+           
 
             <div class="export-section">
-                <h3>🖨️ 匯出工程結算驗收證明書</h3>
-                <p>系統將根據上述資料自動產生驗收證明書</p>
-                <button class="btn btn-primary">匯出PDF</button>
-                <button class="btn btn-primary">匯出Word</button>
-            </div>
-
-            <div class="form-group">
-                <h3>上傳已簽核之工程結算驗收證明書</h3>
-                <div class="file-upload" onclick="document.getElementById('signedCertificate').click()">
-                    <input type="file" id="signedCertificate" style="display: none;" accept=".pdf">
-                    <p>📄 點擊上傳已簽核之驗收證明書</p>
-                    <small>支援格式：pdf、word</small>
+                <h3><i class="fas fa-file-export"></i> 匯出工程結算驗收證明書</h3>
+                <p>系統將根據上述資料自動產生驗收證明書，請確認資料正確後再匯出</p>
+                <div class="review-actions">
+                    
+                    <button class="btn btn-primary"><i class="fas fa-file-word"></i> 匯出Word</button>
+                    
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 30px;">
-                <button class="btn btn-warning" onclick="showStep(1)">返回上一步</button>
-                <button class="btn btn-primary" onclick="nextStep(3)">完成，進入保固作業</button>
+            <div class="document-section">
+                <h3><i class="fas fa-file-signature"></i> 上傳已簽核之工程結算驗收證明書</h3>
+                <div class="file-upload" onclick="document.getElementById('signedCertificate').click()">
+                    <input type="file" id="signedCertificate" style="display: none;" accept=".pdf,.doc,.docx">
+                    <p><i class="fas fa-cloud-upload-alt"></i> 點擊上傳已簽核之驗收證明書</p>
+                    <small>支援格式：PDF、Word (單檔最大10MB)</small>
+                </div>
+                <div class="form-note">請上傳經機關首長或授權人員簽核之正式文件</div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-warning" onclick="showStep(1)"><i class="fas fa-arrow-left"></i> 返回上一步</button>
+                <button class="btn btn-primary btn-lg" onclick="validateStep2()"><i class="fas fa-arrow-right"></i> 完成，進入保固作業</button>
             </div>
         </div>
 
-        <!-- 步驟3：保固作業 -->
+        <!-- Step 3: Warranty Work -->
         <div class="step-content hidden" id="content3">
-            <h2>步驟3：保固作業</h2>
-            <p style="color: #666; margin-bottom: 20px;">設定保固期間與項目，並上傳相關保固文件</p>
+            <h2 class="step-title"><i class="fas fa-shield-alt"></i> 步驟3：保固作業管理</h2>
+            <p class="step-description">設定保固期間與項目，並上傳相關保固文件</p>
             
-            <div class="grid">
-                <div class="form-group">
-                    <label for="warrantyStartDate">保固開始日期 *</label>
-                    <input type="date" id="warrantyStartDate" required>
+            <div class="no-warranty-checkbox">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="noWarranty" onchange="toggleWarrantyFields()">
+                    <label for="noWarranty"><strong>本工程無保固需求</strong></label>
                 </div>
+                <div class="form-note">勾選此項表示本工程依契約規定無需保固，將跳過保固相關設定</div>
+            </div>
+            
+            <div id="warrantyFields">
                 <div class="form-group">
-                    <label for="warrantyEndDate">保固結束日期 *</label>
-                    <input type="date" id="warrantyEndDate" required>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="warrantyAmount">保固金額 *</label>
-                <input type="number" id="warrantyAmount" placeholder="請輸入保固金額" required>
-            </div>
-
-            <div class="form-group">
-                <h3>保固項目</h3>
-                <div id="warrantyItems">
-                    <div class="warranty-item">
-                        <h4>保固項目 #1</h4>
-                        <div class="grid">
-                            <div class="form-group">
-                                <label>項目名稱</label>
-                                <input type="text" placeholder="請輸入保固項目名稱">
+                    <h3><i class="fas fa-list-ul"></i> 保固項目</h3>
+                    <div id="warrantyItems">
+                        <div class="warranty-item">
+                            <h4>保固項目 #1</h4>
+                            <div class="grid">
+                                <div class="form-group">
+                                    <label class="required-field">項目名稱</label>
+                                    <input type="text" class="form-control" placeholder="請輸入保固項目名稱" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="required-field">保固類型</label>
+                                    <select class="form-control" required>
+                                        <option value="">請選擇類型</option>
+                                        <option value="structural">結構保固</option>
+                                        <option value="equipment">設備保固</option>
+                                        <option value="materials">材料保固</option>
+                                        <option value="landscaping">景觀植栽保活</option>
+                                        <option value="others">其他</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>保固類型</label>
-                                <select>
-                                    <option value="">請選擇類型</option>
-                                    <option value="structural">結構保固</option>
-                                    <option value="equipment">設備保固</option>
-                                    <option value="materials">材料保固</option>
-                                    <option value="others">其他</option>
-                                </select>
+                            
+                            <!-- 保固金額相關欄位 -->
+                            <div class="warranty-amount-fields">
+                                <div class="grid">
+                                    <div class="form-group">
+                                        <label class="required-field">保固結束日期</label>
+                                        <input type="date" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required-field">保固金額</label>
+                                        <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="required-field">退還金額</label>
+                                        <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                        <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                                    </div>
+                                </div>
                             </div>
+                            
+                            <div class="form-group">
+                                <label class="required-field">保固內容說明</label>
+                                <textarea class="form-control" rows="3" placeholder="請詳細說明保固內容..." required></textarea>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="removeWarrantyItem(this)"><i class="fas fa-trash"></i> 移除此項目</button>
                         </div>
-                        <div class="form-group">
-                            <label>保固內容說明</label>
-                            <textarea rows="3" placeholder="請詳細說明保固內容..."></textarea>
-                        </div>
-                        <button class="btn btn-danger" onclick="removeWarrantyItem(this)">移除此項目</button>
                     </div>
+                    <button class="add-item-btn" onclick="addWarrantyItem()"><i class="fas fa-plus"></i> 新增保固項目</button>
                 </div>
-                <button class="add-item-btn" onclick="addWarrantyItem()">+ 新增保固項目</button>
-            </div>
 
-            <div class="form-group">
-                <h3>上傳保固金/保活金檔案</h3>
-                <div class="file-upload" onclick="document.getElementById('warrantyFiles').click()">
-                    <input type="file" id="warrantyFiles" style="display: none;" multiple accept=".pdf,.jpg,.png">
-                    <p>💰 點擊上傳保固金相關檔案</p>
-                    <small>支援格式：pdf , excel , word</small>
+                <div class="document-section">
+                    <h3><i class="fas fa-file-invoice-dollar"></i> 保固金/保活金檔案</h3>
+                    <div class="file-upload" onclick="document.getElementById('warrantyFiles').click()">
+                        <input type="file" id="warrantyFiles" style="display: none;" multiple accept=".pdf,.jpg,.png,.doc,.docx,.xls,.xlsx">
+                        <p><i class="fas fa-cloud-upload-alt"></i> 點擊上傳保固金相關檔案</p>
+                        <small>支援格式：PDF、Word、Excel、JPG、PNG (單檔最大10MB)</small>
+                    </div>
+                    <div class="form-note">請上傳保固金繳納證明等相關文件</div>
                 </div>
             </div>
+            
+            <button class="btn btn-success"><i class="fas fa-check"></i> 儲存資料</button>
+            <button class="btn btn-info"><i class="fas fa-paper-plane"></i> 提送監造單位</button>
 
-            <div class="form-group">
-            <div class="save-section">
-                   
-                <button class="btn btn-info" onclick="saveData()">提送至監造單位</button>
-            </div>
-                <h3>監造單位確認</h3>
+            <div class="review-section">
+                <h3><i class="fas fa-user-shield"></i> 監造單位審核</h3>
                 <div class="form-group">
-                    <label for="supervisorWarrantyComments">監造單位審核意見</label>
-                    <textarea id="supervisorWarrantyComments" rows="4" placeholder="請輸入監造審核意見..."></textarea>
-                    <div class="review-actions">
-                        <button class="btn btn-success" onclick="approveWarranty()">同意</button>
-                        <button class="btn btn-danger" onclick="rejectWarranty()">退回修正</button>
-                    </div>
+                    <label for="supervisorWarrantyComments">審核意見</label>
+                    <textarea id="supervisorWarrantyComments" class="form-control" rows="4" placeholder="請輸入監造審核意見..."></textarea>
+                </div>
+                <div class="review-actions">
+                    <button class="btn btn-success" onclick="approveWarranty('supervisor')"><i class="fas fa-check"></i> 同意</button>
+                    <button class="btn btn-danger" onclick="rejectWarranty('supervisor')"><i class="fas fa-times"></i> 退回修正</button>
+                    <button class="btn btn-info"><i class="fas fa-paper-plane"></i> 提送主辦機關</button>
+                </div>
+            </div>
+            
+            <div class="review-section">
+                <h3><i class="fas fa-building"></i> 主辦機關確認</h3>
+                <div class="form-group">
+                    <label for="hostOrgWarrantyComments">審核意見</label>
+                    <textarea id="hostOrgWarrantyComments" class="form-control" rows="4" placeholder="請輸入主辦機關審核意見..."></textarea>
+                </div>
+                <div class="review-actions">
+                    <button class="btn btn-success" onclick="approveWarranty('host')"><i class="fas fa-check"></i> 同意</button>
+                    <button class="btn btn-danger" onclick="rejectWarranty('host')"><i class="fas fa-times"></i> 退回修正</button>
+                    <button class="btn btn-success" onclick="completeWarrantyProcess()"><i class="fas fa-check-double"></i> 完成保固金退還</button>
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 30px;">
-                <button class="btn btn-warning" onclick="showStep(2)">返回上一步</button>
-                <button class="btn btn-success" onclick="completeProcess()">完成保固金退還作業</button>
+            <div class="action-buttons">
+                <button class="btn btn-warning" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> 返回上一步</button>
+         
             </div>
         </div>
     </div>
 
     <script>
+        // 初始化變數
         let currentStep = 1;
         let priceAdjustmentCount = 1;
         let warrantyItemCount = 1;
+        let formData = {
+            step1: {},
+            step2: {},
+            step3: {}
+        };
 
+        // 顯示步驟
         function showStep(step) {
-            // 隱藏所有步驟內容
-            for (let i = 1; i <= 3; i++) {
-                document.getElementById(`content${i}`).classList.add('hidden');
-                document.getElementById(`step${i}`).classList.remove('active', 'completed');
+            // 驗證當前步驟
+            if (!validateCurrentStep()) {
+                return;
             }
+            
+            // 隱藏所有步驟內容
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // 重置步驟樣式
+            document.querySelectorAll('.progress-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
             
             // 顯示當前步驟
             document.getElementById(`content${step}`).classList.remove('hidden');
             document.getElementById(`step${step}`).classList.add('active');
             
-            // 標記已完成的步驟
+            // 標記已完成步驟
             for (let i = 1; i < step; i++) {
                 document.getElementById(`step${i}`).classList.add('completed');
             }
             
             currentStep = step;
+            updateFormNavigation();
         }
 
-        function nextStep(step) {
-            showStep(step);
+        // 驗證當前步驟
+        function validateCurrentStep() {
+            if (currentStep === 1) {
+                return validateStep1(true);
+            } else if (currentStep === 2) {
+                return validateStep2(true);
+            }
+            return true;
         }
 
+        // 更新表單導航狀態
+        function updateFormNavigation() {
+            // 可以在這裡添加導航狀態更新邏輯
+        }
+
+        // 步驟1驗證
+        function validateStep1(silent = false) {
+            const drawingsUploaded = true; // 假設圖說已上傳
+            const settlementStarted = true; // 假設結算已開始
+            
+            if (!drawingsUploaded) {
+                if (!silent) {
+                    alert('請上傳圖說資料！');
+                }
+                return false;
+            }
+            
+            if (!settlementStarted) {
+                if (!silent) {
+                    alert('請先完成工程結算明細表填寫！');
+                }
+                return false;
+            }
+            
+            return true;
+        }
+
+        // 步驟2驗證
+        function validateStep2(silent = false) {
+            const requiredFields = [
+                'actualCompletionDate',
+                'acceptanceStartDate',
+                'acceptanceDate',
+                'finalContractAmount',
+                'settlementTotalAmount',
+                'acceptanceOpinion'
+            ];
+            
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    if (!silent) {
+                        field.focus();
+                        alert(`請填寫「${field.previousElementSibling.textContent.trim()}」！`);
+                    }
+                    isValid = false;
+                    return false; // 跳出循環
+                }
+            });
+            
+            return isValid;
+        }
+
+        // 新增增減價款
         function addPriceAdjustment() {
             priceAdjustmentCount++;
             const container = document.getElementById('priceAdjustments');
@@ -749,31 +1013,36 @@
                 <div class="grid">
                     <div class="form-group">
                         <label>增減或減少/金額</label>
-                        <div class="flex-container">
-                            <select>
+                        <div style="display: flex; gap: 10px;">
+                            <select class="form-control" style="flex: 1;">
                                 <option value="increase">增加</option>
                                 <option value="decrease">減少</option>
                             </select>
-                            <input type="number" placeholder="請輸入金額">
+                            <input type="number" class="form-control" style="flex: 2;" placeholder="請輸入金額">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>簽准日期/核准文號</label>
-                        <div class="flex-container">
-                            <input type="date">
-                            <input type="text" placeholder="輸入核准文號">
+                        <label>簽准日期/核准文號(選填)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="date" class="form-control" style="flex: 1;">
+                            <input type="text" class="form-control" style="flex: 2;" placeholder="輸入核准文號">
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-danger" onclick="removePriceAdjustment(this)">移除</button>
+                <button class="btn btn-danger btn-sm" onclick="removePriceAdjustment(this)"><i class="fas fa-trash"></i> 移除</button>
             `;
             container.appendChild(newItem);
         }
 
+        // 移除增減價款
         function removePriceAdjustment(button) {
-            button.parentElement.remove();
+            if (confirm('確定要移除此增減價款項目嗎？')) {
+                button.parentElement.remove();
+                priceAdjustmentCount--;
+            }
         }
 
+        // 新增保固項目
         function addWarrantyItem() {
             warrantyItemCount++;
             const container = document.getElementById('warrantyItems');
@@ -783,61 +1052,200 @@
                 <h4>保固項目 #${warrantyItemCount}</h4>
                 <div class="grid">
                     <div class="form-group">
-                        <label>項目名稱</label>
-                        <input type="text" placeholder="請輸入保固項目名稱">
+                        <label class="required-field">項目名稱</label>
+                        <input type="text" class="form-control" placeholder="請輸入保固項目名稱" required>
                     </div>
                     <div class="form-group">
-                        <label>保固類型</label>
-                        <select>
+                        <label class="required-field">保固類型</label>
+                        <select class="form-control" required>
                             <option value="">請選擇類型</option>
                             <option value="structural">結構保固</option>
                             <option value="equipment">設備保固</option>
                             <option value="materials">材料保固</option>
+                            <option value="landscaping">景觀植栽保活</option>
                             <option value="others">其他</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>保固內容說明</label>
-                    <textarea rows="3" placeholder="請詳細說明保固內容..."></textarea>
+                
+                <!-- 保固金額相關欄位 -->
+                <div class="warranty-amount-fields">
+                    <div class="grid">
+                        <div class="form-group">
+                            <label class="required-field">保固結束日期</label>
+                            <input type="date" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required-field">保固金額</label>
+                            <input type="number" class="form-control" placeholder="請輸入金額" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="required-field">退還金額</label>
+                            <input type="number" class="form-control" placeholder="請輸入金額" required>
+                            <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                        </div>
+                    </div>
                 </div>
-                <button class="btn btn-danger" onclick="removeWarrantyItem(this)">移除此項目</button>
+                
+                <div class="form-group">
+                    <label class="required-field">保固內容說明</label>
+                    <textarea class="form-control" rows="3" placeholder="請詳細說明保固內容..." required></textarea>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removeWarrantyItem(this)"><i class="fas fa-trash"></i> 移除此項目</button>
             `;
             container.appendChild(newItem);
-        }
-
-        function removeWarrantyItem(button) {
-            button.parentElement.remove();
-        }
-
-        function approveWarranty() {
-            const warrantyStartDate = document.getElementById('warrantyStartDate').value;
-            const warrantyEndDate = document.getElementById('warrantyEndDate').value;
-            const warrantyAmount = document.getElementById('warrantyAmount').value;
             
-            if (!warrantyStartDate || !warrantyEndDate || !warrantyAmount) {
-                alert('請填寫所有必填欄位！');
-                return;
+            // 設置預設日期
+            const dateInputs = newItem.querySelectorAll('input[type="date"]');
+            const today = new Date().toISOString().split('T')[0];
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            const nextYearDate = nextYear.toISOString().split('T')[0];
+            
+            dateInputs[0].value = nextYearDate; // 保固結束日期預設一年後
+        }
+
+        // 移除保固項目
+        function removeWarrantyItem(button) {
+            if (confirm('確定要移除此保固項目嗎？')) {
+                button.parentElement.remove();
+                warrantyItemCount--;
+            }
+        }
+
+        // 切換保固欄位顯示
+        function toggleWarrantyFields() {
+            const noWarrantyChecked = document.getElementById('noWarranty').checked;
+            const warrantyFields = document.getElementById('warrantyFields');
+            
+            if (noWarrantyChecked) {
+                warrantyFields.style.display = 'none';
+            } else {
+                warrantyFields.style.display = 'block';
+            }
+        }
+
+        // 核准保固
+        function approveWarranty(role) {
+            const noWarrantyChecked = document.getElementById('noWarranty').checked;
+            
+            if (!noWarrantyChecked) {
+                // 驗證所有保固項目的必填欄位
+                const warrantyItems = document.querySelectorAll('#warrantyItems .warranty-item');
+                if (warrantyItems.length === 0) {
+                    alert('請至少新增一個保固項目！');
+                    return;
+                }
+                
+                for (const item of warrantyItems) {
+                    const inputs = item.querySelectorAll('input[required], select[required], textarea[required]');
+                    for (const input of inputs) {
+                        if (!input.value.trim()) {
+                            const label = item.querySelector('label[for="' + input.id + '"]') || 
+                                         input.previousElementSibling;
+                            const labelText = label ? label.textContent.trim() : '欄位';
+                            alert('請填寫「' + labelText + '」！');
+                            input.focus();
+                            return;
+                        }
+                    }
+                }
             }
             
-            alert('保固資料已核准！');
-            document.getElementById('step3').classList.add('completed');
+            alert(`${role === 'supervisor' ? '監造單位' : '主辦機關'}已核准保固資料！`);
+            
+            if (role === 'host') {
+                document.getElementById('step3').classList.add('completed');
+            }
         }
 
-        function rejectWarranty() {
-            alert('保固資料已退回，請修改後重新提交！');
+        // 退回保固
+        function rejectWarranty(role) {
+            alert(`${role === 'supervisor' ? '監造單位' : '主辦機關'}已退回保固資料，請修改後重新提交！`);
         }
 
-        function saveData() {
-            alert('資料已儲存！');
-        }
-
-        function completeProcess() {
+        // 完成保固流程
+        function completeWarrantyProcess() {
             if (confirm('確定要完成保固設定嗎？完成後將無法修改資料！')) {
                 alert('保固設定已完成！');
                 document.getElementById('step3').classList.add('completed');
             }
         }
+
+        // 儲存草稿
+        function saveDraft() {
+            // 收集表單數據
+            collectFormData();
+            
+            // 這裡可以添加AJAX請求將數據保存到伺服器
+            alert('草稿已儲存！');
+            console.log('表單數據：', formData);
+        }
+
+        // 收集表單數據
+        function collectFormData() {
+            // 收集步驟1數據
+            formData.step1 = {
+                drawingsStatus: 'uploaded',
+                settlementStatus: 'inprogress'
+            };
+            
+            // 收集步驟2數據
+            formData.step2 = {
+                contractNo: document.getElementById('contractNo').value,
+                vendorName: document.getElementById('vendorName').value,
+                projectName: document.getElementById('projectName').value,
+                amountCategory: document.querySelector('input[name="amountCategory"]:checked')?.value,
+                performancePeriod: document.getElementById('performancePeriod').value,
+                performanceLocation: document.getElementById('performanceLocation').value,
+                startDate: document.getElementById('startDate').value,
+                expectedCompletionDate: document.getElementById('expectedCompletionDate').value,
+                nonCountDays: document.getElementById('nonCountDays').value,
+                actualCompletionDate: document.getElementById('actualCompletionDate').value,
+                acceptanceStartDate: document.getElementById('acceptanceStartDate').value,
+                acceptanceDate: document.getElementById('acceptanceDate').value,
+                totalOverdueDays: document.getElementById('totalOverdueDays').value,
+                exemptViolationDays: document.getElementById('exemptViolationDays').value,
+                calculatedViolationDays: document.getElementById('calculatedViolationDays').value,
+                overdueViolationAmount: document.getElementById('overdueViolationAmount').value,
+                otherViolationAmount: document.getElementById('otherViolationAmount').value,
+                finalContractAmount: document.getElementById('finalContractAmount').value,
+                settlementTotalAmount: document.getElementById('settlementTotalAmount').value,
+                acceptanceOpinion: document.getElementById('acceptanceOpinion').value
+            };
+            
+            // 收集步驟3數據
+            formData.step3 = {
+                noWarranty: document.getElementById('noWarranty').checked,
+                warrantyStartDate: document.getElementById('warrantyStartDate').value,
+                warrantyEndDate: document.getElementById('warrantyEndDate').value,
+                warrantyAmount: document.getElementById('warrantyAmount').value,
+                refundAmount: document.getElementById('refundAmount').value,
+                supervisorComments: document.getElementById('supervisorWarrantyComments').value,
+                hostOrgComments: document.getElementById('hostOrgWarrantyComments').value
+            };
+        }
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 設置日期欄位的預設值為今天
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('actualCompletionDate').value = today;
+            document.getElementById('acceptanceStartDate').value = today;
+            document.getElementById('acceptanceDate').value = today;
+            document.getElementById('warrantyStartDate').value = today;
+            
+            // 計算保固結束日期（預設一年後）
+            const nextYear = new Date();
+            nextYear.setFullYear(nextYear.getFullYear() + 1);
+            document.getElementById('warrantyEndDate').value = nextYear.toISOString().split('T')[0];
+            
+            // 初始化保固欄位顯示
+            toggleWarrantyFields();
+            
+            // 預設顯示第一步驟
+            showStep(1);
+        });
     </script>
 </body>
 </html>
