@@ -324,18 +324,44 @@
             position: relative;
         }
         
-        .warranty-item h4 {
-            margin-bottom: 15px;
-            color: #333;
+        .warranty-item-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 15px;
         }
         
-        .warranty-amount {
+        .warranty-item-title {
+            flex: 1;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .warranty-item-title h4 {
+            margin: 0;
+            white-space: nowrap;
+        }
+        
+        .warranty-item-name-input {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .warranty-item-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 250px;
+            justify-content: flex-end;
+        }
+        
+        .warranty-amount-label {
+            white-space: nowrap;
+        }
+        
+        .warranty-amount-input {
+            width: 120px;
         }
         
         .add-item-btn {
@@ -579,24 +605,6 @@
             margin-bottom: 15px;
             color: #333;
         }
-
-        /* 新增項目名稱與保固金額並排樣式 */
-        .warranty-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .warranty-item-title {
-            flex: 1;
-        }
-        
-        .warranty-item-amount {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -660,16 +668,16 @@
             </div>
 
             <div class="document-section">
-                <h3><i class="fas fa-calculator"></i> 本案結算資料</h3>
+                <h3><i class="fas fa-calculator"></i> 工程結算資料</h3>
                 <div class="status-container">
                     <div class="status-info">
-                        <label>本案結算資料填寫狀態：</label>
-                        <span class="status-badge status-inprogress"><i class="fas fa-pencil-alt"></i> (尚未新增、填寫中、審核中、已核准)</span>
+                        <label>最後一次工程結算資料填寫狀態：</label>
+                        <span class="status-badge status-inprogress"><i class="fas fa-pencil-alt"></i> (尚未新增、填寫中、審核中、已同意核可)</span>
                     </div>
-                    <a class="btn btn-primary" href="https://qms.wrbtycg.tw/TycgwrMis/RCM/EngProject/CostCertificateAdd?ProjectNo=1959" target="_blank">前往本案結算資料功能頁面</a>
+                    <a class="btn btn-primary" href="https://qms.wrbtycg.tw/TycgwrMis/RCM/EngProject/CostCertificateAdd?ProjectNo=1959" target="_blank">前往工程結算資料功能頁面</a>
                 </div>
                 <div class="remarks">
-                    <i class="fas fa-info-circle"></i> 驗收完成後，若需變更本案結算資料內容時，請至本案結算資料修改;若已提送或已核准，請洽本案承辦人線上退回修正!
+                    <i class="fas fa-info-circle"></i> 驗收完成後，若需變更工程結算資料內容時，請至工程結算資料修改;若已提送或已同意核可，請洽本案承辦人線上退回修正!
                 </div>
             </div>
             
@@ -946,10 +954,11 @@
                             <div class="warranty-item-header">
                                 <div class="warranty-item-title">
                                     <h4>保固項目 #1</h4>
+                                    <input type="text" class="form-control warranty-item-name-input" placeholder="請輸入保固項目名稱" required>
                                 </div>
                                 <div class="warranty-item-amount">
-                                    <label>保固金額：</label>
-                                    <input type="number" class="form-control" placeholder="請輸入金額" required style="width: 150px;">
+                                    <span class="warranty-amount-label">保固金額：</span>
+                                    <input type="number" class="form-control warranty-amount-input" placeholder="請輸入金額" required>
                                 </div>
                             </div>
                             
@@ -971,7 +980,7 @@
                                 </div>
                             </div>
                             
-                            <!-- 保固金退還資訊 - 簡化為退還日期+退還金額+退還說明 -->
+                            <!-- 保固金退還資訊 -->
                             <div class="warranty-refunds-section">
                                 <h5><i class="fas fa-money-bill-wave"></i> 保固金退還資訊</h5>
                                 <div id="warrantyRefunds_1">
@@ -1219,10 +1228,11 @@
                 <div class="warranty-item-header">
                     <div class="warranty-item-title">
                         <h4>保固項目 #${warrantyItemCount}</h4>
+                        <input type="text" class="form-control warranty-item-name-input" placeholder="請輸入保固項目名稱" required>
                     </div>
                     <div class="warranty-item-amount">
-                        <label>保固金額：</label>
-                        <input type="number" class="form-control" placeholder="請輸入金額" required style="width: 150px;">
+                        <span class="warranty-amount-label">保固金額：</span>
+                        <input type="number" class="form-control warranty-amount-input" placeholder="請輸入金額" required>
                     </div>
                 </div>
                 
@@ -1244,7 +1254,7 @@
                     </div>
                 </div>
                 
-                <!-- 保固金退還資訊 - 簡化為退還日期+退還金額+退還說明 -->
+                <!-- 保固金退還資訊 -->
                 <div class="warranty-refunds-section">
                     <h5><i class="fas fa-money-bill-wave"></i> 保固金退還資訊</h5>
                     <div id="warrantyRefunds_${warrantyItemCount}">
@@ -1457,8 +1467,8 @@
             // 收集所有保固項目數據
             document.querySelectorAll('#warrantyItems .warranty-item').forEach((item, index) => {
                 const warrantyItem = {
-                    name: item.querySelector('h4').textContent.trim(),
-                    amount: item.querySelector('.warranty-item-amount input').value,
+                    name: item.querySelector('.warranty-item-name-input').value,
+                    amount: item.querySelector('.warranty-amount-input').value,
                     type: item.querySelector('select').value,
                     endDate: item.querySelectorAll('input[type="date"]')[1].value,
                     description: item.querySelector('textarea').value,
