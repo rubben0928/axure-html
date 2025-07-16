@@ -458,13 +458,124 @@
             content: " *";
             color: #dc3545;
         }
+
+        /* 新增的縮圖樣式 */
+        .thumbnail-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .thumbnail {
+            width: 120px;
+            height: 160px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .thumbnail:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .thumbnail img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .thumbnail .caption {
+            padding: 5px;
+            text-align: center;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* 放大預覽的樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 50px;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #bbb;
+        }
+
+        /* 保固項目調整後的樣式 */
+        .warranty-item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .warranty-amount-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        /* 新增保固金退還項目樣式 */
+        .warranty-refund-item {
+            background: #f8f9fa;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .warranty-refunds-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e6ed;
+        }
+        
+        .warranty-refunds-section h5 {
+            margin-bottom: 15px;
+            color: #333;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="header">
         <h1><i class="fas fa-file-contract"></i> 結算保固作業</h1>
-       
     </div>
 
     <div class="container">
@@ -491,7 +602,6 @@
             <h2 class="step-title"><i class="fas fa-check-circle"></i> 步驟1：驗收後資料確認</h2>
             <p class="step-description">請檢核圖說與工程結算資料是否正確，並上傳必要文件</p>
             
-            
             <div class="document-section">
                 <h3><i class="fas fa-drafting-compass"></i> 圖說資料 <span class="required">(若有辦理變更，需上傳變更設計圖說)</span></h3>
                 <div class="status-container">
@@ -499,15 +609,26 @@
                         <label>上傳狀態：</label>
                         <span class="status-badge status-approved"><i class="fas fa-check"></i> 已上傳</span>
                     </div>
-                    <button class="btn btn-primary btn-sm"><i class="fas fa-eye"></i> 檢視檔案</button>
                 </div>
+                
+                <!-- 縮圖顯示區域 -->
+                <div class="thumbnail-container">
+                    <div class="thumbnail" onclick="openModal('https://via.placeholder.com/800x1132?text=設計圖說.pdf')">
+                        <img src="https://via.placeholder.com/120x120?text=PDF" alt="設計圖說">
+                        <div class="caption">設計圖說.pdf</div>
+                    </div>
+                    <div class="thumbnail" onclick="openModal('https://via.placeholder.com/800x1132?text=變更設計圖.pdf')">
+                        <img src="https://via.placeholder.com/120x120?text=PDF" alt="變更設計圖">
+                        <div class="caption">變更設計圖.pdf</div>
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <div class="file-upload" onclick="document.getElementById('completionDrawings').click()">
                         <input type="file" id="completionDrawings" style="display: none;" multiple accept=".pdf,.dwg,.jpg,.png">
                         <p><i class="fas fa-cloud-upload-alt"></i> 點擊上傳圖說檔案</p>
                         <small>支援格式：PDF、DWG、DXF(單檔最大限100MB)</small>
                     </div>
-                   
                 </div>
             </div>
 
@@ -515,14 +636,13 @@
                 <h3><i class="fas fa-calculator"></i> 工程結算資料</h3>
                 <div class="status-container">
                     <div class="status-info">
-                        <label>最後一次估驗請款填寫狀態：</label>
+                        <label>最後一次工程結算資料填寫狀態：</label>
                         <span class="status-badge status-inprogress"><i class="fas fa-pencil-alt"></i> (尚未新增、填寫中、審核中、已同意核可)</span>
                     </div>
-                   
- <a class="btn btn-primary" href="https://qms.wrbtycg.tw/TycgwrMis/RCM/EngProject/CostCertificateAdd?ProjectNo=1959" target="_blank">前往工程估驗計價功能頁面</a>
+                    <a class="btn btn-primary" href="https://qms.wrbtycg.tw/TycgwrMis/RCM/EngProject/CostCertificateAdd?ProjectNo=1959" target="_blank">前往工程結算資料功能頁面</a>
                 </div>
                 <div class="remarks">
-                    <i class="fas fa-info-circle"></i> 驗收完成後，若需變更估驗計價內容，請至工程估驗計價修改;若已提送或已同意核可，請洽本案承辦人線上退回修正!
+                    <i class="fas fa-info-circle"></i> 驗收完成後，若需變更工程結算資料內容時，請至工程結算資料修改;若已提送或已同意核可，請洽本案承辦人線上退回修正!
                 </div>
             </div>
             
@@ -555,7 +675,6 @@
             </div>
 
             <div class="action-buttons">
-         
                 <button class="btn btn-primary btn-lg" onclick="validateStep1()"><i class="fas fa-arrow-right"></i> 確認完成，進入下一步</button>
             </div>
         </div>
@@ -651,7 +770,6 @@
                 <div class="form-group">
                     <label for="totalOverdueDays">履約逾期總天數</label>
                     <input type="number" id="totalOverdueDays" class="form-control" placeholder="請輸入天數" min="0">
-                    
                 </div>
             </div>
 
@@ -669,7 +787,6 @@
             <div class="form-group">
                 <label for="overdueViolationAmount">逾期違約金</label>
                 <input type="number" id="overdueViolationAmount" class="form-control" placeholder="請輸入金額" min="0">
-               
             </div>
 
             <div class="grid">
@@ -755,16 +872,13 @@
                 <textarea id="acceptanceOpinion" class="form-control" rows="4" placeholder="與契約、圖說、貨樣規定相符。" required></textarea>
             </div>
 
-<button class="btn btn-success"><i class="fas fa-check"></i> 儲存資料</button>
-           
+            <button class="btn btn-success"><i class="fas fa-check"></i> 儲存資料</button>
 
             <div class="export-section">
                 <h3><i class="fas fa-file-export"></i> 匯出工程結算驗收證明書</h3>
                 <p>系統將根據上述資料自動產生驗收證明書，請確認資料正確後再匯出</p>
                 <div class="review-actions">
-                    
                     <button class="btn btn-primary"><i class="fas fa-file-word"></i> 匯出Word</button>
-                    
                 </div>
             </div>
 
@@ -803,7 +917,7 @@
                     <div id="warrantyItems">
                         <div class="warranty-item">
                             <h4>保固項目 #1</h4>
-                            <div class="grid">
+                            <div class="warranty-item-grid">
                                 <div class="form-group">
                                     <label class="required-field">項目名稱</label>
                                     <input type="text" class="form-control" placeholder="請輸入保固項目名稱" required>
@@ -819,25 +933,40 @@
                                         <option value="others">其他</option>
                                     </select>
                                 </div>
+                                <div class="form-group">
+                                    <label class="required-field">保固結束日期</label>
+                                    <input type="date" class="form-control" required>
+                                </div>
                             </div>
                             
-                            <!-- 保固金額相關欄位 -->
-                            <div class="warranty-amount-fields">
-                                <div class="grid">
-                                    <div class="form-group">
-                                        <label class="required-field">保固結束日期</label>
-                                        <input type="date" class="form-control" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="required-field">保固金額</label>
-                                        <input type="number" class="form-control" placeholder="請輸入金額" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label class="required-field">退還金額</label>
-                                        <input type="number" class="form-control" placeholder="請輸入金額" required>
-                                        <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                            <!-- 保固金退還資訊 - 改為可新增多筆 -->
+                            <div class="warranty-refunds-section">
+                                <h5><i class="fas fa-money-bill-wave"></i> 保固金退還資訊</h5>
+                                <div id="warrantyRefunds_1">
+                                    <div class="warranty-refund-item">
+                                        <div class="warranty-amount-grid">
+                                            <div class="form-group">
+                                                <label class="required-field">保固金額</label>
+                                                <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="required-field">退還日期</label>
+                                                <input type="date" class="form-control" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="required-field">退還金額</label>
+                                                <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                                <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>退還說明</label>
+                                                <input type="text" class="form-control" placeholder="退還原因說明">
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-danger btn-sm" onclick="removeWarrantyRefund(this)"><i class="fas fa-trash"></i> 移除</button>
                                     </div>
                                 </div>
+                                <button class="btn btn-info btn-sm" onclick="addWarrantyRefund(1)"><i class="fas fa-plus"></i> 新增退還記錄</button>
                             </div>
                             
                             <div class="form-group">
@@ -886,15 +1015,20 @@
                 <div class="review-actions">
                     <button class="btn btn-success" onclick="approveWarranty('host')"><i class="fas fa-check"></i> 同意</button>
                     <button class="btn btn-danger" onclick="rejectWarranty('host')"><i class="fas fa-times"></i> 退回修正</button>
-                    <button class="btn btn-success" onclick="completeWarrantyProcess()"><i class="fas fa-check-double"></i> 完成保固金退還</button>
                 </div>
             </div>
 
             <div class="action-buttons">
                 <button class="btn btn-warning" onclick="showStep(2)"><i class="fas fa-arrow-left"></i> 返回上一步</button>
-         
+                <button class="btn btn-success" onclick="completeWarrantyProcess()"><i class="fas fa-check-double"></i> 完成保固金退還</button>
             </div>
         </div>
+    </div>
+
+    <!-- 圖片放大預覽的模態框 -->
+    <div id="imageModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
     </div>
 
     <script>
@@ -902,6 +1036,9 @@
         let currentStep = 1;
         let priceAdjustmentCount = 1;
         let warrantyItemCount = 1;
+        let warrantyRefundCounts = {}; // 用於追蹤每個保固項目的退還記錄數量
+        warrantyRefundCounts[1] = 1; // 初始化第一個保固項目的退還記錄計數器
+        
         let formData = {
             step1: {},
             step2: {},
@@ -1046,12 +1183,14 @@
         // 新增保固項目
         function addWarrantyItem() {
             warrantyItemCount++;
+            warrantyRefundCounts[warrantyItemCount] = 1; // 初始化新保固項目的退還記錄計數器
+            
             const container = document.getElementById('warrantyItems');
             const newItem = document.createElement('div');
             newItem.className = 'warranty-item';
             newItem.innerHTML = `
                 <h4>保固項目 #${warrantyItemCount}</h4>
-                <div class="grid">
+                <div class="warranty-item-grid">
                     <div class="form-group">
                         <label class="required-field">項目名稱</label>
                         <input type="text" class="form-control" placeholder="請輸入保固項目名稱" required>
@@ -1067,25 +1206,40 @@
                             <option value="others">其他</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label class="required-field">保固結束日期</label>
+                        <input type="date" class="form-control" required>
+                    </div>
                 </div>
                 
-                <!-- 保固金額相關欄位 -->
-                <div class="warranty-amount-fields">
-                    <div class="grid">
-                        <div class="form-group">
-                            <label class="required-field">保固結束日期</label>
-                            <input type="date" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="required-field">保固金額</label>
-                            <input type="number" class="form-control" placeholder="請輸入金額" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="required-field">退還金額</label>
-                            <input type="number" class="form-control" placeholder="請輸入金額" required>
-                            <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                <!-- 保固金退還資訊 - 改為可新增多筆 -->
+                <div class="warranty-refunds-section">
+                    <h5><i class="fas fa-money-bill-wave"></i> 保固金退還資訊</h5>
+                    <div id="warrantyRefunds_${warrantyItemCount}">
+                        <div class="warranty-refund-item">
+                            <div class="warranty-amount-grid">
+                                <div class="form-group">
+                                    <label class="required-field">保固金額</label>
+                                    <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="required-field">退還日期</label>
+                                    <input type="date" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="required-field">退還金額</label>
+                                    <input type="number" class="form-control" placeholder="請輸入金額" required>
+                                    <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                                </div>
+                                <div class="form-group">
+                                    <label>退還說明</label>
+                                    <input type="text" class="form-control" placeholder="退還原因說明">
+                                </div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="removeWarrantyRefund(this)"><i class="fas fa-trash"></i> 移除</button>
                         </div>
                     </div>
+                    <button class="btn btn-info btn-sm" onclick="addWarrantyRefund(${warrantyItemCount})"><i class="fas fa-plus"></i> 新增退還記錄</button>
                 </div>
                 
                 <div class="form-group">
@@ -1104,11 +1258,56 @@
             const nextYearDate = nextYear.toISOString().split('T')[0];
             
             dateInputs[0].value = nextYearDate; // 保固結束日期預設一年後
+            dateInputs[1].value = today; // 退還日期預設今天
+        }
+
+        // 新增保固金退還記錄
+        function addWarrantyRefund(itemIndex) {
+            if (!warrantyRefundCounts[itemIndex]) {
+                warrantyRefundCounts[itemIndex] = 0;
+            }
+            warrantyRefundCounts[itemIndex]++;
+            
+            const container = document.getElementById(`warrantyRefunds_${itemIndex}`);
+            const newRefund = document.createElement('div');
+            newRefund.className = 'warranty-refund-item';
+            newRefund.innerHTML = `
+                <div class="warranty-amount-grid">
+                    <div class="form-group">
+                        <label class="required-field">保固金額</label>
+                        <input type="number" class="form-control" placeholder="請輸入金額" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-field">退還日期</label>
+                        <input type="date" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-field">退還金額</label>
+                        <input type="number" class="form-control" placeholder="請輸入金額" required>
+                        <div class="form-note">通常為保固金扣除應扣款項後之金額</div>
+                    </div>
+                    <div class="form-group">
+                        <label>退還說明</label>
+                        <input type="text" class="form-control" placeholder="退還原因說明">
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removeWarrantyRefund(this)"><i class="fas fa-trash"></i> 移除</button>
+            `;
+            container.appendChild(newRefund);
+        }
+
+        // 移除保固金退還記錄
+        function removeWarrantyRefund(button) {
+            if (confirm('確定要移除此筆保固金退還記錄嗎？')) {
+                button.parentElement.remove();
+            }
         }
 
         // 移除保固項目
         function removeWarrantyItem(button) {
             if (confirm('確定要移除此保固項目嗎？')) {
+                const itemIndex = button.closest('.warranty-item').querySelector('h4').textContent.match(/#(\d+)/)[1];
+                delete warrantyRefundCounts[itemIndex];
                 button.parentElement.remove();
                 warrantyItemCount--;
             }
@@ -1149,6 +1348,13 @@
                             input.focus();
                             return;
                         }
+                    }
+                    
+                    // 驗證每個保固項目的退還記錄
+                    const refundItems = item.querySelectorAll('.warranty-refund-item');
+                    if (refundItems.length === 0) {
+                        alert('每個保固項目至少需要一筆保固金退還記錄！');
+                        return;
                     }
                 }
             }
@@ -1218,13 +1424,52 @@
             // 收集步驟3數據
             formData.step3 = {
                 noWarranty: document.getElementById('noWarranty').checked,
-                warrantyStartDate: document.getElementById('warrantyStartDate').value,
-                warrantyEndDate: document.getElementById('warrantyEndDate').value,
-                warrantyAmount: document.getElementById('warrantyAmount').value,
-                refundAmount: document.getElementById('refundAmount').value,
-                supervisorComments: document.getElementById('supervisorWarrantyComments').value,
-                hostOrgComments: document.getElementById('hostOrgWarrantyComments').value
+                warrantyItems: []
             };
+            
+            // 收集所有保固項目數據
+            document.querySelectorAll('#warrantyItems .warranty-item').forEach((item, index) => {
+                const warrantyItem = {
+                    name: item.querySelector('input[placeholder="請輸入保固項目名稱"]').value,
+                    type: item.querySelector('select').value,
+                    endDate: item.querySelector('input[type="date"]').value,
+                    description: item.querySelector('textarea').value,
+                    refunds: []
+                };
+                
+                // 收集保固金退還記錄
+                item.querySelectorAll('.warranty-refund-item').forEach(refund => {
+                    const inputs = refund.querySelectorAll('input');
+                    warrantyItem.refunds.push({
+                        warrantyAmount: inputs[0].value,
+                        refundDate: inputs[1].value,
+                        refundAmount: inputs[2].value,
+                        refundReason: inputs[3].value
+                    });
+                });
+                
+                formData.step3.warrantyItems.push(warrantyItem);
+            });
+        }
+
+        // 圖片放大預覽功能
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 點擊模態框外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
         }
 
         // 初始化頁面
@@ -1234,12 +1479,6 @@
             document.getElementById('actualCompletionDate').value = today;
             document.getElementById('acceptanceStartDate').value = today;
             document.getElementById('acceptanceDate').value = today;
-            document.getElementById('warrantyStartDate').value = today;
-            
-            // 計算保固結束日期（預設一年後）
-            const nextYear = new Date();
-            nextYear.setFullYear(nextYear.getFullYear() + 1);
-            document.getElementById('warrantyEndDate').value = nextYear.toISOString().split('T')[0];
             
             // 初始化保固欄位顯示
             toggleWarrantyFields();
