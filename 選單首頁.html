@@ -461,7 +461,8 @@
                             <td><span class="status-badge status-pending">尚未屆期</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-info">📋</button>
+                                     <button class="btn btn-info">🔍</button>
+                                    <button class="btn btn-primary">📝</button>
                                     <button class="btn btn-danger">🗑️</button>
                                 </div>
                             </td>
@@ -476,7 +477,8 @@
                             <td><span class="status-badge status-completed">已過期</span></td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn btn-info">📋</button>
+                                    <button class="btn btn-info">🔍</button>
+                                    <button class="btn btn-primary">📝</button>
                                     <button class="btn btn-danger">🗑️</button>
                                 </div>
                             </td>
@@ -504,18 +506,18 @@
                         📋 請選擇驗收方式
                     </div>
                     
-                    <div class="acceptance-options">
+                     <div class="acceptance-options">
                         <div class="acceptance-option">
-                            <input type="radio" id="partialAcceptance" name="acceptanceType" value="partial">
-                            <label for="partialAcceptance">辦理部分驗收</label>
+                            <input type="radio" id="fullAcceptance" name="acceptanceType" value="full" checked>
+                            <label for="fullAcceptance">辦理全部驗收</label>
                         </div>
                         
                         <div class="acceptance-option">
-                            <input type="radio" id="fullAcceptance" name="acceptanceType" value="full">
-                            <label for="fullAcceptance">辦理全部驗收</label>
+                            <input type="radio" id="partialAcceptance" name="acceptanceType" value="partial" disabled>
+                            <label for="partialAcceptance">辦理部分驗收 (尚未開放)</label>
                         </div>
                     </div>
-
+                    
                     <div class="form-group">
                         <label>驗收說明</label>
                         <textarea id="acceptanceDescription" rows="3" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" placeholder="請輸入驗收的具體說明..."></textarea>
@@ -551,27 +553,20 @@
         }
 
         // 為按鈕添加點擊事件
-        document.addEventListener('DOMContentLoaded', function() {
-            const startButton = document.querySelector('.start-button');
-            startButton.addEventListener('click', function() {
-                openSettlementModal();
+         document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('.start-button').addEventListener('click', openSettlementModal);
+
+            document.querySelectorAll('.btn-info').forEach(btn => {
+                btn.addEventListener('click', () => alert('檢視項目詳情'));
             });
 
-            // 為操作按鈕添加事件
-            const infoButtons = document.querySelectorAll('.btn-info');
-            const deleteButtons = document.querySelectorAll('.btn-danger');
-
-            infoButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    alert('查看詳細資訊');
-                });
+            document.querySelectorAll('.btn-primary').forEach(btn => {
+                btn.addEventListener('click', () => alert('進入編修介面'));
             });
 
-            deleteButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (confirm('確定要刪除此項目嗎？')) {
-                        alert('項目已刪除');
-                    }
+            document.querySelectorAll('.btn-danger').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (confirm('確定要刪除此項目嗎？')) alert('項目已刪除');
                 });
             });
         });
