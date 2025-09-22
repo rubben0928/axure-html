@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>原民會工程生命週期系統</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --primary:#3456a1;
+      --accent:#ff9a3d;
+      --bg:#f4f7fb;
+      --card:#ffffff;
+      --muted:#6c757d;
+    }
+    body{
+      margin:0;
+      font-family: "Microsoft JhengHei", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg);
+      color:#222;
+    }
+    header{
+      background:var(--primary);
+      color:#fff;
+      padding:12px 24px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    header h1{ 
+      margin:0; 
+      font-size:1.25rem; 
+      letter-spacing:0.2px; 
+    }
+    .header-buttons{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .header-buttons button{
+      background:#fff;
+      color:var(--primary);
+      border:none;
+      border-radius:6px;
+      padding:6px 12px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:0.9rem;
+    }
+    .header-buttons button:hover{
+      background:rgba(255,255,255,0.85);
+    }
+
+    .container{
+      max-width:1200px;
+      margin:20px auto;
+      padding:18px;
+    }
+
+    /* 搜尋列、功能列、表格、折線圖樣式保持原本 */
+    .search-container {
+      display:flex;
+      gap:8px;
+      margin:16px 0;
+    }
+    .search-container input{
+      flex:1;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid #d0d7e6;
+      font-size:0.95rem;
+    }
+    .search-container button{
+      padding:10px 14px;
+      border-radius:8px;
+      border:none;
+      background:var(--primary);
+      color:#fff;
+      cursor:pointer;
+    }
+
+    .controls{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .controls label{ font-weight:600; margin-right:6px; color:var(--muted); }
+    .controls select, .controls button{
+      padding:8px 10px;
+      border-radius:8px;
+      border:1px solid #d0d7e6;
+      background:#fff;
+      font-size:0.95rem;
+    }
+    .controls .primary{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+      cursor:pointer;
+    }
+    .controls .primary:hover{ filter:brightness(.92); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media(max-width:980px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:14px;
+      box-shadow:0 6px 18px rgba(16,24,40,0.04);
+    }
+
+    .card h3{ margin:0 0 8px 0; color:var(--primary); font-size:1.05rem; }
+    .muted{ color:var(--muted); font-size:0.9rem; }
+
+    canvas{ width:100% !important; height:260px !important; }
+
+    .table-wrap{ margin-top:14px; overflow:auto; max-height:520px; }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1100px;
+    }
+    th, td{
+      padding:10px 8px;
+      border-bottom:1px solid #eef2f7;
+      text-align:center;
+      font-size:0.95rem;
+    }
+    thead th{
+      background:linear-gradient(90deg,var(--primary), #2e4ca0);
+      color:#fff;
+      position:sticky;
+      top:0;
+      z-index:2;
+    }
+    tbody tr:nth-child(even){ background:#fbfcff; }
+    tbody tr:hover{ background:#f4f8ff; }
+    tfoot td{ font-weight:700; background:#fff7e6; color:#2b2b2b; }
+
+    .export {
+      margin-top:12px;
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:8px;
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      cursor:pointer;
+    }
+    .small-note{ font-size:0.85rem; color:var(--muted); margin-top:6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>原民會 - 工程生命週期系統</h1>
+    <div class="header-buttons">
+      <button>計畫預算</button>
+      <button>審議階段</button>
+      <button>發包前階段</button>
+      <button>發包後階段</button>
+      <button>結案階段</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 搜尋 -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="輸入關鍵字搜尋縣市...">
+      <button id="btnSearch">搜尋</button>
+    </div>
+
+    <!-- 功能列 -->
+    <div class="controls">
+      <div>
+        <label for="year">年度</label>
+        <select id="year">
+          <option value="114">114</option>
+          <option value="113">113</option>
+          <option value="115">115</option>
+        </select>
+      </div>
+      <div>
+        <label for="project">計畫別</label>
+        <select id="project">
+          <option value="宜居部落建設計畫">部落永續建設藍圖規劃–強化部落安全防(減)災機能</option>
+          <option value="市區再生計畫">強化部落安全防(減)災機能</option>
+          <option value="道路改善計畫">部落永續建設藍圖規劃–提升部落居住環境品質</option>
+        </select>
+      </div>
+      <div>
+        <button id="btnQuery" class="primary">查詢</button>
+        <button id="btnExport">產製jpg</button>
+      </div>
+    </div>
+
+    <!-- 折線圖 -->
+    <div class="grid">
+      <div class="card">
+        <h3>達成率（%）</h3>
+        <canvas id="achieveChart"></canvas>
+        <div class="muted">達成率 = 執行數/預算分配數</div>
+      </div>
+      <div class="card">
+        <h3>執行率（%）</h3>
+        <canvas id="execChart"></canvas>
+        <div class="muted">執行率 = 執行數/累計預算分配數</div>
+      </div>
+    </div>
+
+    <!-- 表格 -->
+    <div class="card" style="margin-top:16px">
+      <h3>各縣市統計明細</h3>
+      <div class="table-wrap">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>縣市</th>
+              <th>核定件數</th>
+              <th>發包件數</th>
+              <th>期中備查</th>
+              <th>期末備查</th>
+              <th>結案件數</th>
+              <th>核定金額(元)</th>
+              <th>發包金額(元)</th>
+              <th>應付未付(元)</th>
+              <th>節餘(元)</th>
+              <th>保留件數</th>
+              <th>保留金額(元)</th>
+              <th>改列件數</th>
+              <th>改列金額(元)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot>
+            <tr id="totalsRow">
+              <td>總計</td>
+              <td colspan="13">--</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <button class="export" id="btnExport2">匯出xlsx</button>
+    </div>
+  </div>
+
+  <script>
+    // 範例資料與表格、圖表生成邏輯保持不變
+    const sampleData = [
+      { city:'新北市', approvedCount:120, awardedCount:95, midCheck:80, endCheck:110, closedCount:70, approvedAmount:120000000, awardedAmount:98000000, payableUnpaid:12000000, leftover:10000000, reservedCount:5, reservedAmount:2000000, transferredCount:2, transferredAmount:500000 },
+      { city:'桃園市', approvedCount:80, awardedCount:60, midCheck:50, endCheck:75, closedCount:40, approvedAmount:75000000, awardedAmount:50000000, payableUnpaid:4000000, leftover:5000000, reservedCount:3, reservedAmount:1500000, transferredCount:1, transferredAmount:200000 },
+      { city:'新竹縣', approvedCount:50, awardedCount:40, midCheck:35, endCheck:45, closedCount:30, approvedAmount:48000000, awardedAmount:39000000, payableUnpaid:1000000, leftover:500000, reservedCount:2, reservedAmount:800000, transferredCount:0, transferredAmount:0 }
+    ];
+
+    function formatMoney(n){ return n.toLocaleString(); }
+
+    function renderTable(data){
+      const tbody = document.querySelector('#dataTable tbody');
+      tbody.innerHTML='';
+      data.forEach(d=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+          <td>${d.city}</td>
+          <td>${d.approvedCount}</td>
+          <td>${d.awardedCount}</td>
+          <td>${d.midCheck}</td>
+          <td>${d.endCheck}</td>
+          <td>${d.closedCount}</td>
+          <td>${formatMoney(d.approvedAmount)}</td>
+          <td>${formatMoney(d.awardedAmount)}</td>
+          <td>${formatMoney(d.payableUnpaid)}</td>
+          <td>${formatMoney(d.leftover)}</td>
+          <td>${d.reservedCount}</td>
+          <td>${formatMoney(d.reservedAmount)}</td>
+          <td>${d.transferredCount}</td>
+          <td>${formatMoney(d.transferredAmount)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const totals = data.reduce((acc, cur)=>{
+        for(const key of ['approvedCount','awardedCount','midCheck','endCheck','closedCount','approvedAmount','awardedAmount','payableUnpaid','leftover','reservedCount','reservedAmount','transferredCount','transferredAmount']){
+          acc[key]=(acc[key]||0)+cur[key];
+        }
+        return acc;
+      },{});
+      const trow=document.getElementById('totalsRow');
+      trow.innerHTML=`<td>總計</td>
+        <td>${totals.approvedCount}</td>
+        <td>${totals.awardedCount}</td>
+        <td>${totals.midCheck}</td>
+        <td>${totals.endCheck}</td>
+        <td>${totals.closedCount}</td>
+        <td>${formatMoney(totals.approvedAmount)}</td>
+        <td>${formatMoney(totals.awardedAmount)}</td>
+        <td>${formatMoney(totals.payableUnpaid)}</td>
+        <td>${formatMoney(totals.leftover)}</td>
+        <td>${totals.reservedCount}</td>
+        <td>${formatMoney(totals.reservedAmount)}</td>
+        <td>${totals.transferredCount}</td>
+        <td>${formatMoney(totals.transferredAmount)}</td>`;
+    }
+
+    renderTable(sampleData);
+
+    document.getElementById('btnSearch').addEventListener('click',()=>{
+      const keyword=document.getElementById('searchInput').value.trim();
+      const filtered=sampleData.filter(d=>d.city.includes(keyword));
+      renderTable(filtered);
+    });
+
+    const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+    const achieveData={
+      labels:months,
+      datasets:[
+        { label:'實際進度', data:[0,10,25,40,55,65,70,80,85,92,97,100], borderColor:'#3456a1', fill:false, tension:0.3 },
+        { label:'預定進度', data:[0,12,28,42,56,68,75,82,88,95,100,100], borderColor:'#8ab4f8', borderDash:[5,5], fill:false, tension:0.3 },
+        { label:'預測進度', data:[0,11,26,41,54,66,72,81,86,93,98,100], borderColor:'#ff9a3d', borderDash:[2,2], fill:false, tension:0.3 }
+      ]
+    };
+
+    const execData={
+      labels:months,
+      datasets:[
+        { label:'實際進度', data:[0,8,20,33,48,55,63,71,79,87,93,100], borderColor:'#ff9a3d', fill:false, tension:0.3 },
+        { label:'預定進度', data:[0,10,22,35,50,58,65,74,81,90,96,100], borderColor:'#ffb17d', borderDash:[5,5], fill:false, tension:0.3 },
+        { label:'預測進度', data:[0,9,21,34,49,57,64,73,80,89,95,100], borderColor:'#34a853', borderDash:[2,2], fill:false, tension:0.3 }
+      ]
+    };
+
+    new Chart(document.getElementById('achieveChart').getContext('2d'),{
+      type:'line',
+      data:achieveData,
+      options:{
+        responsive:true,
+        plugins:{ legend:{ display:true } },
+        interaction:{ mode:'index', intersect:false },
+        scales:{ y:{ beginAtZero:true, max:100, ticks:{ callback:v=>v+'%' } } }
+      }
+    });
+
+    new Chart(document.getElementById('execChart').getContext('2d'),{
+      type:'line',
+      data:execData,
+      options:{
+        responsive:true,
+        plugins:{ legend:{ display:true } },
+        interaction:{ mode:'index', intersect:false },
+        scales:{ y:{ beginAtZero:true, max:100, ticks:{ callback:v=>v+'%' } } }
+      }
+    });
+  </script>
+</body>
+</html>
