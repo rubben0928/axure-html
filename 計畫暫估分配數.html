@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>預算分配管理系統</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .setup-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .budget-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .budget-type {
+            background: #e8f4fc;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .budget-type h3 {
+            margin-bottom: 10px;
+            color: #2980b9;
+            text-align: center;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button.save {
+            background: #2ecc71;
+        }
+        button.save:hover {
+            background: #27ae60;
+        }
+        button.export {
+            background: #9b59b6;
+        }
+        button.export:hover {
+            background: #8e44ad;
+        }
+        .button-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .over-budget {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .summary h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .summary-item h3 {
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .summary-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .city-input {
+            background: #e8f4fc;
+            width: 90%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: right;
+        }
+        .section-title {
+            color: #2c3e50;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        @media (max-width: 768px) {
+            .budget-inputs, .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>計畫暫估列數分配表</h1>
+            
+        </header>
+
+        <section class="setup-section">
+            <h2 class="section-title">基本設定</h2>
+            <div class="form-group">
+                <label for="year">年度</label>
+                <input type="number" id="year" min="100" max="999" value="114">
+            </div>
+            <div class="form-group">
+                <label for="project-name">計畫名稱</label>
+                <input type="text" id="project-name" value="宜居部落建設計畫">
+            </div>
+
+            <h2 class="section-title">預算概算總額設定</h2>
+            <div class="budget-inputs">
+                <div class="budget-type">
+                    <h3>經常門</h3>
+                    <div class="form-group">
+                        <label for="recurrent-committee">本會補助款</label>
+                        <input type="number" id="recurrent-committee" min="0" value="5000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="recurrent-local">地方配合款</label>
+                        <input type="number" id="recurrent-local" min="0" value="2500000">
+                    </div>
+                </div>
+                <div class="budget-type">
+                    <h3>資本門</h3>
+                    <div class="form-group">
+                        <label for="capital-committee">本會補助款</label>
+                        <input type="number" id="capital-committee" min="0" value="8000000">
+                    </div>
+                    <div class="form-group">
+                        <label for="capital-local">地方配合款</label>
+                        <input type="number" id="capital-local" min="0" value="4000000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button id="setup-budget">設定預算並開始分配</button>
+            </div>
+        </section>
+
+        <section id="allocation-section" style="display: none;">
+            <h2 class="section-title">各縣市預算分配</h2>
+            
+            <div class="button-group">
+                <button id="save-data" class="save">儲存資料</button>
+                <button id="export-excel" class="export">匯出Excel</button>
+            </div>
+            
+            <table id="allocation-table">
+                <thead>
+                    <tr>
+                        <th>縣市</th>
+                        <th colspan="2">經常門</th>
+                        <th colspan="2">資本門</th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th>本會補助款</th>
+                        <th>地方配合款</th>
+                        <th>本會補助款</th>
+                        <th>地方配合款</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 縣市數據將由JavaScript動態生成 -->
+                </tbody>
+            </table>
+
+            <div class="summary">
+                <h2>預算分配總覽</h2>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <h3>(經常門)本會補助總計</h3>
+                        <div id="total-recurrent-committee" class="summary-value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3>(經常門)地方配合總計</h3>
+                        <div id="total-recurrent-local" class="summary-value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3>經常門合計</h3>
+                        <div id="total-capital-committee" class="summary-value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3>(資本門)本會補助總計</h3>
+                        <div id="total-capital-local" class="summary-value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3>(資本門)地方配合總計</h3>
+                        <div id="total-recurrent" class="summary-value">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3>資本門合計</h3>
+                        <div id="total-capital" class="summary-value">0</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cities = [
+                "臺北市政府", "新北市政府", "基隆市政府", "桃園市政府", 
+                "新竹市政府", "苗栗縣政府", "臺中市政府", "彰化縣政府",
+                "南投縣政府", "雲林縣政府", "嘉義市政府", "臺南市政府",
+                "高雄市政府", "屏東縣政府", "宜蘭縣政府", "花蓮縣政府",
+                "臺東縣政府", "澎湖縣政府", "金門縣政府", "連江縣政府"
+            ];
+            
+            const setupBudgetBtn = document.getElementById('setup-budget');
+            const saveDataBtn = document.getElementById('save-data');
+            const exportExcelBtn = document.getElementById('export-excel');
+            const allocationSection = document.getElementById('allocation-section');
+            const tableBody = document.querySelector('#allocation-table tbody');
+            
+            // 設定預算按鈕點擊事件
+            setupBudgetBtn.addEventListener('click', function() {
+                allocationSection.style.display = 'block';
+                
+                // 清空表格內容
+                tableBody.innerHTML = '';
+                
+                // 為每個縣市創建輸入行
+                cities.forEach(city => {
+                    const row = document.createElement('tr');
+                    
+                    // 縣市名稱
+                    const cityCell = document.createElement('td');
+                    cityCell.textContent = city;
+                    row.appendChild(cityCell);
+                    
+                    // 經常門本會補助款
+                    const recurrentCommitteeCell = document.createElement('td');
+                    const recurrentCommitteeInput = document.createElement('input');
+                    recurrentCommitteeInput.type = 'number';
+                    recurrentCommitteeInput.min = '0';
+                    recurrentCommitteeInput.value = '0';
+                    recurrentCommitteeInput.classList.add('city-input');
+                    recurrentCommitteeInput.addEventListener('input', calculateTotals);
+                    recurrentCommitteeCell.appendChild(recurrentCommitteeInput);
+                    row.appendChild(recurrentCommitteeCell);
+                    
+                    // 經常門地方配合款
+                    const recurrentLocalCell = document.createElement('td');
+                    const recurrentLocalInput = document.createElement('input');
+                    recurrentLocalInput.type = 'number';
+                    recurrentLocalInput.min = '0';
+                    recurrentLocalInput.value = '0';
+                    recurrentLocalInput.classList.add('city-input');
+                    recurrentLocalInput.addEventListener('input', calculateTotals);
+                    recurrentLocalCell.appendChild(recurrentLocalInput);
+                    row.appendChild(recurrentLocalCell);
+                    
+                    // 資本門本會補助款
+                    const capitalCommitteeCell = document.createElement('td');
+                    const capitalCommitteeInput = document.createElement('input');
+                    capitalCommitteeInput.type = 'number';
+                    capitalCommitteeInput.min = '0';
+                    capitalCommitteeInput.value = '0';
+                    capitalCommitteeInput.classList.add('city-input');
+                    capitalCommitteeInput.addEventListener('input', calculateTotals);
+                    capitalCommitteeCell.appendChild(capitalCommitteeInput);
+                    row.appendChild(capitalCommitteeCell);
+                    
+                    // 資本門地方配合款
+                    const capitalLocalCell = document.createElement('td');
+                    const capitalLocalInput = document.createElement('input');
+                    capitalLocalInput.type = 'number';
+                    capitalLocalInput.min = '0';
+                    capitalLocalInput.value = '0';
+                    capitalLocalInput.classList.add('city-input');
+                    capitalLocalInput.addEventListener('input', calculateTotals);
+                    capitalLocalCell.appendChild(capitalLocalInput);
+                    row.appendChild(capitalLocalCell);
+                    
+                    tableBody.appendChild(row);
+                });
+                
+                // 初始計算總和
+                calculateTotals();
+            });
+            
+            // 儲存資料按鈕點擊事件
+            saveDataBtn.addEventListener('click', function() {
+                const data = {
+                    year: document.getElementById('year').value,
+                    projectName: document.getElementById('project-name').value,
+                    recurrentCommittee: document.getElementById('recurrent-committee').value,
+                    recurrentLocal: document.getElementById('recurrent-local').value,
+                    capitalCommittee: document.getElementById('capital-committee').value,
+                    capitalLocal: document.getElementById('capital-local').value,
+                    cityData: []
+                };
+                
+                // 收集各縣市數據
+                const rows = tableBody.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    const inputs = row.querySelectorAll('input');
+                    data.cityData.push({
+                        city: cities[index],
+                        recurrentCommittee: inputs[0].value,
+                        recurrentLocal: inputs[1].value,
+                        capitalCommittee: inputs[2].value,
+                        capitalLocal: inputs[3].value
+                    });
+                });
+                
+                // 儲存到localStorage
+                localStorage.setItem('budgetData', JSON.stringify(data));
+                alert('資料已成功儲存！');
+            });
+            
+            // 匯出Excel按鈕點擊事件
+            exportExcelBtn.addEventListener('click', function() {
+                // 创建工作簿
+                const wb = XLSX.utils.book_new();
+                
+                // 基本資料工作表
+                const basicData = [
+                    ['年度', document.getElementById('year').value],
+                    ['計畫名稱', document.getElementById('project-name').value],
+                    [],
+                    ['預算類別', '本會補助款', '地方配合款'],
+                    ['經常門', 
+                        formatNumberForDisplay(document.getElementById('recurrent-committee').value), 
+                        formatNumberForDisplay(document.getElementById('recurrent-local').value)
+                    ],
+                    ['資本門', 
+                        formatNumberForDisplay(document.getElementById('capital-committee').value), 
+                        formatNumberForDisplay(document.getElementById('capital-local').value)
+                    ]
+                ];
+                
+                const basicWS = XLSX.utils.aoa_to_sheet(basicData);
+                XLSX.utils.book_append_sheet(wb, basicWS, "基本資料");
+                
+                // 縣市分配數據工作表
+                const cityData = [
+                    ['縣市', '經常門本會補助款', '經常門地方配合款', '資本門本會補助款', '資本門地方配合款']
+                ];
+                
+                const rows = tableBody.querySelectorAll('tr');
+                rows.forEach((row, index) => {
+                    const inputs = row.querySelectorAll('input');
+                    cityData.push([
+                        cities[index],
+                        inputs[0].value,
+                        inputs[1].value,
+                        inputs[2].value,
+                        inputs[3].value
+                    ]);
+                });
+                
+                // 添加總計行
+                cityData.push([
+                    '總計',
+                    document.getElementById('total-recurrent-committee').textContent,
+                    document.getElementById('total-recurrent-local').textContent,
+                    document.getElementById('total-capital-committee').textContent,
+                    document.getElementById('total-capital-local').textContent
+                ]);
+                
+                const cityWS = XLSX.utils.aoa_to_sheet(cityData);
+                XLSX.utils.book_append_sheet(wb, cityWS, "縣市分配數據");
+                
+                // 匯出Excel文件
+                XLSX.writeFile(wb, `預算分配_${document.getElementById('year').value}年度.xlsx`);
+            });
+            
+            // 計算總和函數
+            function calculateTotals() {
+                let totalRecurrentCommittee = 0;
+                let totalRecurrentLocal = 0;
+                let totalCapitalCommittee = 0;
+                let totalCapitalLocal = 0;
+                
+                // 獲取所有輸入值並計算總和
+                const inputs = document.querySelectorAll('.city-input');
+                for (let i = 0; i < inputs.length; i += 4) {
+                    totalRecurrentCommittee += Number(inputs[i].value) || 0;
+                    totalRecurrentLocal += Number(inputs[i+1].value) || 0;
+                    totalCapitalCommittee += Number(inputs[i+2].value) || 0;
+                    totalCapitalLocal += Number(inputs[i+3].value) || 0;
+                }
+                
+                // 更新總計顯示（使用千分位格式）
+                document.getElementById('total-recurrent-committee').textContent = formatNumberForDisplay(totalRecurrentCommittee);
+                document.getElementById('total-recurrent-local').textContent = formatNumberForDisplay(totalRecurrentLocal);
+                document.getElementById('total-capital-committee').textContent = formatNumberForDisplay(totalCapitalCommittee);
+                document.getElementById('total-capital-local').textContent = formatNumberForDisplay(totalCapitalLocal);
+                document.getElementById('total-recurrent').textContent = formatNumberForDisplay(totalRecurrentCommittee + totalRecurrentLocal);
+                document.getElementById('total-capital').textContent = formatNumberForDisplay(totalCapitalCommittee + totalCapitalLocal);
+                
+                // 檢查是否超過預算
+                const recurrentCommitteeBudget = Number(document.getElementById('recurrent-committee').value);
+                const recurrentLocalBudget = Number(document.getElementById('recurrent-local').value);
+                const capitalCommitteeBudget = Number(document.getElementById('capital-committee').value);
+                const capitalLocalBudget = Number(document.getElementById('capital-local').value);
+                
+                // 設置超支警示
+                setOverBudgetWarning('total-recurrent-committee', totalRecurrentCommittee, recurrentCommitteeBudget);
+                setOverBudgetWarning('total-recurrent-local', totalRecurrentLocal, recurrentLocalBudget);
+                setOverBudgetWarning('total-capital-committee', totalCapitalCommittee, capitalCommitteeBudget);
+                setOverBudgetWarning('total-capital-local', totalCapitalLocal, capitalLocalBudget);
+            }
+            
+            // 設置超支警示
+            function setOverBudgetWarning(elementId, total, budget) {
+                const element = document.getElementById(elementId);
+                if (total > budget) {
+                    element.classList.add('over-budget');
+                } else {
+                    element.classList.remove('over-budget');
+                }
+            }
+            
+            // 格式化數字顯示（添加千分位）
+            function formatNumberForDisplay(number) {
+                return Number(number).toLocaleString('zh-TW');
+            }
+            
+            // 載入儲存的資料
+            function loadSavedData() {
+                const savedData = localStorage.getItem('budgetData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    
+                    // 填充基本資料
+                    document.getElementById('year').value = data.year;
+                    document.getElementById('project-name').value = data.projectName;
+                    document.getElementById('recurrent-committee').value = data.recurrentCommittee;
+                    document.getElementById('recurrent-local').value = data.recurrentLocal;
+                    document.getElementById('capital-committee').value = data.capitalCommittee;
+                    document.getElementById('capital-local').value = data.capitalLocal;
+                    
+                    // 如果有縣市數據，顯示分配區域並填充數據
+                    if (data.cityData && data.cityData.length > 0) {
+                        allocationSection.style.display = 'block';
+                        tableBody.innerHTML = '';
+                        
+                        data.cityData.forEach((cityData, index) => {
+                            const row = document.createElement('tr');
+                            
+                            // 縣市名稱
+                            const cityCell = document.createElement('td');
+                            cityCell.textContent = cityData.city;
+                            row.appendChild(cityCell);
+                            
+                            // 經常門本會補助款
+                            const recurrentCommitteeCell = document.createElement('td');
+                            const recurrentCommitteeInput = document.createElement('input');
+                            recurrentCommitteeInput.type = 'number';
+                            recurrentCommitteeInput.min = '0';
+                            recurrentCommitteeInput.value = cityData.recurrentCommittee;
+                            recurrentCommitteeInput.classList.add('city-input');
+                            recurrentCommitteeInput.addEventListener('input', calculateTotals);
+                            recurrentCommitteeCell.appendChild(recurrentCommitteeInput);
+                            row.appendChild(recurrentCommitteeCell);
+                            
+                            // 經常門地方配合款
+                            const recurrentLocalCell = document.createElement('td');
+                            const recurrentLocalInput = document.createElement('input');
+                            recurrentLocalInput.type = 'number';
+                            recurrentLocalInput.min = '0';
+                            recurrentLocalInput.value = cityData.recurrentLocal;
+                            recurrentLocalInput.classList.add('city-input');
+                            recurrentLocalInput.addEventListener('input', calculateTotals);
+                            recurrentLocalCell.appendChild(recurrentLocalInput);
+                            row.appendChild(recurrentLocalCell);
+                            
+                            // 資本門本會補助款
+                            const capitalCommitteeCell = document.createElement('td');
+                            const capitalCommitteeInput = document.createElement('input');
+                            capitalCommitteeInput.type = 'number';
+                            capitalCommitteeInput.min = '0';
+                            capitalCommitteeInput.value = cityData.capitalCommittee;
+                            capitalCommitteeInput.classList.add('city-input');
+                            capitalCommitteeInput.addEventListener('input', calculateTotals);
+                            capitalCommitteeCell.appendChild(capitalCommitteeInput);
+                            row.appendChild(capitalCommitteeCell);
+                            
+                            // 資本門地方配合款
+                            const capitalLocalCell = document.createElement('td');
+                            const capitalLocalInput = document.createElement('input');
+                            capitalLocalInput.type = 'number';
+                            capitalLocalInput.min = '0';
+                            capitalLocalInput.value = cityData.capitalLocal;
+                            capitalLocalInput.classList.add('city-input');
+                            capitalLocalInput.addEventListener('input', calculateTotals);
+                            capitalLocalCell.appendChild(capitalLocalInput);
+                            row.appendChild(capitalLocalCell);
+                            
+                            tableBody.appendChild(row);
+                        });
+                        
+                        // 計算總和
+                        calculateTotals();
+                    }
+                }
+            }
+            
+            // 頁面載入時嘗試載入儲存的資料
+            loadSavedData();
+        });
+    </script>
+</body>
+</html>
