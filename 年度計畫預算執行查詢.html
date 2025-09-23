@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>年度查詢系統（核定 / 發包 / 執行 / 保留 / 改列）</title>
+
+  <!-- 新 CSS：現代、整齊、響應式、列印友善 -->
+  <style>
+    /* ---------- 色彩變數 ---------- */
+    :root{
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --muted: #64748b;
+      --text: #1e293b;
+      --primary: #3b82f6;   /* 主色 - 更鮮明的藍色 */
+      --primary-light: #60a5fa;
+      --primary-dark: #2563eb;
+      --accent: #06b6d4;    /* 次要強調色 - 保持不變 */
+      --accent-light: #22d3ee;
+      --accent-dark: #0891b2;
+      --success: #10b981;   /* 新增成功色 */
+      --warning: #f59e0b;   /* 新增警告色 */
+      --danger: #ef4444;    /* 危險色 */
+      --soft: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: 0 10px 30px rgba(15,23,42,0.08);
+      --radius: 14px;
+      --radius-sm: 8px;
+      font-family: "Microsoft JhengHei", "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* ---------- 全局設定 ---------- */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      padding:28px;
+      background: linear-gradient(135deg, #f0f9ff 0%, var(--bg) 100%);
+      color:var(--text);
+      font-size:15px;
+      line-height:1.45;
+    }
+
+    .container{
+      max-width:1180px;
+      margin:0 auto;
+    }
+
+    /* ---------- 卡片 ---------- */
+    .card{
+      background:var(--surface);
+      border-radius:var(--radius);
+      padding:22px;
+      box-shadow:var(--shadow);
+      margin-bottom:22px;
+      border: 1px solid rgba(15,23,42,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(15,23,42,0.1);
+    }
+
+    h1{
+      font-size:22px;
+      margin:0 0 8px 0;
+      letter-spacing:0.2px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    p.sub{
+      color:var(--muted);
+      margin:0 0 16px 0;
+      font-size:14px;
+    }
+
+    /* ---------- 控制列 ---------- */
+    .controls{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    label{display:flex; gap:8px; align-items:center; font-size:14px; color:var(--muted); font-weight:500;}
+    select, input.search, button{
+      padding:10px 14px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:linear-gradient(180deg,#fff,#fbfdff);
+      font-size:14px;
+      outline:none;
+      transition:box-shadow .16s ease, transform .08s ease, border-color .2s ease;
+    }
+
+    select:focus, input.search:focus, button:focus{
+      box-shadow: 0 6px 18px rgba(59, 130, 246, 0.15);
+      transform:translateY(-1px);
+      border-color: var(--primary-light);
+    }
+
+    input.search{
+      min-width:220px;
+      max-width:420px;
+      box-shadow:none;
+    }
+
+    .btn-primary{
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color:white;
+      border:none;
+      padding:10px 18px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover{
+      transform:translateY(-2px);
+      box-shadow: 0 12px 28px rgba(59, 130, 246, 0.3);
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+    }
+    
+    .btn-muted{
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color:var(--primary-dark);
+      border:none;
+      padding:8px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      transition: all 0.2s ease;
+    }
+    
+    .btn-muted:hover {
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      transform: translateY(-1px);
+    }
+
+    .flex-right{margin-left:auto; display:flex; gap:14px; align-items:center}
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .badge{
+      display:inline-block; 
+      padding:4px 10px; 
+      border-radius:999px; 
+      font-size:12px; 
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); 
+      color: var(--accent-dark);
+      font-weight: 600;
+    }
+
+    /* ---------- 表格 ---------- */
+    .table-wrap{
+      margin-top:12px;
+      overflow:auto;
+      border-radius:12px;
+      border:1px solid rgba(15,23,42,0.05);
+      background: linear-gradient(180deg,#fff,#fcfdff);
+      box-shadow: 0 4px 12px rgba(15,23,42,0.03);
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:800px;
+    }
+
+    thead th{
+      position:sticky;
+      top:0;
+      z-index:1;
+      background:linear-gradient(180deg,#f8fafc,#f1f5f9);
+      padding:16px 14px;
+      text-align:left;
+      font-weight:700;
+      font-size:14px;
+      color:var(--text);
+      border-bottom:1px solid var(--border);
+    }
+
+    tbody td{
+      padding:14px;
+      border-bottom:1px solid #f1f5f9;
+      vertical-align:middle;
+      font-size:14px;
+      color:var(--text);
+      transition: background 0.2s ease;
+    }
+
+    tbody tr:hover{
+      background:linear-gradient(90deg, rgba(59,130,246,0.04), rgba(6,182,212,0.03));
+    }
+    
+    tbody tr:hover td {
+      background: transparent;
+    }
+
+    /* 讓數字欄靠右，提高可讀性 */
+    td.number, th.number { 
+      text-align:right; 
+      font-variant-numeric: tabular-nums; 
+      font-weight: 600;
+      color: var(--primary-dark);
+    }
+
+    /* ---------- 分頁 ---------- */
+    .pager{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:16px;
+    }
+    .pager button{
+      padding:8px 12px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:white;
+      cursor:pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .pager button:hover {
+      background: var(--soft);
+      border-color: var(--primary-light);
+    }
+
+    /* ---------- 響應式 ---------- */
+    @media (max-width:980px){
+      body{padding:18px}
+      .container{padding:0 6px}
+      .table-wrap{max-width:100%; overflow:auto}
+      input.search{min-width:140px}
+    }
+    @media (max-width:680px){
+      .controls{flex-direction:column; align-items:stretch}
+      .flex-right{margin-left:0; justify-content:space-between}
+      thead th{font-size:12px; padding:12px}
+      tbody td{padding:12px; font-size:13px}
+    }
+
+    /* ---------- 列印友善 ---------- */
+    @media print{
+      body{background:#fff; padding:0; color:#000}
+      .card{box-shadow:none; border:none; border-radius:0; padding:6px 0}
+      .controls, .flex-right, .btn-primary, .btn-muted, .pager { display:none }
+      table{min-width:0}
+      thead th{position:static}
+    }
+  </style>
+
+  <!-- SheetJS (匯出成 xlsx) -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>年度資料查詢系統</h1>
+      <p class="sub">選擇年度與資料屬性（核定 / 發包 / 執行 / 保留 / 改列），右側可搜尋並匯出 Excel。</p>
+
+      <div class="controls">
+        <label>
+          年度：
+          <select id="yearSelect" aria-label="年度選擇">
+            <!-- 範例給幾個年度 -->
+            <option value="114">114</option>
+            <option value="113">113</option>
+            <option value="112">112</option>
+          </select>
+        </label>
+
+        <label>
+          資料屬性：
+          <select id="attrSelect" aria-label="資料屬性選擇">
+            <option value="核定情形">核定情形</option>
+            <option value="發包情形">發包情形</option>
+            <option value="執行情形">執行情形</option>
+            <option value="保留情形">保留情形</option>
+            <option value="改列情形">改列情形</option>
+          </select>
+        </label>
+
+        <div class="input-inline" style="margin-left:6px;">
+          <input id="q" class="search" placeholder="搜尋計畫別..." />
+          <button id="btnRefresh" class="btn-primary">查詢</button>
+        </div>
+
+        <div class="flex-right">
+          <div class="muted small">顯示： <span id="rowCount">0</span> 筆</div>
+          <button id="exportBtn" class="btn-primary">匯出 Excel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap" id="tableWrap">
+        <table id="resultTable" aria-live="polite">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="pager">
+        <button id="prevPage" class="small">上一頁</button>
+        <button id="nextPage" class="small">下一頁</button>
+        <span class="muted small">第 <span id="currentPage">1</span> 頁</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------
+    // 範例資料（示範用）
+    // 真實使用時可改成 fetch("/api/xxx?year=...") 取得資料陣列
+    // 每個屬性對應的資料格式如下（每筆代表一個計畫別）
+    // ---------------------------
+    const SAMPLE = {
+      "114": {
+        "核定情形": [
+          { 計畫別:"部落永續建設藍圖規劃–強化部落安全防(減)災機能", 可支用預算數:38466836, 核定件數:8, 核定數:68546096 },
+          { 計畫別:"強化部落安全防（減）災機", 可支用預算數:12000000, 核定件數:3, 核定數:24000000 }
+        ],
+        "發包情形": [
+          { 計畫別:"部落永續建設藍圖規劃–強化部落安全防(減)災機能", 核定數:68546096, 發包數:43634207 },
+          { 計畫別:"強化部落安全防（減）災機", 核定數:24000000, 發包數:10000000 }
+        ],
+        "執行情形": [
+          { 計畫別:"部落永續建設藍圖規劃–強化部落安全防(減)災機能",
+            可支用預算數:38466836,
+            本年度_實支數:12000000, 本年度_應付未付數:800000, 本年度_節餘款:300000, 保留_實支數:2000000, 保留_應付未付數:100000, 保留_節餘款:40000
+          },
+          { 計畫別:"強化部落安全防（減）災機",
+            可支用預算數:12000000,
+            本年度_實支數:8000000, 本年度_應付未付數:200000, 本年度_節餘款:100000, 保留_實支數:500000, 保留_應付未付數:0, 保留_節餘款:0
+          }
+        ],
+        "保留情形": [
+          { 計畫別:"部落永續建設藍圖規劃–強化部落安全防(減)災機能",
+            本年度_件數:2, 本年度_金額:2000000, 保留_件數:1, 保留_金額:250000, 合計_件數:3, 合計_金額:2250000
+          },
+          { 計畫別:"強化部落安全防（減）災機",
+            本年度_件數:1, 本年度_金額:500000, 保留_件數:0, 保留_金額:0, 合計_件數:1, 合計_金額:500000
+          }
+        ],
+        "改列情形": [
+          { 計畫別:"部落永續建設藍圖規劃–強化部落安全防(減)災機能",
+            本年度_件數:1, 本年度_金額:100000, 保留_件數:0, 保留_金額:0, 合計_件數:1, 合計_金額:100000
+          },
+          { 計畫別:"強化部落安全防（減）災機",
+            本年度_件數:0, 本年度_金額:0, 保留_件數:1, 保留_金額:200000, 合計_件數:1, 合計_金額:200000
+          }
+        ]
+      },
+
+      // 113, 112 也是示範資料，可按實際需求擴充
+      "113": { /* ... */ },
+      "112": { /* ... */ }
+    };
+
+    // ---------------------------
+    // UI & 資料處理
+    // ---------------------------
+    const yearSelect = document.getElementById('yearSelect');
+    const attrSelect = document.getElementById('attrSelect');
+    const qInput = document.getElementById('q');
+    const btnRefresh = document.getElementById('btnRefresh');
+    const tbody = document.getElementById('tbody');
+    const thead = document.getElementById('thead');
+    const rowCount = document.getElementById('rowCount');
+    const exportBtn = document.getElementById('exportBtn');
+    const currentPageEl = document.getElementById('currentPage');
+    const prevPage = document.getElementById('prevPage');
+    const nextPage = document.getElementById('nextPage');
+
+    let currentData = [];
+    let page = 1;
+    const PAGE_SIZE = 10;
+
+    function formatNumber(n){
+      if (n === null || n === undefined) return "";
+      if (typeof n === 'number') return n.toLocaleString();
+      // 若是數字字串
+      if (!isNaN(Number(n))) return Number(n).toLocaleString();
+      return n;
+    }
+
+    function formatPercentage(value) {
+      if (value === null || value === undefined) return "";
+      return (value * 100).toFixed(2) + "%";
+    }
+
+    function getDataFor(year, attr){
+      // 這裡示範從 SAMPLE 取資料；若連後端 API，請改成 fetch 並 return 陣列
+      const y = SAMPLE[year];
+      if (!y) return [];
+      
+      // 複製一份資料並計算正確的比率
+      return (y[attr] || []).map(r => {
+        const newRow = {...r};
+        
+        // 根據屬性計算正確的比率
+        if (attr === '核定情形') {
+          // 核定率 = 核定數 / 可支用預算數
+          if (newRow.可支用預算數 && newRow.可支用預算數 > 0) {
+            newRow.核定率 = newRow.核定數 / newRow.可支用預算數;
+          } else {
+            newRow.核定率 = 0;
+          }
+        } else if (attr === '發包情形') {
+          // 發包率 = 發包數 / 核定數
+          if (newRow.核定數 && newRow.核定數 > 0) {
+            newRow.發包率 = newRow.發包數 / newRow.核定數;
+          } else {
+            newRow.發包率 = 0;
+          }
+        } else if (attr === '執行情形') {
+          // 合計 = 本年度實支數 + 本年度應付未付數 + 本年度節餘款 + 保留實支數 + 保留應付未付數 + 保留節餘款
+          newRow.合計 = (newRow.本年度_實支數 || 0) + 
+                       (newRow.本年度_應付未付數 || 0) + 
+                       (newRow.本年度_節餘款 || 0) + 
+                       (newRow.保留_實支數 || 0) + 
+                       (newRow.保留_應付未付數 || 0) + 
+                       (newRow.保留_節餘款 || 0);
+          
+          // 達成率 = 合計 / 可支用預算數
+          if (newRow.可支用預算數 && newRow.可支用預算數 > 0) {
+            newRow.達成率 = newRow.合計 / newRow.可支用預算數;
+          } else {
+            newRow.達成率 = 0;
+          }
+        }
+        
+        return newRow;
+      });
+    }
+
+    function buildColumnsFor(attr){
+      // 定義每個屬性的顯示欄位（順序、欄位標題）
+      const cols = [];
+      if (attr === '核定情形'){
+        cols.push({k:'計畫別', t:'計畫別'});
+        cols.push({k:'可支用預算數', t:'可支用預算數', cls:'number'});
+        cols.push({k:'核定件數', t:'核定件數', cls:'number'});
+        cols.push({k:'核定數', t:'核定數', cls:'number'});
+        cols.push({k:'核定率', t:'核定率%', cls:''});
+      } else if (attr === '發包情形'){
+        cols.push({k:'計畫別', t:'計畫別'});
+        cols.push({k:'核定數', t:'核定數', cls:'number'});  // 新增核定數欄位
+        cols.push({k:'發包數', t:'發包數', cls:'number'});
+        cols.push({k:'發包率', t:'發包率%', cls:''});
+      } else if (attr === '執行情形'){
+        cols.push({k:'計畫別', t:'計畫別'});
+        cols.push({k:'可支用預算數', t:'可支用預算數', cls:'number'});  // 新增可支用預算數欄位
+        cols.push({k:'本年度_實支數', t:'本年度 - 實支數', cls:'number'});
+        cols.push({k:'本年度_應付未付數', t:'本年度 - 應付未付數', cls:'number'});
+        cols.push({k:'本年度_節餘款', t:'本年度 - 節餘款', cls:'number'});
+        cols.push({k:'保留_實支數', t:'保留 - 實支數', cls:'number'});
+        cols.push({k:'保留_應付未付數', t:'保留 - 應付未付數', cls:'number'});
+        cols.push({k:'保留_節餘款', t:'保留 - 節餘款', cls:'number'});
+        cols.push({k:'合計', t:'合計', cls:'number'});
+        cols.push({k:'達成率', t:'達成率%', cls:''});
+      } else if (attr === '保留情形' || attr === '改列情形'){
+        cols.push({k:'計畫別', t:'計畫別'});
+        cols.push({k:'本年度_件數', t:'本年度 - 件數', cls:'number'});
+        cols.push({k:'本年度_金額', t:'本年度 - 金額', cls:'number'});
+        cols.push({k:'保留_件數', t:'保留 - 件數', cls:'number'});
+        cols.push({k:'保留_金額', t:'保留 - 金額', cls:'number'});
+        cols.push({k:'合計_件數', t:'合計 - 件數', cls:'number'});
+        cols.push({k:'合計_金額', t:'合計 - 金額', cls:'number'});
+      }
+      return cols;
+    }
+
+    function renderTable(year, attr, query=""){
+      const all = getDataFor(year, attr);
+      const q = (query||"").trim().toLowerCase();
+      const filtered = all.filter(r => {
+        if (!q) return true;
+        return String(r.計畫別 || '').toLowerCase().includes(q);
+      });
+
+      currentData = filtered;
+      page = 1;
+      rowCount.textContent = filtered.length;
+      renderPage();
+    }
+
+    function renderPage(){
+      const attr = attrSelect.value;
+      const cols = buildColumnsFor(attr);
+      // header
+      thead.innerHTML = "";
+      const trh = document.createElement('tr');
+      cols.forEach(c=>{
+        const th = document.createElement('th');
+        th.textContent = c.t;
+        if (c.cls) th.classList.add(c.cls);
+        trh.appendChild(th);
+      });
+      thead.appendChild(trh);
+
+      // body (分頁)
+      const start = (page-1)*PAGE_SIZE;
+      const end = start + PAGE_SIZE;
+      const slice = currentData.slice(start, end);
+
+      tbody.innerHTML = "";
+      slice.forEach(row=>{
+        const tr = document.createElement('tr');
+        cols.forEach(c=>{
+          const td = document.createElement('td');
+          if (c.cls) td.classList.add(c.cls);
+          let val = row[c.k];
+          
+          // 特殊處理比率欄位
+          if (c.k === '核定率' || c.k === '發包率' || c.k === '達成率') {
+            if (typeof val === 'number') {
+              td.textContent = formatPercentage(val);
+            } else {
+              td.textContent = val ?? "";
+            }
+          } else {
+            // 數字以千分位顯示
+            if (typeof val === 'number'){
+              td.textContent = formatNumber(val);
+            } else {
+              // 簡單判斷是否為有 '數' 或 '金額' 的欄位名稱
+              if (/[數|金額|實支|節餘款|發包|核定|合計|件數]/.test(c.k) && !isNaN(Number(val))){
+                td.textContent = formatNumber(Number(val));
+              } else {
+                td.textContent = val ?? "";
+              }
+            }
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+
+      currentPageEl.textContent = page;
+    }
+
+    // 分頁按鈕
+    prevPage.addEventListener('click', ()=>{
+      if (page > 1){
+        page--;
+        renderPage();
+      }
+    });
+    nextPage.addEventListener('click', ()=>{
+      const maxPage = Math.ceil(currentData.length / PAGE_SIZE) || 1;
+      if (page < maxPage){
+        page++;
+        renderPage();
+      }
+    });
+
+    // 查詢按鈕
+    btnRefresh.addEventListener('click', ()=>{
+      renderTable(yearSelect.value, attrSelect.value, qInput.value);
+    });
+
+    // Enter 在搜尋欄也觸發
+    qInput.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter') btnRefresh.click();
+    });
+
+    // 當屬性或年度變更時自動查詢
+    yearSelect.addEventListener('change', ()=> btnRefresh.click());
+    attrSelect.addEventListener('change', ()=> btnRefresh.click());
+
+    // 匯出 Excel（採用 SheetJS）
+    exportBtn.addEventListener('click', ()=>{
+      if (!currentData || currentData.length === 0){
+        alert('目前無資料可匯出');
+        return;
+      }
+      const attr = attrSelect.value;
+      const cols = buildColumnsFor(attr);
+      // 組成匯出陣列（標題為欄位標題）
+      const exportArray = currentData.map(r=>{
+        const obj = {};
+        cols.forEach(c=>{
+          // 將欄位 key -> 標題
+          let val = r[c.k];
+          // 若為 number，保留 number 型別給 excel 正確格式
+          if (typeof val === 'string' && val.match(/^-?\d+(\.\d+)?$/)){
+            val = Number(val);
+          }
+          // 特殊處理比率欄位
+          if (c.k === '核定率' || c.k === '發包率' || c.k === '達成率') {
+            if (typeof val === 'number') {
+              val = formatPercentage(val);
+            }
+          }
+          obj[c.t] = val ?? "";
+        });
+        return obj;
+      });
+
+      // 建 workbook
+      const ws = XLSX.utils.json_to_sheet(exportArray, {skipHeader:false});
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, `${yearSelect.value}_${attr}`);
+      const fname = `${yearSelect.value}_${attr}.xlsx`;
+      XLSX.writeFile(wb, fname);
+    });
+
+    // 初始載入
+    renderTable(yearSelect.value, attrSelect.value, qInput.value);
+  </script>
+</body>
+</html>
