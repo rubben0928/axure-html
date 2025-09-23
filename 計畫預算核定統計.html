@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>年度核定金額查詢系統</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px;
+        }
+        .container {
+            max-width: 1400px; margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px); padding: 30px;
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #2c3e50; font-size: 2.5rem; margin-bottom: 10px; font-weight: 700; }
+        .header p { color: #7f8c8d; font-size: 1.1rem; }
+        .filter-section { background: linear-gradient(45deg, #3498db, #2980b9); padding: 20px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3); }
+        .filter-group { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .filter-group label { color: white; font-weight: 600; font-size: 1.1rem; }
+        .filter-group select {
+            padding: 10px 15px; border: none; border-radius: 8px;
+            font-size: 1rem; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .filter-group select:focus { outline: none; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+        .export-btn {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white; padding: 10px 20px; border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .export-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+        .approval-rate {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white; padding: 15px 25px; border-radius: 12px;
+            margin-bottom: 20px; text-align: center; font-size: 1.3rem; font-weight: 600;
+            box-shadow: 0 8px 16px rgba(39, 174, 96, 0.3); animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .summary-table, .detail-table { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 15px 30px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: linear-gradient(45deg, #34495e, #2c3e50); color: white; padding: 15px; text-align: center; font-weight: 600; font-size: 1rem; }
+        td { padding: 12px; text-align: center; border-bottom: 1px solid #ecf0f1; font-size: 1rem; }
+        .year-label { font-weight: 600; color: #2c3e50; }
+        .amount { font-weight: 600; color: #27ae60; }
+        .amount.over-budget { color: #e74c3c !important; font-weight: 700 !important; }
+        .total-row { background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; }
+        .total-row td { font-weight: 700; font-size: 1.1rem; border: none; }
+        .clickable { cursor: pointer; transition: all 0.3s ease; }
+        .clickable:hover { color: #f39c12; text-shadow: 0 2px 4px rgba(0,0,0,0.3); transform: scale(1.05); }
+        .detail-section { margin-top: 30px; opacity: 0; transform: translateY(20px); transition: all 0.5s ease; }
+        .detail-section.show { opacity: 1; transform: translateY(0); }
+        .detail-header { background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; padding: 20px; border-radius: 15px 15px 0 0; text-align: center; font-size: 1.3rem; font-weight: 600; }
+        .batch-number { background: linear-gradient(45deg, #f39c12, #e67e22); color: white; padding: 5px 10px; border-radius: 20px; font-weight: 600; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 2rem; }
+            .filter-group { flex-direction: column; align-items: stretch; }
+            .filter-group select { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>年度核定金額查詢系統</h1>
+            <p>選擇年度查詢前年度、當年度及次年度的核定金額統計</p>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="yearSelect">選擇查詢年度：</label>
+                <select id="yearSelect">
+                    <option value="113">民國113年</option>
+                    <option value="114" selected>民國114年</option>
+                    <option value="115">民國115年</option>
+                    <option value="116">民國116年</option>
+                </select>
+                
+                <label for="projectSelect">計畫別：</label>
+                <select id="projectSelect">
+                    <option value="宜居部落建設計畫">宜居部落建設計畫</option>
+                    <option value="強化部落安全防（減）災機能">強化部落安全防（減）災機能</option>
+                    <option value="提升部落居住環境品質">提升部落居住環境品質</option>
+                    <option value="道路特色計畫">道路特色計畫</option>
+                </select>
+
+                <button class="export-btn" onclick="exportToExcel()">匯出Excel</button>
+            </div>
+        </div>
+
+        <div class="approval-rate" id="approvalRate">
+            114年 整體核定率：49.07%
+        </div>
+
+        <div class="summary-table">
+            <table id="summaryTable">
+                <thead>
+                    <tr>
+                        <th rowspan="2">年度</th>
+                        <th colspan="1">計畫預算</th>
+                        <th colspan="3">計畫核定</th>
+                    </tr>
+                    <tr>
+                        <th>總經費</th>
+                        <th>中央補助款</th>
+                        <th>地方配合款</th>
+                        <th>總經費</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryBody">
+                    <!-- JavaScript生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="detail-section" id="detailSection">
+            <div class="detail-header">
+                <span id="detailYear">114</span>年度各核定批次明細
+            </div>
+            <div class="detail-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>核定批次</th>
+                            <th>中央補助款</th>
+                            <th>地方配合款</th>
+                            <th>總經費</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailBody">
+                        <!-- 詳細資料由JavaScript生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        const budgetData = {
+            113: {
+                "宜居部落建設計畫": {
+                    budget: { total: 1400000000 },
+                    approved: { central: 850000000, local: 425000000, total: 1275000000 },
+                    approvalRate: 45.23,
+                    batches: [
+                        { batch: 1, central: 200000000, local: 100000000, total: 300000000 },
+                        { batch: 2, central: 180000000, local: 90000000, total: 270000000 },
+                        { batch: 3, central: 250000000, local: 125000000, total: 375000000 },
+                        { batch: 4, central: 220000000, local: 110000000, total: 330000000 }
+                    ]
+                },
+                "強化部落安全防（減）災機能": {
+                    budget: { total: 800000000 },
+                    approved: { central: 820000000, local: 260000000, total: 780000000 },
+                    approvalRate: 52.15,
+                    batches: [
+                        { batch: 1, central: 130000000, local: 65000000, total: 195000000 },
+                        { batch: 2, central: 150000000, local: 75000000, total: 225000000 },
+                        { batch: 3, central: 120000000, local: 60000000, total: 180000000 },
+                        { batch: 4, central: 420000000, local: 60000000, total: 180000000 }
+                    ]
+                },
+                "提升部落居住環境品質": {
+                    budget: { total: 600000000 },
+                    approved: { central: 380000000, local: 190000000, total: 570000000 },
+                    approvalRate: 48.90,
+                    batches: [
+                        { batch: 1, central: 100000000, local: 50000000, total: 150000000 },
+                        { batch: 2, central: 95000000, local: 47500000, total: 142500000 },
+                        { batch: 3, central: 110000000, local: 55000000, total: 165000000 },
+                        { batch: 4, central: 75000000, local: 37500000, total: 112500000 }
+                    ]
+                },
+                "道路特色計畫": {
+                    budget: { total: 900000000 },
+                    approved: { central: 600000000, local: 300000000, total: 900000000 },
+                    approvalRate: 55.80,
+                    batches: [
+                        { batch: 1, central: 150000000, local: 75000000, total: 225000000 },
+                        { batch: 2, central: 160000000, local: 80000000, total: 240000000 },
+                        { batch: 3, central: 140000000, local: 70000000, total: 210000000 },
+                        { batch: 4, central: 150000000, local: 75000000, total: 225000000 }
+                    ]
+                }
+            },
+            114: {
+                "宜居部落建設計畫": {
+                    budget: { total: 1500000000 },
+                    approved: { central: 980000000, local: 490000000, total: 1470000000 },
+                    approvalRate: 49.07,
+                    batches: [
+                        { batch: 1, central: 250000000, local: 125000000, total: 375000000 },
+                        { batch: 2, central: 220000000, local: 110000000, total: 330000000 },
+                        { batch: 3, central: 280000000, local: 140000000, total: 420000000 },
+                        { batch: 4, central: 230000000, local: 115000000, total: 345000000 }
+                    ]
+                },
+                "強化部落安全防（減）災機能": {
+                    budget: { total: 850000000 },
+                    approved: { central: 950000000, local: 275000000, total: 825000000 },
+                    approvalRate: 53.82,
+                    batches: [
+                        { batch: 1, central: 140000000, local: 70000000, total: 210000000 },
+                        { batch: 2, central: 155000000, local: 77500000, total: 232500000 },
+                        { batch: 3, central: 125000000, local: 62500000, total: 187500000 },
+                        { batch: 4, central: 530000000, local: 65000000, total: 195000000 }
+                    ]
+                },
+                "提升部落居住環境品質": {
+                    budget: { total: 650000000 },
+                    approved: { central: 420000000, local: 210000000, total: 630000000 },
+                    approvalRate: 51.25,
+                    batches: [
+                        { batch: 1, central: 110000000, local: 55000000, total: 165000000 },
+                        { batch: 2, central: 105000000, local: 52500000, total: 157500000 },
+                        { batch: 3, central: 115000000, local: 57500000, total: 172500000 },
+                        { batch: 4, central: 90000000, local: 45000000, total: 135000000 }
+                    ]
+                },
+                "道路特色計畫": {
+                    budget: { total: 950000000 },
+                    approved: { central: 650000000, local: 325000000, total: 975000000 },
+                    approvalRate: 58.15,
+                    batches: [
+                        { batch: 1, central: 165000000, local: 82500000, total: 247500000 },
+                        { batch: 2, central: 170000000, local: 85000000, total: 255000000 },
+                        { batch: 3, central: 155000000, local: 77500000, total: 232500000 },
+                        { batch: 4, central: 160000000, local: 80000000, total: 240000000 }
+                    ]
+                }
+            },
+            115: {
+                "宜居部落建設計畫": {
+                    budget: { total: 1600000000 },
+                    approved: { central: 1050000000, local: 525000000, total: 1575000000 },
+                    approvalRate: 51.35,
+                    batches: [
+                        { batch: 1, central: 265000000, local: 132500000, total: 397500000 },
+                        { batch: 2, central: 240000000, local: 120000000, total: 360000000 },
+                        { batch: 3, central: 295000000, local: 147500000, total: 442500000 },
+                        { batch: 4, central: 250000000, local: 125000000, total: 375000000 }
+                    ]
+                },
+                "強化部落安全防（減）災機能": {
+                    budget: { total: 900000000 },
+                    approved: { central: 590000000, local: 295000000, total: 885000000 },
+                    approvalRate: 55.68,
+                    batches: [
+                        { batch: 1, central: 150000000, local: 75000000, total: 225000000 },
+                        { batch: 2, central: 165000000, local: 82500000, total: 247500000 },
+                        { batch: 3, central: 135000000, local: 67500000, total: 202500000 },
+                        { batch: 4, central: 140000000, local: 70000000, total: 210000000 }
+                    ]
+                },
+                "提升部落居住環境品質": {
+                    budget: { total: 700000000 },
+                    approved: { central: 460000000, local: 230000000, total: 690000000 },
+                    approvalRate: 53.12,
+                    batches: [
+                        { batch: 1, central: 120000000, local: 60000000, total: 180000000 },
+                        { batch: 2, central: 115000000, local: 57500000, total: 172500000 },
+                        { batch: 3, central: 125000000, local: 62500000, total: 187500000 },
+                        { batch: 4, central: 100000000, local: 50000000, total: 150000000 }
+                    ]
+                },
+                "道路特色計畫": {
+                    budget: { total: 1000000000 },
+                    approved: { central: 1100000000, local: 350000000, total: 1050000000 },
+                    approvalRate: 60.25,
+                    batches: [
+                        { batch: 1, central: 180000000, local: 90000000, total: 270000000 },
+                        { batch: 2, central: 185000000, local: 92500000, total: 277500000 },
+                        { batch: 3, central: 170000000, local: 85000000, total: 255000000 },
+                        { batch: 4, central: 565000000, local: 82500000, total: 247500000 }
+                    ]
+                }
+            },
+            116: {
+                "宜居部落建設計畫": {
+                    budget: { total: 1700000000 },
+                    approved: { central: 1120000000, local: 560000000, total: 1680000000 },
+                    approvalRate: 53.88,
+                    batches: [
+                        { batch: 1, central: 285000000, local: 142500000, total: 427500000 },
+                        { batch: 2, central: 260000000, local: 130000000, total: 390000000 },
+                        { batch: 3, central: 315000000, local: 157500000, total: 472500000 },
+                        { batch: 4, central: 260000000, local: 130000000, total: 390000000 }
+                    ]
+                },
+                "強化部落安全防（減）災機能": {
+                    budget: { total: 950000000 },
+                    approved: { central: 630000000, local: 315000000, total: 945000000 },
+                    approvalRate: 57.45,
+                    batches: [
+                        { batch: 1, central: 160000000, local: 80000000, total: 240000000 },
+                        { batch: 2, central: 175000000, local: 87500000, total: 262500000 },
+                        { batch: 3, central: 145000000, local: 72500000, total: 217500000 },
+                        { batch: 4, central: 150000000, local: 75000000, total: 225000000 }
+                    ]
+                },
+                "提升部落居住環境品質": {
+                    budget: { total: 750000000 },
+                    approved: { central: 500000000, local: 250000000, total: 750000000 },
+                    approvalRate: 55.78,
+                    batches: [
+                        { batch: 1, central: 130000000, local: 65000000, total: 195000000 },
+                        { batch: 2, central: 125000000, local: 62500000, total: 187500000 },
+                        { batch: 3, central: 135000000, local: 67500000, total: 202500000 },
+                        { batch: 4, central: 110000000, local: 55000000, total: 165000000 }
+                    ]
+                },
+                "道路特色計畫": {
+                    budget: { total: 1050000000 },
+                    approved: { central: 750000000, local: 375000000, total: 1125000000 },
+                    approvalRate: 62.88,
+                    batches: [
+                        { batch: 1, central: 195000000, local: 97500000, total: 292500000 },
+                        { batch: 2, central: 200000000, local: 100000000, total: 300000000 },
+                        { batch: 3, central: 185000000, local: 92500000, total: 277500000 },
+                        { batch: 4, central: 170000000, local: 85000000, total: 255000000 }
+                    ]
+                }
+            }
+        };
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('zh-TW').format(num);
+        }
+
+        function updateDisplay() {
+            const year = document.getElementById('yearSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const data = budgetData[year]?.[project];
+
+            if (!data) return;
+
+            document.getElementById('approvalRate').textContent =
+                `${year}年 整體核定率：${data.approvalRate}%`;
+
+            const years = [parseInt(year) - 1, parseInt(year), parseInt(year) + 1];
+            let html = '';
+            years.forEach(y => {
+                const d = budgetData[y]?.[project];
+                if (d) {
+                    const isOverBudget = d.approved.central > d.budget.total;
+                    const centralClass = isOverBudget ? "amount over-budget" : "amount";
+                    html += `<tr>
+                        <td class="year-label">民國${y}年</td>
+                        <td class="amount">${formatNumber(d.budget.total)}</td>
+                        <td class="${centralClass}">${formatNumber(d.approved.central)}</td>
+                        <td class="amount">${formatNumber(d.approved.local)}</td>
+                        <td class="amount">${formatNumber(d.approved.total)}</td>
+                    </tr>`;
+                } else {
+                    html += `<tr>
+                        <td class="year-label">民國${y}年</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td>-</td>
+                    </tr>`;
+                }
+            });
+            document.getElementById('summaryBody').innerHTML = html;
+        }
+
+        function exportToExcel() {
+            const year = document.getElementById('yearSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const years = [parseInt(year) - 1, parseInt(year), parseInt(year) + 1];
+            
+            // 準備摘要資料
+            const summaryData = [['年度', '計畫預算總經費', '中央補助款', '地方配合款', '核定總經費']];
+            years.forEach(y => {
+                const d = budgetData[y]?.[project];
+                if (d) {
+                    summaryData.push([
+                        `民國${y}年`,
+                        d.budget.total,
+                        d.approved.central,
+                        d.approved.local,
+                        d.approved.total
+                    ]);
+                } else {
+                    summaryData.push([`民國${y}年`, '-', '-', '-', '-']);
+                }
+            });
+
+            // 準備批次明細資料
+            const currentYearData = budgetData[year]?.[project];
+            const batchData = [['核定批次', '中央補助款', '地方配合款', '總經費']];
+            if (currentYearData && currentYearData.batches) {
+                currentYearData.batches.forEach(batch => {
+                    batchData.push([
+                        `第${batch.batch}批次`,
+                        batch.central,
+                        batch.local,
+                        batch.total
+                    ]);
+                });
+            }
+
+            // 創建工作簿
+            const wb = XLSX.utils.book_new();
+            
+            // 創建摘要工作表
+            const ws1 = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, ws1, "年度摘要");
+
+            // 創建明細工作表
+            const ws2 = XLSX.utils.aoa_to_sheet(batchData);
+            XLSX.utils.book_append_sheet(wb, ws2, `${year}年度明細`);
+
+            // 匯出檔案
+            XLSX.writeFile(wb, `${project}_${year}年度核定金額.xlsx`);
+        }
+
+        document.getElementById('yearSelect').addEventListener('change', () => {
+            updateDisplay();
+            document.getElementById('detailSection').classList.remove('show');
+        });
+
+        document.getElementById('projectSelect').addEventListener('change', () => {
+            updateDisplay();
+            document.getElementById('detailSection').classList.remove('show');
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
