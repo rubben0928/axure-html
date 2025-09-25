@@ -1,0 +1,2061 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>計畫管理系統 - 六頁籤完整版</title>
+  <style>
+    :root{
+      --bg:#f4f7fb; --card:#ffffff; --muted:#6b7280; --accent:#2563eb; --accent-2:#06b6d4; --glass: rgba(255,255,255,0.7);
+      --radius:12px; --shadow: 0 6px 18px rgba(15,23,42,0.08);
+      font-family: "Noto Sans TC", 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef4fb);color:#0f172a}
+
+    .app{max-width:1100px;margin:36px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;box-shadow:0 6px 20px rgba(37,99,235,0.16)}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid #eef2f7;padding-bottom:12px;margin-bottom:18px;flex-wrap:wrap}
+    .tab{padding:10px 14px;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;border:1px solid transparent;white-space:nowrap}
+    .tab.active{background:linear-gradient(90deg,#f8fbff,#ffffff);color:var(--accent);border-color:#e6eefc;font-weight:600;box-shadow:0 6px 18px rgba(37,99,235,0.06)}
+
+    .tab-content{padding-top:8px}
+
+    /* form grid - 2 columns */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .field{display:flex;flex-direction:column}
+    label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .value{padding:10px 12px;border-radius:8px;border:1px solid #e6eef7;background:var(--glass);min-height:42px;display:flex;align-items:center}
+    .value.input{background:#fff}
+    input[type="text"], input[type="tel"], input[type="email"], textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid #e6eef7;background:#fff}
+    textarea{min-height:96px;resize:vertical}
+
+    /* full-width row (when needed) */
+    .full{grid-column:1 / -1}
+
+    .meta-row{display:flex;gap:8px;align-items:center}
+    .badge{font-size:12px;padding:6px 8px;border-radius:999px;border:1px solid #e6eef7;background:#fff}
+
+    /* right-bottom fetch button */
+    .tab-footer{display:flex;justify-content:flex-end;padding-top:18px}
+    .fetch-btn{position:relative;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#3b82f6);color:#fff;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(59,130,246,0.18)}
+    .fetch-btn[disabled]{opacity:0.7;cursor:wait}
+    .fetch-hint{font-size:12px;color:var(--muted);margin-right:auto;align-self:center}
+
+    /* small responsive */
+    @media(max-width:900px){
+      .grid{grid-template-columns:1fr}
+      .fetch-btn{width:100%}
+      .tab-footer{flex-direction:column;gap:8px}
+      .tab-footer .fetch-hint{margin-right:0}
+      .tabs{justify-content:center}
+    }
+
+    /* decorative map area */
+    .map{height:160px;border-radius:10px;border:1px solid #e6eef7;background:linear-gradient(180deg,#fbfdff,#f6fbff);display:flex;align-items:center;justify-content:center;color:var(--muted)}
+
+    /* small helpers */
+    .row-two{display:flex;gap:8px}
+    .muted{color:var(--muted)}
+
+    /* Budget System Styles */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+        opacity: 0.8;
+    }
+    
+    .unit-label {
+        position: absolute;
+        top: 20px;
+        right: 30px;
+        font-size: 14px;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+    
+    .content {
+        padding: 25px;
+    }
+    
+    .section {
+        margin-bottom: 30px;
+        border: 1px solid #e1e5eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .section-header {
+        background: #f8f9fa;
+        padding: 12px 20px;
+        border-bottom: 1px solid #e1e5eb;
+        font-weight: bold;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .section-header i {
+        margin-right: 10px;
+        color: #4a6491;
+    }
+    
+    .section-info {
+        font-size: 12px;
+        color: #666;
+        font-weight: normal;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+    
+    .form-group:hover {
+        background-color: #f9fafb;
+    }
+    
+    .form-group:last-child {
+        border-bottom: none;
+    }
+    
+    .form-label {
+        width: 250px;
+        font-weight: 600;
+        color: #555;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-label i {
+        margin-right: 8px;
+        color: #4a6491;
+        font-size: 14px;
+    }
+    
+    .form-input {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+    
+    .readonly {
+        background-color: #f9f9f9;
+        color: #666;
+        font-weight: 500;
+        padding: 8px 12px;
+        border-radius: 4px;
+        min-width: 200px;
+        display: inline-block;
+        text-align: right;
+        border: 1px solid #e1e5eb;
+    }
+    
+    .currency {
+        margin-left: 8px;
+        color: #666;
+    }
+    
+    .total-row {
+        background-color: #f0f7ff;
+        font-weight: bold;
+        border-top: 2px solid #cce0ff;
+    }
+    
+    .payment-percentage {
+        font-size: 12px;
+        color: #666;
+        margin-left: 10px;
+    }
+    
+    .payment-row {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .payment-amount {
+        width: 200px;
+    }
+    
+    .payment-date {
+        width: 180px;
+    }
+    
+    .footer {
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        color: #666;
+        font-size: 12px;
+        border-top: 1px solid #e1e5eb;
+    }
+    
+    .grants-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .grants-section .form-group {
+        flex: 1;
+        min-width: 300px;
+        border: 1px solid #e1e5eb;
+        border-radius: 6px;
+        margin-bottom: 0;
+    }
+    
+    .additional-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    
+    .additional-section .form-group {
+        flex: 1;
+        min-width: 300px;
+        border: 1px solid #e1e5eb;
+        border-radius: 6px;
+        margin-bottom: 0;
+    }
+    
+    .unpaid-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 15px;
+    }
+    
+    .unpaid-section .form-group {
+        flex: 1;
+        min-width: 300px;
+        border: 1px solid #e1e5eb;
+        border-radius: 6px;
+        margin-bottom: 0;
+    }
+    
+    .summary-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border: 1px solid #e1e5eb;
+    }
+    
+    .summary-item {
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+        padding: 10px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e1e5eb;
+    }
+    
+    .summary-label {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    
+    .summary-value {
+        font-size: 16px;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    
+    .status-complete {
+        background-color: #10b981;
+    }
+    
+    .status-pending {
+        background-color: #f59e0b;
+    }
+    
+    .status-future {
+        background-color: #6b7280;
+    }
+
+    input[type="date"] {
+        width: 180px;
+        text-align: left;
+    }
+
+    /* 考核结果页签样式 */
+    .assessment-container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .assessment-section {
+        margin-bottom: 20px;
+        border: 1px solid #e1e5eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .assessment-header {
+        background: #f8f9fa;
+        padding: 12px 20px;
+        border-bottom: 1px solid #e1e5eb;
+        font-weight: bold;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .assessment-row {
+        display: flex;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+    
+    .assessment-row:hover {
+        background-color: #f9fafb;
+    }
+    
+    .assessment-row:last-child {
+        border-bottom: none;
+    }
+    
+    .assessment-label {
+        width: 300px;
+        font-weight: 600;
+        color: #555;
+        display: flex;
+        align-items: center;
+    }
+    
+    .assessment-input {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .assessment-score {
+        width: 100px;
+        text-align: right;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .assessment-percentage {
+        width: 80px;
+        text-align: right;
+        color: #666;
+    }
+    
+    .assessment-total {
+        background-color: #f0f7ff;
+        font-weight: bold;
+        border-top: 2px solid #cce0ff;
+    }
+    
+    .assessment-grade {
+        font-size: 18px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-left: 10px;
+    }
+    
+    .grade-excellent { color: #10b981; }
+    .grade-good { color: #3b82f6; }
+    .grade-average { color: #f59e0b; }
+    .grade-poor { color: #ef4444; }
+
+    /* 工程照片页签样式 */
+    .photo-container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .photo-upload-section {
+        margin-bottom: 30px;
+        border: 1px solid #e1e5eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .photo-upload-header {
+        background: #f8f9fa;
+        padding: 12px 20px;
+        border-bottom: 1px solid #e1e5eb;
+        font-weight: bold;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .upload-area {
+        padding: 30px 20px;
+        text-align: center;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        margin: 20px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        background: #f9fafb;
+    }
+    
+    .upload-area:hover {
+        border-color: #3b82f6;
+        background: #f0f7ff;
+    }
+    
+    .upload-area.dragover {
+        border-color: #2563eb;
+        background: #e0f2fe;
+    }
+    
+    .upload-icon {
+        font-size: 48px;
+        color: #9ca3af;
+        margin-bottom: 12px;
+    }
+    
+    .upload-text {
+        color: #6b7280;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+    
+    .upload-button {
+        background: linear-gradient(90deg, var(--accent), #3b82f6);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .photo-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .photo-item {
+        border: 1px solid #e1e5eb;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .photo-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .photo-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid #e1e5eb;
+        cursor: pointer;
+    }
+    
+    .photo-info {
+        padding: 15px;
+    }
+    
+    .photo-title {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .photo-description {
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+    
+    .photo-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #9ca3af;
+    }
+    
+    .photo-date {
+        font-weight: 500;
+    }
+    
+    .photo-actions {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .action-button {
+        background: none;
+        border: none;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        transition: all 0.2s ease;
+    }
+    
+    .action-button:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+    
+    .action-button.delete:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+    
+    .photo-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+    }
+    
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 12px;
+        max-width: 90vw;
+        max-height: 90vh;
+        overflow: auto;
+    }
+    
+    .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e1e5eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #6b7280;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+    
+    .modal-close:hover {
+        background: #f3f4f6;
+    }
+    
+    .modal-image {
+        width: 100%;
+        max-width: 600px;
+        height: auto;
+    }
+    
+    .modal-info {
+        padding: 20px;
+    }
+    
+    .form-row {
+        margin-bottom: 15px;
+    }
+    
+    .form-row label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #374151;
+        font-size: 13px;
+    }
+    
+    .form-row input,
+    .form-row textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+    
+    .form-row textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .modal-actions {
+        padding: 20px;
+        border-top: 1px solid #e1e5eb;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(90deg, var(--accent), #3b82f6);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    
+    .empty-gallery {
+        text-align: center;
+        padding: 60px 20px;
+        color: #9ca3af;
+        grid-column: 1 / -1;
+    }
+    
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    .empty-text {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    
+    .empty-subtext {
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .form-label {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .form-input {
+            width: 100%;
+        }
+        
+        .payment-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .payment-amount, .payment-date {
+            width: 100%;
+        }
+        
+        .grants-section .form-group,
+        .additional-section .form-group,
+        .unpaid-section .form-group {
+            min-width: 100%;
+        }
+        
+        .unit-label {
+            position: static;
+            text-align: center;
+            margin-top: 10px;
+            display: block;
+        }
+        
+        .summary-section {
+            flex-direction: column;
+        }
+        
+        .assessment-label {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .assessment-input {
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .assessment-score, .assessment-percentage {
+            width: 100%;
+            text-align: left;
+            margin-top: 5px;
+        }
+
+        .photo-gallery {
+            grid-template-columns: 1fr;
+        }
+        
+        .modal-content {
+            max-width: 95vw;
+            max-height: 95vh;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">花蓮縣</div>
+      <div>
+        <h1></h1>
+        <p class="lead">112年花蓮縣玉里鎮拿彌散部落防減災工程</p>
+      </div>
+    </header>
+
+    <div class="card">
+      <nav class="tabs" role="tablist" aria-label="主要頁籤">
+        <button class="tab active" role="tab" data-tab="basic">基本資料</button>
+        <button class="tab" role="tab" data-tab="status">執行情形</button>
+        <button class="tab" role="tab" data-tab="budget">預算額度</button>
+        <button class="tab" role="tab" data-tab="kpi">KPI績效</button>
+        <button class="tab" role="tab" data-tab="assessment">考核結果</button>
+        <button class="tab" role="tab" data-tab="photos">工程照片</button>
+      </nav>
+
+      <section class="tab-content">
+        <!-- Basic -->
+        <div class="pane" id="basic" role="tabpanel">
+          <form id="basicForm">
+            <div class="grid">
+              <div class="field"><label>計畫年度</label><div class="value">114</div></div>
+              <div class="field"><label>計畫別</label><div class="value">宜居建設計畫</div></div>
+
+              <div class="field"><label>縣市別</label><div class="value">花蓮縣</div></div>
+              <div class="field"><label>鄉鎮市區別</label><div class="value">玉里鎮</div></div>
+
+              <div class="field"><label>村里別</label><div class="value">樂合里</div></div>
+              <div class="field"><label>計畫名稱</label><div class="value">112年花蓮縣玉里鎮拿彌散部落防減災工程</div></div>
+
+              <div class="field"><label>執行機關</label><div class="value">玉里鎮公所</div></div>
+              <div class="field"><label>聯絡人</label><div class="value">王小明</div></div>
+
+              <div class="field"><label>聯絡電話</label><div class="value">(03) 123-4567</div></div>
+              <div class="field"><label>聯絡手機</label><div class="value">0912-345-678</div></div>
+
+              <div class="field"><label>聯絡電子信箱</label><div class="value">example@yl.gov.tw</div></div>
+              <div class="field"><label>工程項目</label><div class="value">愛國埔永久屋排水規劃設計</div></div>
+
+              <div class="field"><label>經度</label><div class="value">121.300000</div></div>
+              <div class="field"><label>緯度</label><div class="value">23.300000</div></div>
+
+              <div class="field full"><label>備註</label><textarea name="note" placeholder="可輸入備註或補充說明..."></textarea></div>
+            </div>
+
+            <div class="tab-footer">
+              <div class="fetch-hint muted">從工程會雲端網手動撈取工程會資料（右側按鈕）</div>
+              <button type="button" id="fetchCloud" class="fetch-btn" title="手動撈取工程會雲端網資料">⟳ 立刻撈取工程會資料</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Status -->
+        <div class="pane" id="status" role="tabpanel" hidden>
+          <div style="display:flex;gap:12px;flex-direction:column">
+            <!-- 執行情形 區塊 -->
+            <h3 style="margin:0 0 8px 0;color:var(--accent)">執行情形</h3>
+            <div class="grid">
+              <div class="field"><label>核定日期</label><div class="value">2025/01/15</div></div>
+              <div class="field"><label>規劃設計完成發包</label><div class="value">已完成</div></div>
+
+              <div class="field"><label>規劃設計招標進度</label><div class="value">招標中</div></div>
+              <div class="field"><label>規劃設計流標次數</label><div class="value">0 次</div></div>
+
+              <div class="field"><label>規劃設計進度</label><div class="value">100%</div></div>
+              <div class="field"><label>工程招標階段</label><div class="value">已決標</div></div>
+
+              <div class="field"><label>工程招標方式 / 決標金額</label><div class="value">公開招標 / NT$ 7,800,000</div></div>
+              <div class="field"><label>工程流標次數</label><div class="value">1 次</div></div>
+
+              <div class="field"><label>施工階段</label><div class="value">基礎施作</div></div>
+              <div class="field"><label>工期</label><div class="value">180 天</div></div>
+
+              <div class="field"><label>預計完工日期</label><div class="value">2025/12/20</div></div>
+              <div class="field"><label>工程進度</label><div class="value">45%</div></div>
+
+              <div class="field"><label>驗收</label><div class="value">未驗收</div></div>
+              <div class="field"><label>結案</label><div class="value">未結案</div></div>
+            </div>
+
+            <!-- 辦理期程 區塊 -->
+            <h3 style="margin:18px 0 8px 0;color:var(--accent)">辦理期程</h3>
+            <div class="grid">
+              <!-- each item shows 預定日期 / 實際日期 -->
+              <div class="field"><label>發包日期</label>
+                <div class="row-two">
+                  <div class="value" style="min-width:120px">預定：2025/02/01</div>
+                  <div class="value" style="min-width:120px">實際：2025/02/03</div>
+                </div>
+              </div>
+
+              <div class="field"><label>第一期請款日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/04/01</div>
+                  <div class="value">實際：2025/04/10</div>
+                </div>
+              </div>
+
+              <div class="field"><label>開工日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/03/01</div>
+                  <div class="value">實際：2025/03/05</div>
+                </div>
+              </div>
+
+              <div class="field"><label>進度30%日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/05/01</div>
+                  <div class="value">實際：2025/05/12</div>
+                </div>
+              </div>
+
+              <div class="field"><label>第二期請款日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/07/01</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+              <div class="field"><label>進度50%日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/08/15</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+              <div class="field"><label>第三期請款日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/10/01</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+              <div class="field"><label>完工日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2025/12/20</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+              <div class="field"><label>結算日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2026/01/15</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+              <div class="field"><label>第四期請款日期</label>
+                <div class="row-two">
+                  <div class="value">預定：2026/02/01</div>
+                  <div class="value">實際：</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="tab-footer">
+              <div class="fetch-hint muted">手動撈取工程會雲端網資料（右下按鈕）</div>
+              <button type="button" id="fetchCloud_status" class="fetch-btn">⟳ 立刻撈取工程會資料</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="pane" id="budget" role="tabpanel" hidden>
+          <div class="container">
+            <header>
+                
+                <div class="unit-label">單位:元</div>
+            </header>
+            
+            <div class="content">
+                <!-- 核定金額區塊 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div>
+                            <i class="fas fa-file-contract"></i>
+                            核定金額
+                        </div>
+                        <div class="section-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="far fa-calendar-alt"></i>
+                            核定年度
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="approvalYear">2023</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="far fa-calendar-check"></i>
+                            核定日期
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="approvalDate">2023-01-15</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-landmark"></i>
+                            核定中央補助款
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="approvedCentralGrant">4,000,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-city"></i>
+                            核定地方配合款
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="approvedLocalGrant">1,000,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group total-row">
+                        <div class="form-label">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            核定總金額
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="approvedTotalAmount">5,000,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 發包金額區塊 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div>
+                            <i class="fas fa-calculator"></i>
+                            發包金額
+                        </div>
+                        <div class="section-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-hard-hat"></i>
+                            發包工程費
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="constructionCost" value="4,000,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-drafting-compass"></i>
+                            設計監造費
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="designFee" value="300,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-tasks"></i>
+                            工程管理費
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="managementFee" value="200,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-industry"></i>
+                            空污費
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="pollutionFee" value="50,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-ellipsis-h"></i>
+                            其他費用
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="otherFees" value="100,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group total-row">
+                        <div class="form-label">
+                            <i class="fas fa-calculator"></i>
+                            總工程經費
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="totalProjectCost">4,650,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grants-section">
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-landmark"></i>
+                                實際中央補助款
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="actualCentralGrant">4,650,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-city"></i>
+                                實際地方配合款
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="actualLocalGrant">350,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 扣款區塊 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div>
+                            <i class="fas fa-minus-circle"></i>
+                            扣款
+                        </div>
+                        <div class="section-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-gavel"></i>
+                            廠商違約金
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="penaltyFee" value="50,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            扣罰金額
+                        </div>
+                        <div class="form-input">
+                            <input type="text" id="deductionFee" value="25,000">
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group total-row">
+                        <div class="form-label">
+                            <i class="fas fa-minus-circle"></i>
+                            總扣款金額
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="totalDeduction">75,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 撥付金額區塊 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div>
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            撥付金額
+                        </div>
+                        <div class="section-info"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span class="status-indicator status-complete"></span>
+                            <i class="fas fa-money-check-alt"></i>
+                            撥付第一期款
+                        </div>
+                        <div class="form-input">
+                            <div class="payment-row">
+                                <div class="payment-amount">
+                                    <input type="text" id="payment1" value="1,395,000">
+                                    <span class="currency">元</span>
+                                    <span class="payment-percentage">(30%)</span>
+                                </div>
+                                <div class="payment-date">
+                                    <label for="paymentDate1">撥款日期：</label>
+                                    <input type="date" id="paymentDate1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span class="status-indicator status-pending"></span>
+                            <i class="fas fa-money-check-alt"></i>
+                            撥付第二期款
+                        </div>
+                        <div class="form-input">
+                            <div class="payment-row">
+                                <div class="payment-amount">
+                                    <input type="text" id="payment2" value="1,627,500">
+                                    <span class="currency">元</span>
+                                    <span class="payment-percentage">(35%)</span>
+                                </div>
+                                <div class="payment-date">
+                                    <label for="paymentDate2">撥款日期：</label>
+                                    <input type="date" id="paymentDate2">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span class="status-indicator status-future"></span>
+                            <i class="fas fa-money-check-alt"></i>
+                            撥付第三期款
+                        </div>
+                        <div class="form-input">
+                            <div class="payment-row">
+                                <div class="payment-amount">
+                                    <input type="text" id="payment3" value="1,395,000">
+                                    <span class="currency">元</span>
+                                    <span class="payment-percentage">(30%)</span>
+                                </div>
+                                <div class="payment-date">
+                                    <label for="paymentDate3">撥款日期：</label>
+                                    <input type="date" id="paymentDate3">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="form-label">
+                            <span class="status-indicator status-future"></span>
+                            <i class="fas fa-money-check-alt"></i>
+                            撥付第四期款
+                        </div>
+                        <div class="form-input">
+                            <div class="payment-row">
+                                <div class="payment-amount">
+                                    <input type="text" id="payment4" value="232,500">
+                                    <span class="currency">元</span>
+                                    <span class="payment-percentage">(5%)</span>
+                                </div>
+                                <div class="payment-date">
+                                    <label for="paymentDate4">撥款日期：</label>
+                                    <input type="date" id="paymentDate4">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group total-row">
+                        <div class="form-label">
+                            <i class="fas fa-receipt"></i>
+                            實支數
+                        </div>
+                        <div class="form-input">
+                            <div class="readonly" id="actualExpenditure">4,650,000</div>
+                            <span class="currency">元</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 應付未付數放在實支數下方 -->
+                    <div class="unpaid-section">
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-clock"></i>
+                                應付未付數
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="unpaidAmount">100,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他區塊 -->
+                <div class="section">
+                    <div class="section-header">
+                        <div>
+                            <i class="fas fa-ellipsis-h"></i>
+                            其他
+                        </div>
+                        <div class="section-info"></div>
+                    </div>
+                    
+                    <div class="additional-section">
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-piggy-bank"></i>
+                                節餘數
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="surplusAmount">275,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-lock"></i>
+                                保留數
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="reservedAmount">50,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-label">
+                                <i class="fas fa-exchange-alt"></i>
+                                改列數
+                            </div>
+                            <div class="form-input">
+                                <div class="readonly" id="reclassifiedAmount">25,000</div>
+                                <span class="currency">元</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 新增：財務摘要區塊 -->
+               
+            </div>
+            
+            <div class="footer">
+               
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI -->
+        <div class="pane" id="kpi" role="tabpanel" hidden>
+          <div class="grid">
+            <div class="field"><label>受益部落數</label><div class="value">3 個部落</div></div>
+            <div class="field"><label>受益部落名稱</label><div class="value">拿彌散部落、樂合部落、春日部落</div></div>
+
+            <div class="field"><label>是否位於一級生態檢核區</label><div class="value">是</div></div>
+            <div class="field"><label>受益戶數</label><div class="value">125 戶</div></div>
+
+            <div class="field"><label>受益人口數</label><div class="value">378 人</div></div>
+            <div class="field"><label>受益面積</label><div class="value">45.8 公頃</div></div>
+
+            <div class="field"><label>績效-完成盤查及藍圖規劃部落數</label><div class="value">3 個部落</div></div>
+            <div class="field"><label>績效-完成部落溝通場次</label><div class="value">8 場次</div></div>
+
+            <div class="field"><label>成效-內政部孤島</label><div class="value">已脫離孤島狀態</div></div>
+            <div class="field"><label>成效-段已加入韌性</label><div class="value">完成韌性提升</div></div>
+
+            <div class="field"><label>土石流自主防災</label><div class="value">已建立機制</div></div>
+            <div class="field"><label>水患自主社區</label><div class="value">已成立2個社區</div></div>
+
+            <div class="field full"><label>備註</label><textarea placeholder="KPI 評估補充說明..."></textarea></div>
+          </div>
+
+          <div class="tab-footer">
+            <div class="fetch-hint muted"></div>
+                      </div>
+        </div>
+
+        <!-- Assessment -->
+        <div class="pane" id="assessment" role="tabpanel" hidden>
+          <div class="assessment-container">
+            <div class="content">
+                <!-- 考核評分區塊 -->
+                <div class="assessment-section">
+                    <div class="assessment-header">
+                        <div>
+                            <i class="fas fa-chart-bar"></i>
+                            考核評分明細
+                        </div>
+                        <div class="section-info">系統自動計算評分</div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-tasks"></i>
+                            發包作業考核
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">20%</div>
+                            <div class="assessment-score" id="procurementScore">18.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-money-bill-wave"></i>
+                            預算執行考核
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">20%</div>
+                            <div class="assessment-score" id="budgetScore">16.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-chart-line"></i>
+                            執行進度考核 (週期性報表填報)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">5%</div>
+                            <div class="assessment-score" id="progressReportScore">4.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-calendar-check"></i>
+                            執行進度考核 (100萬以下第一期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">20%</div>
+                            <div class="assessment-score" id="progressFirstScore">18.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-calendar-check"></i>
+                            執行進度考核 (100萬以下第二期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">20%</div>
+                            <div class="assessment-score" id="progressSecondScore">17.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            執行進度考核 (第一期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">10%</div>
+                            <div class="assessment-score" id="paymentFirstScore">9.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            執行進度考核 (第二期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">10%</div>
+                            <div class="assessment-score" id="paymentSecondScore">8.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            執行進度考核 (第三期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">15%</div>
+                            <div class="assessment-score" id="paymentThirdScore">13.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                            執行進度考核 (第四期請款時程)
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">5%</div>
+                            <div class="assessment-score" id="paymentFourthScore">4.5</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row">
+                        <div class="assessment-label">
+                            <i class="fas fa-award"></i>
+                            計畫品質考核
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">15%</div>
+                            <div class="assessment-score" id="qualityScore">13.0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="assessment-row assessment-total">
+                        <div class="assessment-label">
+                            <i class="fas fa-calculator"></i>
+                            考核評分合計
+                        </div>
+                        <div class="assessment-input">
+                            <div class="assessment-percentage">100%</div>
+                            <div class="assessment-score" id="totalScore">89.5</div>
+                            <div class="assessment-grade grade-good" id="grade"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 原有考核結果區塊 -->
+                <div class="grid">
+                  <div class="field"><label>考核等級</label><div class="value">記功一次</div></div>
+                  <div class="field"><label>考核日期</label><div class="value">2025/06/01</div></div>
+
+                  <div class="field"><label>評語</label><div class="value">依據本次執行情形、請款進度管控等，予以良好評等。</div></div>
+                  <div class="field full"><label>處理建議</label><textarea placeholder="建議或改進方向..."></textarea></div>
+                </div>
+            </div>
+          </div>
+
+          <div class="tab-footer">
+                      </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="pane" id="photos" role="tabpanel" hidden>
+          <div class="photo-container">
+            <div class="content">
+              <!-- 照片上傳區塊 -->
+              <div class="photo-upload-section">
+                <div class="photo-upload-header">
+                  <div>
+                    <i class="fas fa-camera"></i>
+                    工程照片上傳
+                  </div>
+                  <div class="section-info">支援 JPG, PNG 格式，最大 10MB</div>
+                </div>
+                
+                <div class="upload-area" id="uploadArea">
+                  <div class="upload-icon">📷</div>
+                  <div class="upload-text">拖拽照片到此處或點擊上傳</div>
+                  <button type="button" class="upload-button" id="uploadButton">選擇照片</button>
+                  <input type="file" id="photoInput" multiple accept="image/*" style="display: none;">
+                </div>
+              </div>
+              
+              <!-- 照片展示區域 -->
+              <div class="photo-gallery" id="photoGallery">
+                <div class="empty-gallery" id="emptyGallery">
+                  <div class="empty-icon">📸</div>
+                  <div class="empty-text">尚未上傳照片</div>
+                  <div class="empty-subtext">請上傳工程進度照片以便管理和查看</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 照片編輯模態框 -->
+          <div class="photo-modal" id="photoModal">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 style="margin: 0;">照片資訊</h3>
+                <button class="modal-close" id="modalClose">&times;</button>
+              </div>
+              <div class="modal-body">
+                <img class="modal-image" id="modalImage" src="" alt="">
+                <div class="modal-info">
+                  <div class="form-row">
+                    <label for="photoDesc">照片說明</label>
+                    <textarea id="photoDesc" placeholder="請描述照片內容、工程進度等..."></textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="btn-secondary" id="modalCancel">取消</button>
+                <button class="btn-primary" id="modalSave">保存</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-footer">
+            <div class="fetch-hint muted">可批量上傳照片，支援拖拽操作</div>
+            <button type="button" id="exportPhotos" class="fetch-btn">📤 匯出照片報告</button>
+          </div>
+        </div>
+
+      </section>
+    </div>
+
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.pane').forEach(p=>{ p.hidden = (p.id !== tab); });
+        
+        // 當切換到考核頁籤時重新計算評分
+        if (tab === 'assessment') {
+          setTimeout(calculateAssessment, 100);
+        }
+      });
+    });
+
+    // Fetch button handlers - stubs that show UX feedback
+    function simulateFetch(btn){
+      btn.disabled = true; const orig = btn.innerText; btn.innerText = '⟳ 資料撈取中...';
+      setTimeout(()=>{ btn.disabled = false; btn.innerText = orig; alert('示範：已嘗試從工程會雲端網撈取資料（此為範例，不會實際連線）。'); }, 1400);
+    }
+
+    ['fetchCloud','fetchCloud_status','fetchCloud_budget','fetchCloud_kpi','fetchCloud_assess'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el) el.addEventListener('click', ()=> simulateFetch(el));
+    });
+
+    // Accessibility: allow keyboard tab switching (ArrowLeft/Right)
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    document.querySelector('.tabs').addEventListener('keydown', (e)=>{
+      const idx = tabs.findIndex(t=>t.classList.contains('active'));
+      if(e.key==='ArrowRight'){ tabs[(idx+1)%tabs.length].click(); }
+      if(e.key==='ArrowLeft'){ tabs[(idx-1+tabs.length)%tabs.length].click(); }
+    });
+
+    // Photo gallery functionality
+    let photos = [];
+    let currentEditingPhoto = null;
+
+    // Initialize photo gallery
+    function initPhotoGallery() {
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadButton = document.getElementById('uploadButton');
+        const photoInput = document.getElementById('photoInput');
+        const photoModal = document.getElementById('photoModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+        const modalSave = document.getElementById('modalSave');
+        const exportPhotos = document.getElementById('exportPhotos');
+
+        // Upload area click handler
+        uploadButton.addEventListener('click', () => photoInput.click());
+        uploadArea.addEventListener('click', () => photoInput.click());
+
+        // File input change handler
+        photoInput.addEventListener('change', handleFileSelect);
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleFileDrop);
+
+        // Modal handlers
+        modalClose.addEventListener('click', closeModal);
+        modalCancel.addEventListener('click', closeModal);
+        modalSave.addEventListener('click', savePhotoInfo);
+        photoModal.addEventListener('click', (e) => {
+            if (e.target === photoModal) closeModal();
+        });
+
+        // Export handler
+        exportPhotos.addEventListener('click', exportPhotoReport);
+
+        // Prevent default drag behaviors on the document
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+    }
+
+    function handleFileDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+        processFiles(files);
+    }
+
+    function handleFileSelect(e) {
+        const files = Array.from(e.target.files);
+        processFiles(files);
+        e.target.value = ''; // Reset input
+    }
+
+    function processFiles(files) {
+        if (files.length === 0) return;
+
+        files.forEach(file => {
+            if (file.size > 10 * 1024 * 1024) {
+                alert(`檔案 ${file.name} 超過 10MB 限制`);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const photo = {
+                    id: Date.now() + Math.random(),
+                    name: file.name,
+                    src: e.target.result,
+                    title: file.name.split('.')[0],
+                    description: '',
+                    uploadDate: new Date().toLocaleDateString('zh-TW')
+                };
+                
+                photos.push(photo);
+                renderPhotoGallery();
+                
+                // 自動開啟編輯模態框為新上傳的照片
+                openPhotoModal(photo);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderPhotoGallery() {
+        const gallery = document.getElementById('photoGallery');
+        const emptyGallery = document.getElementById('emptyGallery');
+
+        if (photos.length === 0) {
+            emptyGallery.style.display = 'block';
+            return;
+        }
+
+        emptyGallery.style.display = 'none';
+        
+        gallery.innerHTML = photos.map(photo => `
+            <div class="photo-item" data-photo-id="${photo.id}">
+                <img src="${photo.src}" alt="${photo.title}" class="photo-image" onclick="openPhotoModal(getPhotoById('${photo.id}'))">
+                <div class="photo-info">
+                    <div class="photo-title">${photo.title || '未命名照片'}</div>
+                    <div class="photo-description">${photo.description || '無描述'}</div>
+                    <div class="photo-meta">
+                        <div class="photo-date">${photo.uploadDate}</div>
+                        <div class="photo-actions">
+                            <button class="action-button" onclick="openPhotoModal(getPhotoById('${photo.id}'))">編輯</button>
+                            <button class="action-button delete" onclick="deletePhoto('${photo.id}')">刪除</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('') + (emptyGallery.outerHTML);
+    }
+
+    function getPhotoById(id) {
+        return photos.find(photo => photo.id == id);
+    }
+
+    function openPhotoModal(photo) {
+        if (!photo) return;
+        
+        currentEditingPhoto = photo;
+        const modal = document.getElementById('photoModal');
+        const modalImage = document.getElementById('modalImage');
+        const photoTitle = document.getElementById('photoTitle');
+        const photoDesc = document.getElementById('photoDesc');
+
+        modalImage.src = photo.src;
+        photoTitle.value = photo.title || '';
+        photoDesc.value = photo.description || '';
+
+        modal.style.display = 'block';
+        
+        // 聚焦到標題輸入框
+        setTimeout(() => photoTitle.focus(), 100);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('photoModal');
+        modal.style.display = 'none';
+        currentEditingPhoto = null;
+    }
+
+    function savePhotoInfo() {
+        if (!currentEditingPhoto) return;
+
+        const photoTitle = document.getElementById('photoTitle');
+        const photoDesc = document.getElementById('photoDesc');
+
+        currentEditingPhoto.title = photoTitle.value.trim() || '未命名照片';
+        currentEditingPhoto.description = photoDesc.value.trim();
+
+        renderPhotoGallery();
+        closeModal();
+        
+        // 顯示保存成功提示
+        showNotification('照片資訊已保存');
+    }
+
+    function deletePhoto(id) {
+        if (confirm('確定要刪除這張照片嗎？')) {
+            photos = photos.filter(photo => photo.id != id);
+            renderPhotoGallery();
+            showNotification('照片已刪除');
+        }
+    }
+
+    function exportPhotoReport() {
+        if (photos.length === 0) {
+            alert('目前沒有照片可以匯出');
+            return;
+        }
+        
+        // 模擬匯出功能
+        showNotification('照片報告匯出功能開發中...');
+    }
+
+    function showNotification(message) {
+        // 創建簡單的通知提示
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1001;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // 將函數暴露到全局作用域以便 HTML onclick 使用
+    window.openPhotoModal = openPhotoModal;
+    window.getPhotoById = getPhotoById;
+    window.deletePhoto = deletePhoto;
+
+    // Budget system functionality
+    // 格式化數字為千分位
+    function formatNumber(num) {
+        if (!num && num !== 0) return '';
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    
+    // 移除千分位符號，轉為數字
+    function parseNumber(str) {
+        if (!str) return 0;
+        return parseFloat(str.replace(/,/g, ''));
+    }
+    
+    // 處理輸入框的千分位格式
+    function setupInputFormatting() {
+        const inputs = document.querySelectorAll('#budget input[type="text"]');
+        
+        inputs.forEach(input => {
+            // 當輸入框失去焦點時，格式化數字
+            input.addEventListener('blur', function() {
+                const value = parseNumber(this.value);
+                if (!isNaN(value)) {
+                    this.value = formatNumber(value);
+                    calculateAll();
+                }
+            });
+            
+            // 當輸入框獲得焦點時，移除千分位以便編輯
+            input.addEventListener('focus', function() {
+                this.value = this.value.replace(/,/g, '');
+            });
+            
+            // 只允許數字和退格鍵
+            input.addEventListener('keydown', function(e) {
+                // 允許退格、刪除、Tab、左右箭頭
+                if ([8, 9, 37, 39, 46].includes(e.keyCode)) return;
+                
+                // 允許數字
+                if (e.keyCode >= 48 && e.keyCode <= 57) return;
+                
+                // 允許小鍵盤數字
+                if (e.keyCode >= 96 && e.keyCode <= 105) return;
+                
+                // 阻止其他輸入
+                e.preventDefault();
+            });
+        });
+    }
+    
+    // 計算所有數值
+    function calculateAll() {
+        if (!document.getElementById('budget') || document.getElementById('budget').hidden) return;
+        
+        // 計算核定總金額
+        const approvedCentralGrant = parseNumber(document.getElementById('approvedCentralGrant').textContent) || 0;
+        const approvedLocalGrant = parseNumber(document.getElementById('approvedLocalGrant').textContent) || 0;
+        const approvedTotalAmount = approvedCentralGrant + approvedLocalGrant;
+        document.getElementById('approvedTotalAmount').textContent = formatNumber(approvedTotalAmount);
+        
+        // 獲取發包金額輸入值並解析
+        const constructionCost = parseNumber(document.getElementById('constructionCost').value) || 0;
+        const designFee = parseNumber(document.getElementById('designFee').value) || 0;
+        const managementFee = parseNumber(document.getElementById('managementFee').value) || 0;
+        const pollutionFee = parseNumber(document.getElementById('pollutionFee').value) || 0;
+        const otherFees = parseNumber(document.getElementById('otherFees').value) || 0;
+        
+        // 計算總工程經費
+        const totalProjectCost = constructionCost + designFee + managementFee + pollutionFee + otherFees;
+        document.getElementById('totalProjectCost').textContent = formatNumber(totalProjectCost);
+        
+        // 計算實際中央補助款（取核定中央補助款和總工程經費中較小者）
+        const actualCentralGrant = Math.min(approvedCentralGrant, totalProjectCost);
+        document.getElementById('actualCentralGrant').textContent = formatNumber(actualCentralGrant);
+        
+        // 計算實際地方配合款
+        const actualLocalGrant = approvedTotalAmount - actualCentralGrant;
+        document.getElementById('actualLocalGrant').textContent = formatNumber(actualLocalGrant > 0 ? actualLocalGrant : 0);
+        
+        // 計算扣款
+        const penaltyFee = parseNumber(document.getElementById('penaltyFee').value) || 0;
+        const deductionFee = parseNumber(document.getElementById('deductionFee').value) || 0;
+        const totalDeduction = penaltyFee + deductionFee;
+        document.getElementById('totalDeduction').textContent = formatNumber(totalDeduction);
+        
+        // 計算撥付款項（基於實際中央補助款減去扣款）
+        const adjustedCentralGrant = Math.max(0, actualCentralGrant - totalDeduction);
+        document.getElementById('payment1').value = formatNumber(Math.round(adjustedCentralGrant * 0.3));
+        document.getElementById('payment2').value = formatNumber(Math.round(adjustedCentralGrant * 0.35));
+        document.getElementById('payment3').value = formatNumber(Math.round(adjustedCentralGrant * 0.3));
+        document.getElementById('payment4').value = formatNumber(Math.round(adjustedCentralGrant * 0.05));
+        
+        // 計算實支數
+        const payment1 = parseNumber(document.getElementById('payment1').value) || 0;
+        const payment2 = parseNumber(document.getElementById('payment2').value) || 0;
+        const payment3 = parseNumber(document.getElementById('payment3').value) || 0;
+        const payment4 = parseNumber(document.getElementById('payment4').value) || 0;
+        const actualExpenditure = payment1 + payment2 + payment3 + payment4;
+        document.getElementById('actualExpenditure').textContent = formatNumber(actualExpenditure);
+        
+        // 計算節餘數（實際中央補助款 - 實支數 - 扣款）
+        const surplusAmount = Math.max(0, actualCentralGrant - actualExpenditure - totalDeduction);
+        document.getElementById('surplusAmount').textContent = formatNumber(surplusAmount);
+    }
+    
+    // 設定預設日期為今天
+    function setDefaultDates() {
+        const today = new Date();
+        const formattedDate = today.toISOString().split('T')[0];
+        
+        if (document.getElementById('paymentDate1')) {
+            // 設定第一期款日期為今天
+            document.getElementById('paymentDate1').value = formattedDate;
+            
+            // 設定其他期款日期為未來日期（僅為示例）
+            const futureDate1 = new Date(today);
+            futureDate1.setMonth(today.getMonth() + 1);
+            document.getElementById('paymentDate2').value = futureDate1.toISOString().split('T')[0];
+            
+            const futureDate2 = new Date(today);
+            futureDate2.setMonth(today.getMonth() + 2);
+            document.getElementById('paymentDate3').value = futureDate2.toISOString().split('T')[0];
+            
+            const futureDate3 = new Date(today);
+            futureDate3.setMonth(today.getMonth() + 3);
+            document.getElementById('paymentDate4').value = futureDate3.toISOString().split('T')[0];
+        }
+    }
+
+    // 初始化預算系統
+    function initBudgetSystem() {
+        setupInputFormatting();
+        setDefaultDates();
+        
+        // 為輸入框添加事件監聽器
+        const budgetInputs = [
+            'constructionCost', 'designFee', 'managementFee', 'pollutionFee', 'otherFees',
+            'penaltyFee', 'deductionFee'
+        ];
+        
+        budgetInputs.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('input', calculateAll);
+            }
+        });
+        
+        // 當切換到預算頁籤時重新計算
+        document.querySelector('[data-tab="budget"]').addEventListener('click', () => {
+            setTimeout(calculateAll, 100);
+        });
+    }
+
+    // 考核評分計算功能
+    function calculateAssessment() {
+        // 模擬從系統數據自動計算評分
+        // 這裡使用模擬數據，實際應用中應從系統獲取真實數據
+        
+        // 發包作業考核 (20%)
+        const procurementScore = Math.min(20, 18.5);
+        document.getElementById('procurementScore').textContent = procurementScore.toFixed(1);
+        
+        // 預算執行考核 (20%)
+        const budgetScore = Math.min(20, 16.0);
+        document.getElementById('budgetScore').textContent = budgetScore.toFixed(1);
+        
+        // 執行進度考核 - 週期性報表填報 (5%)
+        const progressReportScore = Math.min(5, 4.5);
+        document.getElementById('progressReportScore').textContent = progressReportScore.toFixed(1);
+        
+        // 執行進度考核 - 100萬以下第一期請款時程 (20%)
+        const progressFirstScore = Math.min(20, 18.0);
+        document.getElementById('progressFirstScore').textContent = progressFirstScore.toFixed(1);
+        
+        // 執行進度考核 - 100萬以下第二期請款時程 (20%)
+        const progressSecondScore = Math.min(20, 17.5);
+        document.getElementById('progressSecondScore').textContent = progressSecondScore.toFixed(1);
+        
+        // 執行進度考核 - 第一期請款時程 (10%)
+        const paymentFirstScore = Math.min(10, 9.0);
+        document.getElementById('paymentFirstScore').textContent = paymentFirstScore.toFixed(1);
+        
+        // 執行進度考核 - 第二期請款時程 (10%)
+        const paymentSecondScore = Math.min(10, 8.5);
+        document.getElementById('paymentSecondScore').textContent = paymentSecondScore.toFixed(1);
+        
+        // 執行進度考核 - 第三期請款時程 (15%)
+        const paymentThirdScore = Math.min(15, 13.5);
+        document.getElementById('paymentThirdScore').textContent = paymentThirdScore.toFixed(1);
+        
+        // 執行進度考核 - 第四期請款時程 (5%)
+        const paymentFourthScore = Math.min(5, 4.5);
+        document.getElementById('paymentFourthScore').textContent = paymentFourthScore.toFixed(1);
+        
+        // 計畫品質考核 (15%)
+        const qualityScore = Math.min(15, 13.0);
+        document.getElementById('qualityScore').textContent = qualityScore.toFixed(1);
+        
+        // 計算總分
+        const totalScore = procurementScore + budgetScore + progressReportScore + 
+                          progressFirstScore + progressSecondScore + paymentFirstScore + 
+                          paymentSecondScore + paymentThirdScore + paymentFourthScore + 
+                          qualityScore;
+        
+        document.getElementById('totalScore').textContent = totalScore.toFixed(1);
+        
+        // 根據總分設定考核等級
+        const gradeElement = document.getElementById('grade');
+        if (totalScore >= 90) {
+            gradeElement.textContent = '';
+            gradeElement.className = 'assessment-grade grade-excellent';
+        } else if (totalScore >= 85) {
+            gradeElement.textContent = '良好';
+            gradeElement.className = 'assessment-grade grade-good';
+        } else if (totalScore >= 80) {
+            gradeElement.textContent = '普通';
+            gradeElement.className = 'assessment-grade grade-average';
+        } else {
+            gradeElement.textContent = '待改進';
+            gradeElement.className = 'assessment-grade grade-poor';
+        }
+    }
+
+    // 頁面載入完成後初始化
+    document.addEventListener('DOMContentLoaded', function() {
+        initBudgetSystem();
+        initPhotoGallery();
+        
+        // 初始化考核評分
+        calculateAssessment();
+    });
+  </script>
+</body>
