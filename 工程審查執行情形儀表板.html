@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>工程審查情形 - 視覺化儀表板</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- simple-datatables (純 JS, optional) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body { background: linear-gradient(180deg,#f7fbff,#ffffff); font-family: 'Noto Sans TC', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+    .card { border-radius: 14px; box-shadow: 0 6px 20px rgba(20,40,80,0.06); }
+    .controls .form-select, .controls .form-control { min-width: 160px; }
+    .small-muted { font-size: 0.85rem; color: #6c757d; }
+    .kpi { font-weight:700; font-size:1.15rem; }
+    .chart-wrap { min-height: 280px; }
+    footer { font-size: .85rem; color:#7a7a7a; }
+
+    /* fallback table styles */
+    .fallback-controls { display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; flex-wrap:wrap }
+    .fallback-controls .search { min-width:200px }
+    .fallback-pagination { display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem; flex-wrap:wrap }
+    .fallback-pagination button { min-width:36px }
+
+    @media (max-width: 768px) { .controls { flex-direction:column; gap:.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <header class="d-flex align-items-center justify-content-between mb-3">
+      <div>
+        <h3 class="mb-0">工程審查進度儀表板</h3>
+              </div>
+      <div class="text-end small-muted">匯入測試資料後即可互動</div>
+    </header>
+
+    <section class="card p-3 mb-3">
+      <div class="d-flex gap-2 align-items-center controls flex-wrap">
+        <select id="yearSelect" class="form-select">
+          <!-- 以資料載入後動態填入 -->
+        </select>
+
+        <select id="projectSelect" class="form-select">
+          <option value="all">所有計畫別</option>
+        </select>
+
+        <select id="citySelect" class="form-select">
+          <option value="all">所有縣市</option>
+        </select>
+
+        <input id="townSearch" class="form-control" placeholder="搜尋鄉鎮 (名稱)" />
+
+        
+        <button id="exportBtn" class="btn btn-primary"><i class="bi bi-download"></i> 匯出 CSV</button>
+      </div>
+    </section>
+
+    <section class="row g-3">
+      <div class="col-12 col-xl-8">
+        <div class="card p-3 mb-3">
+          <h5 class="mb-2">年度 / 計畫別趨勢</h5>
+          <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+        </div>
+
+        <div class="card p-3 mb-3">
+          <h5 class="mb-2">審查狀態分布</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="small-muted mb-1">縣市審查（審查中 / 已送出 / 補正）</p>
+              <canvas id="countyStatusChart"></canvas>
+            </div>
+            <div class="col-md-6">
+              <p class="small-muted mb-1">原民會審查（不予審查/不符規定/初檢退件/審查通過/補正）</p>
+              <canvas id="aboriginalStatusChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="card p-3 mb-3">
+          <h5 class="mb-2">逾期未發包（超過 3 個月）</h5>
+          <div class="d-flex gap-3 flex-wrap">
+            <div class="me-3">
+              <div class="small-muted">總已核定件數</div>
+              <div id="kpiApproved" class="kpi">0</div>
+            </div>
+            <div class="me-3">
+              <div class="small-muted">逾期三個月未發包件數</div>
+              <div id="kpiOverdue" class="kpi text-danger">0</div>
+            </div>
+            <div>
+              <div class="small-muted">逾期比例</div>
+              <div id="kpiOverdueRate" class="kpi">0%</div>
+            </div>
+          </div>
+          <div class="mt-3 chart-wrap"><canvas id="overdueChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="card p-3 mb-3">
+          <h5 class="mb-2">提案 & 各類審查總覽</h5>
+          <div class="small-muted">提案：鄉鎮 / 縣市 提案件數</div>
+          <ul id="proposalList" class="list-unstyled mt-2 mb-0"></ul>
+        </div>
+
+        <div class="card p-3 mb-3">
+          <h5 class="mb-2">錄案件數（最近年度）</h5>
+          <div id="recordedBadge" class="display-6 fw-bold">0</div>
+          <div class="small-muted">顯示已錄案件數（可切換年度）</div>
+        </div>
+
+       
+      </div>
+
+      <div class="col-12">
+        <div class="card p-3">
+          <h5 class="mb-2">明細表格</h5>
+          <div class="table-responsive">
+            <!-- 下面的 table 會由程式初始化為 simple-datatables 或 fallback 實作 -->
+            <table id="detailTable" class="table table-striped table-hover" style="width:100%">
+              <thead>
+                <tr>
+                  <th>年度</th>
+                  <th>計畫別</th>
+                  <th>縣市</th>
+                  <th>鄉鎮</th>
+                  <th>鄉鎮提案件數</th>
+                  <th>縣市提案件數</th>
+                  <th>縣市-審查中</th>
+                  <th>縣市-已送出</th>
+                  <th>縣市-補正</th>
+                  <th>原民-不予審查</th>
+                  <th>原民-不符規定</th>
+                  <th>原民-初檢退件</th>
+                  <th>原民-審查通過</th>
+                  <th>原民-補正</th>
+                  <th>已核定件數</th>
+                  <th>逾期3月未發包件數</th>
+                  <th>逾期3月未發包比例</th>
+                  <th>錄案件數</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mt-4 text-center"><span id="generatedTime"></span></footer>
+  </div>
+
+  <!-- Dependencies -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/simple-datatables.js"></script>
+
+  <script>
+    // 使用純原生 JS，並對 simple-datatables 做容錯（若不存在則啟用 fallback）
+    const $id = (id) => document.getElementById(id);
+
+    // ------- 測試資料 (更多樣本：增加測試案例) -------
+    const SAMPLE = [
+      { year: 111, project: '宜居計畫', city: '新北市', town: '', town_proposals: 2, city_proposals: 6, county_review: { reviewing:1, submitted:1, revise:0 }, aboriginal_review: { not_review:0, not_comply:0, precheck_return:0, passed:2, revise:0 }, approved: 2, overdue3m_unawarded: 0, recorded: 2 },
+      { year: 112, project: '宜居計畫', city: '台中市', town: '', town_proposals: 3, city_proposals: 10, county_review: { reviewing:5, submitted:3, revise:2 }, aboriginal_review: { not_review:0, not_comply:1, precheck_return:0, passed:4, revise:1 }, approved: 6, overdue3m_unawarded: 1, recorded: 5 },
+           { year: 114, project: '族群', city: '彰化縣', town: '', town_proposals: 5, city_proposals: 12, county_review: { reviewing:6, submitted:4, revise:2 }, aboriginal_review: { not_review:1, not_comply:0, precheck_return:1, passed:6, revise:2 }, approved: 9, overdue3m_unawarded: 3, recorded: 8 },
+      { year: 113, project: '族群', city: '南投縣', town: '', town_proposals: 2, city_proposals: 6, county_review: { reviewing:3, submitted:2, revise:1 }, aboriginal_review: { not_review:0, not_comply:0, precheck_return:0, passed:2, revise:0 }, approved: 2, overdue3m_unawarded: 0, recorded: 2 },
+      { year: 114, project: '防災', city: '高雄市', town: '', town_proposals: 4, city_proposals: 9, county_review: { reviewing:2, submitted:5, revise:1 }, aboriginal_review: { not_review:0, not_comply:0, precheck_return:0, passed:4, revise:0 }, approved: 6, overdue3m_unawarded: 2, recorded: 4 },
+    ];
+
+    let data = SAMPLE.slice(); // 實際情況可 replace
+
+    // Helpers
+    function uniq(values){ return [...new Set(values)]; }
+    function formatPct(n){ return (isFinite(n)? (n*100).toFixed(1) : '0.0') + '%' }
+
+    // Populate controls
+    function initControls(){
+      const years = uniq(data.map(d=>d.year)).sort();
+      const yearSelect = $id('yearSelect'); yearSelect.innerHTML = '';
+      yearSelect.appendChild(new Option('所有年度','all'));
+      years.forEach(y=> yearSelect.appendChild(new Option(String(y), String(y))));
+
+      const projects = uniq(data.map(d=>d.project)).sort();
+      const projectSelect = $id('projectSelect'); projectSelect.innerHTML = '';
+      projectSelect.appendChild(new Option('所有計畫別','all'));
+      projects.forEach(p=> projectSelect.appendChild(new Option(p,p)));
+
+      const cities = uniq(data.map(d=>d.city)).sort();
+      const citySelect = $id('citySelect'); citySelect.innerHTML = '';
+      citySelect.appendChild(new Option('所有縣市','all'));
+      cities.forEach(c=> citySelect.appendChild(new Option(c,c)));
+
+      $id('generatedTime').textContent = new Date().toLocaleString();
+    }
+
+    // Build aggregated metrics for charts
+    function aggregate(filtered){
+      // Trend: year vs total approved
+      const trend = {};
+      filtered.forEach(r=>{
+        trend[r.year] = trend[r.year] || { approved:0, recorded:0 };
+        trend[r.year].approved += (r.approved||0);
+        trend[r.year].recorded += (r.recorded||0);
+      });
+
+      // County status totals
+      const countyStatus = {reviewing:0, submitted:0, revise:0};
+      const abStatus = { not_review:0, not_comply:0, precheck_return:0, passed:0, revise:0 };
+      let approvedTotal=0, overdueTotal=0, recordedTotal=0;
+      const proposals = {}; // city->town->counts
+      const overdueByCity = {};
+
+      filtered.forEach(r=>{
+        countyStatus.reviewing += (r.county_review && r.county_review.reviewing) ? r.county_review.reviewing : 0;
+        countyStatus.submitted += (r.county_review && r.county_review.submitted) ? r.county_review.submitted : 0;
+        countyStatus.revise += (r.county_review && r.county_review.revise) ? r.county_review.revise : 0;
+        Object.keys(abStatus).forEach(k => { abStatus[k] += (r.aboriginal_review && r.aboriginal_review[k]) ? r.aboriginal_review[k] : 0; });
+        approvedTotal += r.approved||0;
+        overdueTotal += r.overdue3m_unawarded||0;
+        recordedTotal += r.recorded||0;
+
+        proposals[r.city] = proposals[r.city] || {};
+        proposals[r.city][r.town] = proposals[r.city][r.town] || { town_proposals:0, city_proposals:0 };
+        proposals[r.city][r.town].town_proposals += r.town_proposals||0;
+        proposals[r.city][r.town].city_proposals += r.city_proposals||0;
+
+        overdueByCity[r.city] = overdueByCity[r.city] || { approved:0, overdue:0 };
+        overdueByCity[r.city].approved += r.approved||0;
+        overdueByCity[r.city].overdue += r.overdue3m_unawarded||0;
+      });
+
+      return { trend, countyStatus, abStatus, approvedTotal, overdueTotal, recordedTotal, proposals, overdueByCity };
+    }
+
+    // Charts
+    let trendChart, countyChart, abChart, overdueChart;
+    function renderCharts(agg){
+      // Trend chart (year -> approved & recorded)
+      const years = Object.keys(agg.trend).sort();
+      const approvedSeries = years.map(y=> agg.trend[y].approved );
+      const recordedSeries = years.map(y=> agg.trend[y].recorded );
+
+      const tCtx = $id('trendChart').getContext('2d');
+      if(trendChart) trendChart.destroy();
+      trendChart = new Chart(tCtx, {
+        type:'line', data:{ labels: years, datasets:[ { label:'已提案', data: approvedSeries, tension:0.3, borderWidth:2, fill:false }, { label:'錄案件數', data: recordedSeries, tension:0.3, borderDash:[6,4], borderWidth:2, fill:false } ] }, options:{ responsive:true, plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:true } } }
+      });
+
+      // County status (stacked bar)
+      const cCtx = $id('countyStatusChart').getContext('2d');
+      if(countyChart) countyChart.destroy();
+      countyChart = new Chart(cCtx, { type:'bar', data:{ labels:['縣市審查'], datasets:[ { label:'審查中', data:[agg.countyStatus.reviewing], stack:'a' }, { label:'已送出', data:[agg.countyStatus.submitted], stack:'a' }, { label:'補正', data:[agg.countyStatus.revise], stack:'a' } ] }, options:{ indexAxis:'y', responsive:true } });
+
+      // Aboriginal status (horizontal bar)
+      const aCtx = $id('aboriginalStatusChart').getContext('2d');
+      if(abChart) abChart.destroy();
+      abChart = new Chart(aCtx, { type:'bar', data:{ labels: Object.keys(agg.abStatus).map(k=> k.replace(/_/g,' ')), datasets:[ { label:'件數', data: Object.values(agg.abStatus) } ] }, options:{ indexAxis:'y', responsive:true } });
+
+      // Overdue by city (bar)
+      const ocLabels = Object.keys(agg.overdueByCity);
+      const ocApproved = ocLabels.map(c=> agg.overdueByCity[c].approved);
+      const ocOverdue = ocLabels.map(c=> agg.overdueByCity[c].overdue);
+      const oCtx = $id('overdueChart').getContext('2d');
+      if(overdueChart) overdueChart.destroy();
+      overdueChart = new Chart(oCtx, { type:'bar', data:{ labels: ocLabels, datasets:[ { label:'已核定件數', data: ocApproved }, { label:'逾期3月未發包', data: ocOverdue } ] }, options:{ responsive:true, plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:true } } } });
+
+      // KPI numbers
+      $id('kpiApproved').textContent = agg.approvedTotal;
+      $id('kpiOverdue').textContent = agg.overdueTotal;
+      const overdueRate = agg.approvedTotal ? (agg.overdueTotal / agg.approvedTotal) : 0;
+      $id('kpiOverdueRate').textContent = formatPct(overdueRate);
+    }
+
+    // --- fallback simple table implementation (若 simple-datatables 未載入) ---
+    function initFallbackDataTable(tableEl, opts = {}){
+      const defaultOpts = { perPage: 10, perPageOptions: [10,25,50], searchable: true, fixedHeight: true };
+      const o = Object.assign({}, defaultOpts, opts);
+
+      // keep original rows
+      const tbody = tableEl.tBodies[0];
+      const originalRows = Array.from(tbody.querySelectorAll('tr'));
+      let filteredRows = originalRows.slice();
+      let currentPage = 1;
+      let perPage = o.perPage;
+
+      // create wrapper and controls
+      const wrapper = document.createElement('div'); wrapper.className = 'fallback-datatable-wrapper';
+      const parent = tableEl.parentNode;
+      parent.insertBefore(wrapper, tableEl);
+      wrapper.appendChild(tableEl);
+
+      const controls = document.createElement('div'); controls.className = 'fallback-controls';
+      wrapper.insertBefore(controls, tableEl);
+
+      // search input
+      let searchInput = null;
+      if(o.searchable){
+        searchInput = document.createElement('input');
+        searchInput.type = 'search'; searchInput.placeholder = '搜尋表格...'; searchInput.className = 'form-control search';
+        controls.appendChild(searchInput);
+      }
+
+      // per page select
+      const perSelect = document.createElement('select'); perSelect.className = 'form-select';
+      o.perPageOptions.forEach(n => { const opt = new Option(String(n), String(n)); perSelect.appendChild(opt); });
+      perSelect.value = String(perPage);
+      controls.appendChild(perSelect);
+
+      // pagination container
+      const pagination = document.createElement('div'); pagination.className = 'fallback-pagination';
+      wrapper.appendChild(pagination);
+
+      function render(){
+        // clear tbody
+        tbody.innerHTML = '';
+        const start = (currentPage - 1) * perPage;
+        const pageRows = filteredRows.slice(start, start + perPage);
+        pageRows.forEach(r => tbody.appendChild(r));
+
+        renderPagination();
+      }
+
+      function renderPagination(){
+        pagination.innerHTML = '';
+        const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
+
+        const info = document.createElement('div'); info.className = 'small-muted';
+        info.textContent = `共 ${filteredRows.length} 筆 / 第 ${currentPage} 頁，共 ${totalPages} 頁`;
+        pagination.appendChild(info);
+
+        const prev = document.createElement('button'); prev.className = 'btn btn-outline-secondary btn-sm'; prev.textContent = '<'; prev.disabled = currentPage === 1;
+        prev.addEventListener('click', ()=>{ if(currentPage>1) { currentPage--; render(); } });
+        pagination.appendChild(prev);
+
+        const next = document.createElement('button'); next.className = 'btn btn-outline-secondary btn-sm'; next.textContent = '>';
+        next.disabled = currentPage === totalPages;
+        next.addEventListener('click', ()=>{ if(currentPage < totalPages) { currentPage++; render(); } });
+        pagination.appendChild(next);
+
+        // page numbers (show up to 5 centered)
+        const maxButtons = 5; let startPage = Math.max(1, currentPage - Math.floor(maxButtons/2));
+        let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+        if(endPage - startPage < maxButtons -1){ startPage = Math.max(1, endPage - maxButtons + 1); }
+        for(let p = startPage; p <= endPage; p++){
+          const b = document.createElement('button'); b.className = (p===currentPage? 'btn btn-primary btn-sm' : 'btn btn-outline-secondary btn-sm'); b.textContent = String(p);
+          b.addEventListener('click', ()=>{ currentPage = p; render(); });
+          pagination.appendChild(b);
+        }
+      }
+
+      function applyFilter(q){
+        if(!q) { filteredRows = originalRows.slice(); }
+        else {
+          const ql = q.toLowerCase();
+          filteredRows = originalRows.filter(tr => tr.textContent.toLowerCase().includes(ql));
+        }
+        currentPage = 1; render();
+      }
+
+      if(searchInput){
+        searchInput.addEventListener('input', ()=> applyFilter(searchInput.value));
+      }
+
+      perSelect.addEventListener('change', ()=>{ perPage = Number(perSelect.value); currentPage = 1; render(); });
+
+      // initial render
+      applyFilter('');
+
+      return {
+        destroy(){
+          // move table back to original parent position (before wrapper) and remove wrapper
+          try{
+            parent.insertBefore(tableEl, wrapper);
+            wrapper.remove();
+          }catch(e){ /* ignore */ }
+        },
+        // helper to get current visible rows if needed
+        getVisibleRows(){ return Array.from(tbody.querySelectorAll('tr')); }
+      };
+    }
+
+    // Render proposals list and table
+    let detailDataTable = null;
+    function renderProposalsAndTable(filtered){
+      const agg = aggregate(filtered);
+
+      // Proposals list (city -> top towns)
+      const ul = $id('proposalList'); ul.innerHTML = '';
+      Object.keys(agg.proposals).forEach(city=>{
+        const towns = agg.proposals[city];
+        const li = document.createElement('li'); li.className = 'mb-2';
+        let html = `<strong>${city}</strong><div class=\"small-muted\">`;
+        Object.keys(towns).forEach(t=> { html += `<div>${t}: 鄉鎮提案 ${towns[t].town_proposals} / 縣市提案 ${towns[t].city_proposals}</div>`; });
+        html += '</div>';
+        li.innerHTML = html; ul.appendChild(li);
+      });
+
+      // Table
+      const tbody = document.querySelector('#detailTable tbody'); tbody.innerHTML = '';
+      filtered.forEach(r=>{
+        const overdueRate = r.approved ? ((r.overdue3m_unawarded||0) / r.approved) : 0;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${r.year}</td>
+          <td>${r.project}</td>
+          <td>${r.city}</td>
+          <td>${r.town}</td>
+          <td>${r.town_proposals||0}</td>
+          <td>${r.city_proposals||0}</td>
+          <td>${(r.county_review && r.county_review.reviewing) ? r.county_review.reviewing : 0}</td>
+          <td>${(r.county_review && r.county_review.submitted) ? r.county_review.submitted : 0}</td>
+          <td>${(r.county_review && r.county_review.revise) ? r.county_review.revise : 0}</td>
+          <td>${(r.aboriginal_review && r.aboriginal_review.not_review) ? r.aboriginal_review.not_review : 0}</td>
+          <td>${(r.aboriginal_review && r.aboriginal_review.not_comply) ? r.aboriginal_review.not_comply : 0}</td>
+          <td>${(r.aboriginal_review && r.aboriginal_review.precheck_return) ? r.aboriginal_review.precheck_return : 0}</td>
+          <td>${(r.aboriginal_review && r.aboriginal_review.passed) ? r.aboriginal_review.passed : 0}</td>
+          <td>${(r.aboriginal_review && r.aboriginal_review.revise) ? r.aboriginal_review.revise : 0}</td>
+          <td>${r.approved||0}</td>
+          <td>${r.overdue3m_unawarded||0}</td>
+          <td>${formatPct(overdueRate)}</td>
+          <td>${r.recorded||0}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Destroy previous table instance (if any)
+      if(detailDataTable && typeof detailDataTable.destroy === 'function'){
+        try{ detailDataTable.destroy(); } catch(e){ /* ignore */ }
+        detailDataTable = null;
+      }
+
+      // Try to initialize simple-datatables (if available), otherwise fallback
+      const tableEl = document.querySelector('#detailTable');
+      if(window.simpleDatatables && typeof window.simpleDatatables.DataTable === 'function'){
+        try{
+          detailDataTable = new simpleDatatables.DataTable(tableEl, { perPage: 10, searchable: true, fixedHeight: true });
+        }catch(e){
+          // fallback if initialization fails
+          detailDataTable = initFallbackDataTable(tableEl, { perPage: 10 });
+        }
+      } else if(window.DataTable && typeof window.DataTable === 'function'){
+        // some builds might expose DataTable directly
+        try{ detailDataTable = new DataTable(tableEl, { perPage:10 }); }catch(e){ detailDataTable = initFallbackDataTable(tableEl, { perPage: 10 }); }
+      } else {
+        // fallback implementation
+        detailDataTable = initFallbackDataTable(tableEl, { perPage: 10 });
+      }
+
+      // update recorded badge
+      const yearSelectVal = $id('yearSelect').value;
+      const latestYear = (yearSelectVal === 'all') ? Math.max(...data.map(d=>d.year)) : Number(yearSelectVal);
+      const rec = filtered.filter(r=> Number(r.year) === Number(latestYear)).reduce((s,r)=> s + (r.recorded||0), 0);
+      $id('recordedBadge').textContent = rec;
+
+      // Charts re-render
+      const newAgg = aggregate(filtered);
+      renderCharts(newAgg);
+    }
+
+    // Apply filters
+    function applyFilters(){
+      const year = $id('yearSelect').value;
+      const project = $id('projectSelect').value;
+      const city = $id('citySelect').value;
+      const townq = $id('townSearch').value.trim();
+      let filtered = data.slice();
+      if(year && year!=='all') filtered = filtered.filter(d=> String(d.year)===String(year));
+      if(project && project!=='all') filtered = filtered.filter(d=> d.project===project);
+      if(city && city!=='all') filtered = filtered.filter(d=> d.city===city);
+      if(townq) filtered = filtered.filter(d=> d.town.includes(townq));
+      renderProposalsAndTable(filtered);
+    }
+
+    // Export CSV
+    function exportCSV(){
+      const rows = [];
+      const trs = document.querySelectorAll('#detailTable tbody tr');
+      trs.forEach(tr => {
+        const cols = Array.from(tr.querySelectorAll('td')).map(td => '"' + td.textContent.replace(/"/g,'""') + '"');
+        rows.push(cols.join(','));
+      });
+      const header = '"年度","計畫別","縣市","鄉鎮","鄉鎮提案件數","縣市提案件數","縣市-審查中","縣市-已送出","縣市-補正","原民-不予審查","原民-不符規定","原民-初檢退件","原民-審查通過","原民-補正","已核定件數","逾期3月未發包件數","逾期3月未發包比例","錄案件數"\n';
+      const csv = header + rows.join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = '工程審查明細.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      initControls();
+      applyFilters();
+
+      $id('yearSelect').addEventListener('change', applyFilters);
+      $id('projectSelect').addEventListener('change', applyFilters);
+      $id('citySelect').addEventListener('change', applyFilters);
+      $id('townSearch').addEventListener('input', applyFilters);
+      $id('resetBtn').addEventListener('click', function(){ $id('yearSelect').value = 'all'; $id('projectSelect').value = 'all'; $id('citySelect').value = 'all'; $id('townSearch').value = ''; applyFilters(); });
+      $id('exportBtn').addEventListener('click', exportCSV);
+
+      // If you want to replace data from server, call loadData(newArray)
+      window.loadData = function(newData){ data = (Array.isArray(newData) ? newData.slice() : []); initControls(); applyFilters(); };
+    });
+
+  </script>
+</body>
+</html>
