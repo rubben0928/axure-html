@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>工程期程填報介面</title>
+  <style>
+    :root{
+      --bg:#1a2b3c; --card:#21374a; --muted:#a8b5c2; --accent:#06b6d4; --glass: rgba(255,255,255,0.08);
+      --success:#10b981; --danger:#ef4444; --soft:#1f3244;
+      --filter-bg: #2a4158;
+      font-family: 'Noto Sans TC', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#152534 0%, #1a2b3c 100%);color:#e6eef6;min-height:100vh}
+    .wrap{max-width:1200px;margin:28px auto;padding:20px}
+
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;color:#042028}
+    h1{margin:0;font-size:20px}
+    p.lead{margin:4px 0 0;color:var(--muted);font-size:13px}
+
+    /* 篩選條件 */
+    .filters{background:var(--filter-bg);padding:16px;border-radius:12px;margin-bottom:18px;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+    .filters h3{margin-top:0;margin-bottom:12px;font-size:16px}
+    .filter-row{display:flex;gap:16px;flex-wrap:wrap}
+    .filter-group{flex:1;min-width:180px}
+    .filter-group label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted)}
+    .filter-group select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:var(--card);color:inherit}
+    .filter-actions{display:flex;gap:8px;align-items:flex-end}
+    .filter-actions button{white-space:nowrap}
+
+    .grid{display:grid;grid-template-columns:1fr 380px;gap:18px}
+
+    /* 左側列表卡 */
+    .card{background:var(--card);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,0.4);}
+    .project-row{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.03), transparent);margin-bottom:10px}
+    .project-row .idx{min-width:36px;height:36px;border-radius:8px;background:var(--glass);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700}
+    .project-row .meta{flex:1}
+    .project-row .meta .title{font-weight:600}
+    .project-row .meta .sub{font-size:12px;color:var(--muted)}
+    .project-row .actions{display:flex;gap:6px}
+    button.btn{background:transparent;border:1px solid rgba(255,255,255,0.08);color:inherit;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all 0.2s}
+    button.btn:hover{background:rgba(255,255,255,0.05)}
+    button.primary{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#062025;border:0}
+    button.primary:hover{opacity:0.9}
+
+    /* 表單 */
+    form.schedule{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    fieldset{border:1px dashed rgba(255,255,255,0.08);padding:12px;border-radius:10px}
+    legend{padding:0 8px;color:var(--muted);font-size:13px}
+    label{display:block;font-size:13px;margin-bottom:6px}
+    input[type=date], input[type=text]{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:var(--soft);color:inherit}
+
+    .form-row{display:flex;gap:8px}
+    .form-col{flex:1}
+    .controls{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+    /* 右側摘要 */
+    .summary{position:sticky;top:20px}
+    .stat{display:flex;justify-content:space-between;padding:8px 10px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,0.03), transparent);margin-bottom:8px}
+    .small{font-size:12px;color:var(--muted)}
+
+    /* mobile */
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr;}
+      .summary{position:static}
+      form.schedule{grid-template-columns:1fr}
+      .filter-row{flex-direction:column}
+      .filter-actions{align-self:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">工</div>
+      <div>
+        <h1>工程期程填報與管制</h1>
+        <p class="lead">列出您負責的工程，並填寫「規劃設計階段」與「發包階段」的預定期程。</p>
+      </div>
+    </header>
+
+    <div class="filters">
+      <h3>篩選條件</h3>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>年度</label>
+          <select id="yearFilter">
+            <option value="">全部年度</option>
+            <option value="113">115年</option>
+            <option value="114" selected>114年</option>
+            <option value="115">113年</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>計畫別</label>
+          <select id="planFilter">
+            <option value="">全部計畫</option>
+            <option value="宜居建設計畫">宜居建設計畫</option>
+            <option value="族群主流計畫">族群主流計畫</option>
+            <option value="特色道路計畫">特色道路計畫</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>縣市別</label>
+          <select id="cityFilter">
+            <option value="">全部縣市</option>
+            <option value="苗栗縣">苗栗縣</option>
+            <option value="南投縣">南投縣</option>
+            <option value="台中市">台中市</option>
+            <option value="彰化縣">彰化縣</option>
+          </select>
+        </div>
+        <div class="filter-actions">
+          <button class="btn" id="resetFilters">重設篩選</button>
+          <button class="btn primary" id="applyFilters">套用篩選</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card" id="left">
+        <h3 style="margin-top:0">專案清單</h3>
+        <div id="projectList"></div>
+
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.08);margin:14px 0">
+        <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <div class="small">已選取專案：<strong id="selectedTitle">(尚未選取)</strong></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="clearAll">清除所有</button>
+            <button class="btn primary" id="exportSchedule">匯出期程管制表</button>
+          </div>
+        </div>
+
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.08);margin:14px 0">
+
+        <form class="schedule" id="scheduleForm">
+          <fieldset>
+            <legend>規劃設計階段</legend>
+            <div class="form-row">
+              <div class="form-col">
+                <label>預定規劃設計完成發包日期</label>
+                <input type="date" name="plan_contract_date" required />
+              </div>
+              <div class="form-col">
+                <label>預定規劃設計完成日期</label>
+                <input type="date" name="plan_finish_date" required />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>工程發包階段</legend>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div>
+                <label>預定招標公告日期</label>
+                <input type="date" name="tender_announce" />
+              </div>
+              <div>
+                <label>預定發包決標日期</label>
+                <input type="date" name="award_date" />
+              </div>
+              <div>
+                <label>預定開工日期</label>
+                <input type="date" name="start_date" />
+              </div>
+              <div>
+                <label>預定完工日期</label>
+                <input type="date" name="end_date" />
+              </div>
+              <div style="grid-column:1/3">
+                <label>預定驗收日期</label>
+                <input type="date" name="accept_date" />
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="controls" style="grid-column:1/3">
+            <button type="button" class="btn" id="resetBtn">重設</button>
+            <button type="submit" class="btn primary">儲存期程</button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="summary card">
+        <h3 style="margin-top:0">期程摘要</h3>
+        <div class="stat"><div class="small">專案總數</div><div id="totalCount">0</div></div>
+        <div class="stat"><div class="small">已填寫期程</div><div id="filledCount">0</div></div>
+        <div class="stat"><div class="small">尚未填寫</div><div id="emptyCount">0</div></div>
+
+        <div style="height:12px"></div>
+        <h4 style="margin-bottom:8px">快速操作</h4>
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <button class="btn" id="fillSample">填入期程範例</button>
+          <button class="btn" id="applyToAll">套用相同期程到全部</button>
+        </div>
+
+        
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    // 先建立專案清單（使用者所提供的 5 件）
+    const initialProjects = [
+      {id:1,title:'114年苗栗縣南庄鄉八卦力部落導排水改善工程', year:'114', plan:'宜居建設計畫', city:'苗栗縣'},
+      {id:2,title:'114年苗栗縣南庄鄉瓦祿部落導排水改善工程', year:'114', plan:'宜居建設計畫', city:'苗栗縣'},
+      {id:3,title:'114年苗栗縣南庄鄉瓦祿部落導排水改善工程', year:'114', plan:'基礎建設計畫', city:'苗栗縣'},
+      {id:4,title:'114年苗栗縣泰安鄉司馬限部落重建工程', year:'114', plan:'宜居建設計畫', city:'苗栗縣'},
+      {id:5,title:'114年苗栗縣泰安鄉司馬限部落重建工程', year:'114', plan:'防災減災計畫', city:'苗栗縣'}
+    ];
+
+    const LS_KEY='project_schedules_v2';
+    let projects = [];
+    let filteredProjects = [];
+    let selectedId = null;
+
+    // 元件
+    const projectListEl = document.getElementById('projectList');
+    const selectedTitleEl = document.getElementById('selectedTitle');
+    const scheduleForm = document.getElementById('scheduleForm');
+    const totalCountEl = document.getElementById('totalCount');
+    const filledCountEl = document.getElementById('filledCount');
+    const emptyCountEl = document.getElementById('emptyCount');
+    const yearFilterEl = document.getElementById('yearFilter');
+    const planFilterEl = document.getElementById('planFilter');
+    const cityFilterEl = document.getElementById('cityFilter');
+    const resetFiltersEl = document.getElementById('resetFilters');
+    const applyFiltersEl = document.getElementById('applyFilters');
+
+    // 載入 / 初始化
+    function load(){
+      const raw = localStorage.getItem(LS_KEY);
+      if(raw){
+        try{ projects = JSON.parse(raw); }
+        catch(e){ projects = initialProjects.map(p=> ({...p,schedule:{}})); }
+      } else {
+        projects = initialProjects.map(p=> ({...p,schedule:{}}));
+      }
+      filteredProjects = [...projects];
+      renderList();
+      updateStats();
+    }
+
+    function save(){
+      localStorage.setItem(LS_KEY, JSON.stringify(projects));
+      updateStats();
+      alert('期程已儲存');
+    }
+
+    function renderList(){
+      projectListEl.innerHTML = '';
+      if (filteredProjects.length === 0) {
+        projectListEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">沒有符合篩選條件的專案</div>';
+        return;
+      }
+      
+      filteredProjects.forEach((p, idx)=>{
+        const div = document.createElement('div'); div.className='project-row';
+        div.innerHTML = `<div class="idx">${idx+1}</div><div class="meta"><div class="title">${p.title}</div><div class="sub">${p.year} · ${p.plan} · ${p.city} ${p.schedule && p.schedule.plan_finish_date ? '· 已填期程' : ''}</div></div><div class="actions"><button class="btn" data-id="${p.id}">編輯</button></div>`;
+        projectListEl.appendChild(div);
+      });
+      // 綁定按鈕
+      projectListEl.querySelectorAll('button').forEach(btn=>btn.addEventListener('click', (ev)=>{
+        const id = Number(ev.currentTarget.dataset.id); selectProject(id);
+      }));
+    }
+
+    function selectProject(id){
+      const proj = projects.find(p=>p.id===id);
+      if(!proj) return;
+      selectedId = id;
+      selectedTitleEl.textContent = proj.title;
+      // 將現有值填回表單
+      const s = proj.schedule || {};
+      for(const el of scheduleForm.elements){
+        if(!el.name) continue;
+        el.value = s[el.name] || '';
+      }
+    }
+
+    // 篩選功能
+    function applyFilters() {
+      const year = yearFilterEl.value;
+      const plan = planFilterEl.value;
+      const city = cityFilterEl.value;
+      
+      filteredProjects = projects.filter(p => {
+        return (!year || p.year === year) &&
+               (!plan || p.plan === plan) &&
+               (!city || p.city === city);
+      });
+      
+      renderList();
+      updateStats();
+    }
+
+    function resetFilters() {
+      yearFilterEl.value = '';
+      planFilterEl.value = '';
+      cityFilterEl.value = '';
+      filteredProjects = [...projects];
+      renderList();
+      updateStats();
+    }
+
+    scheduleForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      if(!selectedId){ alert('請先從左側選擇一個專案'); return; }
+      const data = {};
+      for(const el of scheduleForm.elements){ if(!el.name) continue; data[el.name]=el.value||''; }
+      const proj = projects.find(p=>p.id===selectedId);
+      proj.schedule = data;
+      save();
+      renderList();
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(!selectedId) return; if(!confirm('確認要重設此專案的期程欄位？')) return;
+      const proj = projects.find(p=>p.id===selectedId);
+      proj.schedule = {};
+      save(); renderList();
+      selectProject(selectedId);
+    });
+
+    document.getElementById('clearAll').addEventListener('click', ()=>{
+      if(!confirm('確認要清除所有專案期程？此動作無法復原。')) return;
+      projects.forEach(p=>p.schedule={}); save(); renderList(); updateStats();
+    });
+
+    document.getElementById('exportSchedule').addEventListener('click', ()=>{
+      const rows=[['年度','計畫別','縣市別','專案名稱','預定規劃設計完成發包日期','預定規劃設計完成日期','預定招標公告日期','預定發包決標日期','預定開工日期','預定完工日期','預定驗收日期']];
+      projects.forEach(p=>{
+        const s=p.schedule||{};
+        rows.push([
+          p.year, 
+          p.plan, 
+          p.city, 
+          p.title, 
+          s.plan_contract_date||'', 
+          s.plan_finish_date||'', 
+          s.tender_announce||'', 
+          s.award_date||'', 
+          s.start_date||'', 
+          s.end_date||'', 
+          s.accept_date||''
+        ]);
+      });
+      const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = '工程期程管制表.csv'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('fillSample').addEventListener('click', ()=>{
+      if(!confirm('將為每個專案填入測試日期（今日為基準）？')) return;
+      const today = new Date();
+      const pad=(n)=>n.toString().padStart(2,'0');
+      const fmt=(d)=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      projects.forEach((p,i)=>{
+        const s={
+          plan_contract_date: fmt(new Date(today.getTime()+ (i*3)*24*3600*1000)),
+          plan_finish_date: fmt(new Date(today.getTime()+ (i*6)*24*3600*1000)),
+          tender_announce: fmt(new Date(today.getTime()+ (i*7)*24*3600*1000)),
+          award_date: fmt(new Date(today.getTime()+ (i*9)*24*3600*1000)),
+          start_date: fmt(new Date(today.getTime()+ (i*12)*24*3600*1000)),
+          end_date: fmt(new Date(today.getTime()+ (i*60)*24*3600*1000)),
+          accept_date: fmt(new Date(today.getTime()+ (i*66)*24*3600*1000))
+        };
+        p.schedule = s;
+      });
+      save(); renderList();
+    });
+
+    document.getElementById('applyToAll').addEventListener('click', ()=>{
+      if(!selectedId){ alert('請先選取一個已填寫期程的專案，然後按此按鈕來套用到全部專案'); return; }
+      const src = projects.find(p=>p.id===selectedId);
+      if(!src || !src.schedule || Object.keys(src.schedule).length===0){ alert('目前選取專案尚未有任何期程可套用'); return; }
+      if(!confirm('確認要把目前選取專案的期程套用到全部專案？')) return;
+      projects.forEach(p=>{p.schedule = {...src.schedule};}); save(); renderList();
+    });
+
+    function updateStats(){
+      totalCountEl.textContent = filteredProjects.length;
+      const filled = filteredProjects.filter(p=>p.schedule && Object.values(p.schedule).some(v=>v)).length;
+      filledCountEl.textContent = filled;
+      emptyCountEl.textContent = filteredProjects.length - filled;
+    }
+
+    // 事件監聽器
+    applyFiltersEl.addEventListener('click', applyFilters);
+    resetFiltersEl.addEventListener('click', resetFilters);
+
+    // 初次載入
+    load();
+  </script>
+</body>
+</html>
