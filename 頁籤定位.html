@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>頁籤固定定位示範</title>
+    <style>
+        /* 基本樣式 */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+        }
+        .header {
+            height: 300px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content-section {
+            padding: 20px;
+        }
+
+        /* 頁籤區塊樣式 */
+        .tab-section {
+            background-color: #e9e9e9;
+            padding: 10px 0;
+            /* 關鍵樣式：使用 sticky 定位 */
+            position: sticky;
+            top: 0; /* 當觸及視窗頂部時，固定在頂部 0px 的位置 */
+            z-index: 100;
+            transition: box-shadow 0.3s ease;
+        }
+        /* 當頁籤固定時，可加上陰影增強視覺效果 */
+        .tab-section.sticky {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            gap: 10px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        /* 內容區域樣式 */
+        .tab-content {
+            border: 1px solid #ccc;
+            border-top: none;
+            padding: 20px;
+            min-height: 400px; /* 為了示範滾動 */
+            margin-top: 0;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 頁首大圖或內容 -->
+    <div class="header">
+        <h1>網站頁首</h1>
+    </div>
+
+    <!-- 頁籤區塊 -->
+    <div class="tab-section" id="tabSection">
+        <ul class="tabs">
+            <li class="tab active" data-tab="tab1">頁籤一</li>
+            <li class="tab" data-tab="tab2">頁籤二</li>
+            <li class="tab" data-tab="tab3">頁籤三</li>
+        </ul>
+    </div>
+
+    <!-- 頁籤內容 -->
+    <div class="tab-content">
+        <div id="tab1" class="tab-pane active">
+            <h2>頁籤一的內容</h2>
+            <p>此處是頁籤一的詳細資訊。請嘗試向下滾動，頁籤會固定在頂部。</p>
+        </div>
+        <div id="tab2" class="tab-pane">
+            <h2>頁籤二的內容</h2>
+            <p>此處是頁籤二的詳細資訊。點擊上方的頁籤可以平滑切換內容。</p>
+        </div>
+        <div id="tab3" class="tab-pane">
+            <h2>頁籤三的內容</h2>
+            <p>此處是頁籤三的詳細資訊。頁面不會因為切換而跳動。</p>
+        </div>
+    </div>
+
+    <!-- 其他內容，用來撐高頁面以演示滾動 -->
+    <div style="height: 1000px; background-color: #f9f9f9;"></div>
+
+    <script>
+        // 頁籤切換功能
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // 移除所有頁籤和內容的 active 類
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-pane')..forEach(p => p.classList.remove('active'));
+
+                // 為當前點擊的頁籤和對應內容添加 active 類
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // 監聽滾動，為固定的頁籤添加陰影（可選）
+        window.addEventListener('scroll', () => {
+            const tabSection = document.getElementById('tabSection');
+            if (window.scrollY > tabSection.offsetTop) {
+                tabSection.classList.add('sticky');
+            } else {
+                tabSection.classList.remove('sticky');
+            }
+        });
+    </script>
+</body>
+</html>
