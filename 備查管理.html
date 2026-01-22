@@ -1,0 +1,2689 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兒童遊戲場備查管理系統</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            padding-top: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), #1a5276);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 600;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0 !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+        }
+        
+        .btn-success {
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+        }
+        
+        .btn-warning {
+            background-color: #ffc107;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: #212529;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+        }
+        
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .badge-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .badge-not-started {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #e9f7fe;
+        }
+        
+        .file-upload-area.view-mode {
+            background-color: #f0f8ff;
+            border-color: #b3d9ff;
+            cursor: default;
+        }
+        
+        .group-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+        }
+        
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .group-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .park-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .park-item:last-child {
+            border-bottom: none;
+        }
+        
+        .park-info {
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+        
+        .park-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: color 0.2s;
+        }
+        
+        .park-name:hover {
+            color: #1a5276;
+            text-decoration: underline;
+        }
+        
+        .park-district {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .review-type-select {
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-box .form-control {
+            padding-left: 40px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .section-title {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+            margin: 20px 0 15px;
+            font-weight: 600;
+        }
+        
+        footer {
+            margin-top: 40px;
+            padding: 20px 0;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .document-number-list {
+            margin: 0;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        
+        .document-number-list li {
+            padding: 3px 0;
+            font-size: 0.85rem;
+        }
+        
+        .document-date-list {
+            margin: 0;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        
+        .document-date-list li {
+            padding: 3px 0;
+            font-size: 0.85rem;
+        }
+        
+        .review-type-list {
+            margin: 0;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        
+        .review-type-list li {
+            padding: 3px 0;
+            font-size: 0.85rem;
+        }
+        
+        .completed-park-name {
+            cursor: pointer;
+            color: var(--primary-color);
+            transition: color 0.2s;
+        }
+        
+        .completed-park-name:hover {
+            color: #1a5276;
+            text-decoration: underline;
+        }
+        
+        .form-control.view-mode {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .view-mode-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .view-mode-value {
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+        
+        .file-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .file-status i {
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+        
+        /* 篩選區域樣式 */
+        .filter-card {
+            margin-bottom: 20px;
+        }
+        
+        .date-range-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 分頁樣式 */
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+        
+        .pagination .page-link:hover {
+            color: var(--primary-color);
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        /* 篩選結果計數 */
+        .filter-result-count {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        /* 歷次檢驗報告紀錄樣式 */
+        .history-btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+        
+        /* 新增：檢驗報告項目樣式 */
+        .inspection-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            position: relative;
+        }
+        
+        .inspection-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .inspection-item-number {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .inspection-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .inspection-section-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 15px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        /* 新增：檔案清單樣式 */
+        .file-list {
+            margin-bottom: 15px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        
+        .file-icon {
+            color: var(--primary-color);
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .file-name {
+            flex-grow: 1;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* 新增：遊戲場別名樣式 */
+        .playground-alias-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .playground-alias-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        /* 新增加載動畫 */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        /* 新增：表格輸入框樣式 */
+        .document-number-input, .review-date-input {
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            height: 30px;
+        }
+        
+        .document-number-input {
+            width: 120px;
+        }
+        
+        .review-date-input {
+            width: 110px;
+        }
+        
+        /* 儲存按鈕容器 - 已移除 */
+        
+        /* 新增：檔案上傳項目樣式調整 */
+        .file-upload-item {
+            margin-bottom: 15px;
+        }
+        
+        /* 新增：文件列表樣式 */
+        .file-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .file-upload-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: white;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .file-upload-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* 新增：表格響應式調整 */
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.85rem;
+            }
+            
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .file-list-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 新增：已刪除清單樣式 */
+        .deleted-section {
+            margin-top: 25px;
+            border-top: 2px solid #e74c3c;
+            padding-top: 15px;
+        }
+        
+        .deleted-section .inspection-section-title {
+            color: #e74c3c;
+        }
+        
+        .deleted-inspection-item {
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff5f5;
+        }
+        
+        .deleted-inspection-item .inspection-item-number {
+            color: #e74c3c;
+        }
+        
+        .deleted-badge {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 8px;
+        }
+        
+        /* 歷史紀錄表格樣式調整 */
+        .history-table-section {
+            margin-bottom: 25px;
+        }
+        
+        /* 新增：完成備查作業按鈕樣式 */
+        .complete-review-btn {
+            white-space: nowrap;
+        }
+        
+        /* 新增：待備查清單操作按鈕容器樣式 */
+        .pending-action-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        /* 新增：表格欄位群組樣式 */
+        .table-cell-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 新增：歷次備查紀錄按鈕樣式 */
+        .review-history-btn {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            white-space: nowrap;
+        }
+        
+        /* 新增：歷次備查紀錄表格樣式 */
+        .review-history-table {
+            margin-top: 15px;
+        }
+        
+        .review-history-table th {
+            background-color: #f8f9fa;
+            color: #495057;
+            font-weight: 600;
+        }
+        
+        /* 新增：歷次備查紀錄模態視窗樣式 */
+        .review-history-modal .modal-dialog {
+            max-width: 800px;
+        }
+        
+        /* 新增：最新備查紀錄標籤 */
+        .latest-review-badge {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+        
+        /* 新增：檔案下載按鈕樣式 */
+        .file-download-btn {
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        /* 新增：檔案下載區域樣式 */
+        .file-download-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        /* 新增：檢驗報告下載按鈕樣式 */
+        .inspection-download-btn {
+            margin-top: 10px;
+        }
+        
+        /* 新增：檔案下載按鈕容器 */
+        .file-actions-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 頁首 -->
+        <div class="header text-center">
+            <h1><i class="fas fa-child me-2"></i>兒童遊戲場備查管理系統</h1>
+            <p class="mb-0">管理公園兒童遊戲場的新設與變更備查作業</p>
+        </div>
+        
+        <!-- 主要內容區域 -->
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+                    <i class="fas fa-tasks me-2"></i>待備查作業
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">
+                    <i class="fas fa-check-circle me-2"></i>完成備查查詢
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- 待備查作業 -->
+            <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+                <div class="row">
+                    <!-- 左側：公園選擇區 -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-tree me-2"></i>選擇公園
+                            </div>
+                            <div class="card-body">
+                                <div class="search-box mb-3">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="輸入公園名稱關鍵字...">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">行政區</label>
+                                    <select class="form-select" id="districtFilter">
+                                        <option selected>全部行政區</option>
+                                        <option>中區</option>
+                                        <option>東區</option>
+                                        <option>西區</option>
+                                        <option>南區</option>
+                                        <option>北區</option>
+                                        <option>西屯區</option>
+                                        <option>南屯區</option>
+                                        <option>北屯區</option>
+                                        <option>豐原區</option>
+                                        <option>大里區</option>
+                                        <option>太平區</option>
+                                        <option>清水區</option>
+                                        <option>沙鹿區</option>
+                                        <option>大甲區</option>
+                                        <option>東勢區</option>
+                                        <option>梧棲區</option>
+                                        <option>烏日區</option>
+                                        <option>神岡區</option>
+                                        <option>大肚區</option>
+                                        <option>大雅區</option>
+                                        <option>后里區</option>
+                                        <option>霧峰區</option>
+                                        <option>潭子區</option>
+                                        <option>龍井區</option>
+                                        <option>外埔區</option>
+                                        <option>和平區</option>
+                                        <option>石岡區</option>
+                                        <option>大安區</option>
+                                        <option>新社區</option>
+                                    </select>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="park-list" style="max-height: 400px; overflow-y: auto;">
+                                    <div class="park-item">
+                                        <input class="form-check-input park-checkbox" type="checkbox" id="park1">
+                                        <div class="park-info">
+                                            <div class="park-name" data-bs-toggle="modal" data-bs-target="#parkDataModal" data-park="文心森林公園">文心森林公園</div>
+                                            <div class="park-district">南屯區</div>
+                                        </div>
+                                    </div>
+                                    <div class="park-item">
+                                        <input class="form-check-input park-checkbox" type="checkbox" id="park2" checked>
+                                        <div class="park-info">
+                                            <div class="park-name" data-bs-toggle="modal" data-bs-target="#parkDataModal" data-park="豐樂雕塑公園">豐樂雕塑公園</div>
+                                            <div class="park-district">南屯區</div>
+                                        </div>
+                                    </div>
+                                    <div class="park-item">
+                                        <input class="form-check-input park-checkbox" type="checkbox" id="park3">
+                                        <div class="park-info">
+                                            <div class="park-name" data-bs-toggle="modal" data-bs-target="#parkDataModal" data-park="台中公園">台中公園</div>
+                                            <div class="park-district">北區</div>
+                                        </div>
+                                    </div>
+                                    <div class="park-item">
+                                        <input class="form-check-input park-checkbox" type="checkbox" id="park4">
+                                        <div class="park-info">
+                                            <div class="park-name" data-bs-toggle="modal" data-bs-target="#parkDataModal" data-park="秋紅谷景觀生態公園">秋紅谷景觀生態公園</div>
+                                            <div class="park-district">西屯區</div>
+                                        </div>
+                                    </div>
+                                    <div class="park-item">
+                                        <input class="form-check-input park-checkbox" type="checkbox" id="park5">
+                                        <div class="park-info">
+                                            <div class="park-name" data-bs-toggle="modal" data-bs-target="#parkDataModal" data-park="坪林森林公園">坪林森林公園</div>
+                                            <div class="park-district">太平區</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid gap-2 mt-4">
+                                    <button class="btn btn-primary" id="addToPending">
+                                        <i class="fas fa-plus-circle me-2"></i>加入待備查清單
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右側：待備查清單 -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-list me-2"></i>待備查清單</span>
+                                <span class="badge bg-primary">2 個公園</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>序號</th>
+                                                <th>行政區</th>
+                                                <th>公園名稱</th>
+                                                <th>兒童遊戲場數</th>
+                                                <th>備查類型</th>
+                                                <th>備查文號</th>
+                                                <th>備查日期</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>南屯區</td>
+                                                <td>
+                                                    <span class="park-name-link" data-bs-toggle="modal" data-bs-target="#registrationModal" data-playground-count="3" style="cursor: pointer; color: var(--primary-color);">豐樂雕塑公園</span>
+                                                </td>
+                                                <td>3</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm review-type-select-table" style="width: 100px;">
+                                                        <option value="新設">新設</option>
+                                                        <option value="變更">變更</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm document-number-input" placeholder="輸入文號" value="TC-PK-2023-001">
+                                                </td>
+                                                <td>
+                                                    <input type="date" class="form-control form-control-sm review-date-input" value="2023-06-15">
+                                                </td>
+                                                <td>
+                                                    <div class="pending-action-container">
+                                                        <button class="btn btn-sm btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registrationModal" data-playground-count="3">
+                                                            <i class="fas fa-edit me-1"></i>案件登錄
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success complete-review-btn" onclick="completeReview('豐樂雕塑公園')">
+                                                            <i class="fas fa-check-circle me-1"></i>完成備查作業
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>2</td>
+                                                <td>北區</td>
+                                                <td>
+                                                    <span class="park-name-link" data-bs-toggle="modal" data-bs-target="#registrationModal" data-playground-count="2" style="cursor: pointer; color: var(--primary-color);">台中公園</span>
+                                                </td>
+                                                <td>2</td>
+                                                <td>
+                                                    <select class="form-select form-select-sm review-type-select-table" style="width: 100px;">
+                                                        <option value="新設">新設</option>
+                                                        <option value="變更" selected>變更</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm document-number-input" placeholder="輸入文號">
+                                                </td>
+                                                <td>
+                                                    <input type="date" class="form-control form-control-sm review-date-input">
+                                                </td>
+                                                <td>
+                                                    <div class="pending-action-container">
+                                                        <button class="btn btn-sm btn-primary register-btn" data-bs-toggle="modal" data-bs-target="#registrationModal" data-playground-count="2">
+                                                            <i class="fas fa-edit me-1"></i>案件登錄
+                                                        </button>
+                                                        <button class="btn btn-sm btn-success complete-review-btn" onclick="completeReview('台中公園')">
+                                                            <i class="fas fa-check-circle me-1"></i>完成備查作業
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-danger">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- 匯出按鈕 -->
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button class="btn btn-outline-secondary" id="exportPendingBtn">
+                                        <i class="fas fa-download me-2"></i>匯出清單
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 完成備查查詢區 -->
+            <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                <!-- 搜尋篩選區塊 -->
+                <div class="card filter-card">
+                    <div class="card-header">
+                        <i class="fas fa-filter me-2"></i>查詢條件
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- 行政區篩選 -->
+                            <div class="col-md-4">
+                                <label class="form-label">行政區</label>
+                                <select class="form-select" id="completedDistrictFilter">
+                                    <option value="">全部行政區</option>
+                                    <option>中區</option>
+                                    <option>東區</option>
+                                    <option>西區</option>
+                                    <option>南區</option>
+                                    <option>北區</option>
+                                    <option>西屯區</option>
+                                    <option>南屯區</option>
+                                    <option>北屯區</option>
+                                    <option>豐原區</option>
+                                    <option>大里區</option>
+                                    <option>太平區</option>
+                                    <option>清水區</option>
+                                    <option>沙鹿區</option>
+                                    <option>大甲區</option>
+                                    <option>東勢區</option>
+                                    <option>梧棲區</option>
+                                    <option>烏日區</option>
+                                    <option>神岡區</option>
+                                    <option>大肚區</option>
+                                    <option>大雅區</option>
+                                    <option>后里區</option>
+                                    <option>霧峰區</option>
+                                    <option>潭子區</option>
+                                    <option>龍井區</option>
+                                    <option>外埔區</option>
+                                    <option>和平區</option>
+                                    <option>石岡區</option>
+                                    <option>大安區</option>
+                                    <option>新社區</option>
+                                </select>
+                            </div>
+                            
+                            <!-- 關鍵字搜尋 -->
+                            <div class="col-md-4">
+                                <label class="form-label">公園名稱關鍵字</label>
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" class="form-control" id="completedSearchInput" placeholder="請輸入公園名稱...">
+                                </div>
+                            </div>
+                            
+                            <!-- 備查日期區間 -->
+                            <div class="col-md-4">
+                                <label class="form-label">備查日期區間</label>
+                                <div class="row g-2">
+                                    <div class="col">
+                                        <input type="date" class="form-control" id="completedDateStart" placeholder="開始日期">
+                                    </div>
+                                    <div class="col-auto align-self-center">
+                                        <span class="text-muted">至</span>
+                                    </div>
+                                    <div class="col">
+                                        <input type="date" class="form-control" id="completedDateEnd" placeholder="結束日期">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 查詢操作按鈕 -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button class="btn btn-primary" id="applyFilterBtn">
+                                            <i class="fas fa-search me-2"></i>查詢
+                                        </button>
+                                        <button class="btn btn-outline-secondary" id="resetFilterBtn">
+                                            <i class="fas fa-undo me-2"></i>重設條件
+                                        </button>
+                                    </div>
+                                    <div class="filter-result-count">
+                                        <span id="filterResultCount">顯示 8 筆資料</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 完成備查查詢表格 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-check-circle me-2"></i>已完成備查查詢</span>
+                        <span class="badge bg-success" id="completedCount">8 個公園</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="completedTable">
+                                <thead>
+                                    <tr>
+                                        <th>序號</th>
+                                        <th>行政區</th>
+                                        <th>公園名稱</th>
+                                        <th>兒童遊戲場數</th>
+                                        <th>檢驗報告數</th>
+                                        <th>備查類型</th>
+                                        <th>備查日期</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="completedTableBody">
+                                    <!-- 資料將由JavaScript動態生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- 分頁控制 -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div class="text-muted">
+                                顯示 <span id="pageStart">1</span> - <span id="pageEnd">8</span> 筆，共 <span id="totalRecords">8</span> 筆資料
+                            </div>
+                            <nav>
+                                <ul class="pagination mb-0">
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">上一頁</a>
+                                    </li>
+                                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">下一頁</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <button class="btn btn-outline-secondary" id="exportCompletedBtn">
+                                <i class="fas fa-download me-2"></i>匯出清單
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 案件登錄模態視窗 (待備查作業使用) -->
+        <div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registrationModalLabel">
+                            <i class="fas fa-edit me-2"></i>案件登錄 - <span id="currentParkName">豐樂雕塑公園</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="playgroundGroups">
+                            <!-- 遊戲場分區將由JavaScript動態生成 -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="savePlaygroundDataBtn">
+                            <i class="fas fa-save me-2"></i>儲存資料
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 檢視備查模態視窗 (完成備查查詢區使用) -->
+        <div class="modal fade" id="viewRegistrationModal" tabindex="-1" aria-labelledby="viewRegistrationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewRegistrationModalLabel">
+                            <i class="fas fa-eye me-2"></i>檢視備查 - <span id="viewCurrentParkName">秋紅谷景觀生態公園</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="viewPlaygroundGroups">
+                            <!-- 檢視模式的群組將由JavaScript動態生成 -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 歷次檢驗報告紀錄模態視窗 -->
+        <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="historyModalLabel">
+                            <i class="fas fa-history me-2"></i>歷次檢驗報告紀錄 - <span id="historyPlaygroundName">A區</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 現有檢驗報告紀錄 -->
+                        <div class="history-table-section">
+                            <h6 class="inspection-section-title">現有檢驗報告紀錄</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="historyTable">
+                                    <thead>
+                                        <tr>
+                                            <th>序號</th>
+                                            <th>檢驗報告項目</th>
+                                            <th>檢驗報告合格日期</th>
+                                            <th>檢視檢驗報告</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="historyTableBody">
+                                        <!-- 歷次檢驗報告紀錄將由JavaScript動態生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- 已刪除檢驗報告紀錄 -->
+                        <div class="deleted-section">
+                            <h6 class="inspection-section-title">已刪除檢驗報告紀錄</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="deletedHistoryTable">
+                                    <thead>
+                                        <tr>
+                                            <th>序號</th>
+                                            <th>檢驗報告項目</th>
+                                            <th>檢驗報告合格日期</th>
+                                            <th>檢視檢驗報告</th>
+                                            <th>狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deletedHistoryTableBody">
+                                        <!-- 已刪除檢驗報告紀錄將由JavaScript動態生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 歷次備查紀錄模態視窗 -->
+        <div class="modal fade review-history-modal" id="reviewHistoryModal" tabindex="-1" aria-labelledby="reviewHistoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reviewHistoryModalLabel">
+                            <i class="fas fa-history me-2"></i>歷次備查紀錄 - <span id="reviewHistoryParkName">秋紅谷景觀生態公園</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover review-history-table">
+                                <thead>
+                                    <tr>
+                                        <th>項次</th>
+                                        <th>備查類型</th>
+                                        <th>備查日期</th>
+                                        <th>備查文號</th>
+                                        <th>狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reviewHistoryTableBody">
+                                    <!-- 歷次備查紀錄將由JavaScript動態生成 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 公園資料模態視窗 -->
+        <div class="modal fade" id="parkDataModal" tabindex="-1" aria-labelledby="parkDataModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="parkDataModalLabel">
+                            <i class="fas fa-info-circle me-2"></i>公園資料 - <span id="detailParkName">公園名稱</span>
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>行政區:</strong> <span id="detailDistrict">南屯區</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>兒童遊戲場數:</strong> <span id="detailPlaygroundCount">3</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 頁尾 -->
+        <footer>
+            <p>© 2023 兒童遊戲場備查管理系統 | 設計用於管理公園兒童遊戲場的新設與變更備查作業</p>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 完成備查查詢區的資料
+        let completedParksData = [];
+        
+        // 待備查作業的遊戲場資料
+        let playgroundGroupsData = {};
+        
+        // 歷次檢驗報告紀錄資料 - 包含現有和已刪除的項目
+        let historyData = {};
+        
+        // 歷次備查紀錄資料
+        let reviewHistoryData = {};
+        
+        // 待備查清單資料
+        let pendingListData = [
+            {
+                id: 1,
+                district: '南屯區',
+                parkName: '豐樂雕塑公園',
+                playgroundCount: 3,
+                reviewType: '新設',
+                documentNumber: 'TC-PK-2023-001',
+                reviewDate: '2023-06-15'
+            },
+            {
+                id: 2,
+                district: '北區',
+                parkName: '台中公園',
+                playgroundCount: 2,
+                reviewType: '變更',
+                documentNumber: '',
+                reviewDate: ''
+            }
+        ];
+        
+        // 完成備查作業功能
+        function completeReview(parkName) {
+            // 獲取表格行中的資料
+            const tableRow = document.querySelector(`.park-name-link:contains('${parkName}')`).closest('tr');
+            
+            if (!tableRow) return;
+            
+            const district = tableRow.cells[1].textContent;
+            const playgroundCount = parseInt(tableRow.cells[3].textContent);
+            const reviewType = tableRow.cells[4].querySelector('select').value;
+            const documentNumber = tableRow.cells[5].querySelector('input').value;
+            const reviewDate = tableRow.cells[6].querySelector('input').value;
+            
+            // 驗證必填欄位
+            if (!documentNumber.trim()) {
+                alert('請填寫備查文號');
+                return;
+            }
+            
+            if (!reviewDate) {
+                alert('請選擇備查日期');
+                return;
+            }
+            
+            // 確認操作
+            if (confirm(`確定要完成 ${parkName} 的備查作業嗎？此操作將把該公園移到完成備查清單。`)) {
+                // 從待備查清單中移除
+                tableRow.remove();
+                
+                // 檢查公園是否已有歷次備查紀錄
+                const existingPark = completedParksData.find(park => park.parkName === parkName);
+                let inspectionReportCount = 0;
+                
+                if (existingPark) {
+                    // 如果公園已存在，更新檢驗報告數
+                    inspectionReportCount = existingPark.inspectionReportCount;
+                    
+                    // 更新該公園的備查紀錄
+                    updateReviewHistory(parkName, {
+                        reviewType,
+                        reviewDate,
+                        documentNumber
+                    });
+                } else {
+                    // 新公園，計算檢驗報告數
+                    inspectionReportCount = playgroundCount * 2; // 模擬檢驗報告數
+                    
+                    // 創建初始備查紀錄
+                    createInitialReviewHistory(parkName, {
+                        reviewType,
+                        reviewDate,
+                        documentNumber
+                    });
+                }
+                
+                // 添加到完成備查清單
+                const newCompletedPark = {
+                    id: completedParksData.length + 1,
+                    district,
+                    parkName,
+                    playgroundCount,
+                    inspectionReportCount: inspectionReportCount,
+                    reviewType,
+                    reviewDate,
+                    documentNumber
+                };
+                
+                // 如果公園已存在，更新資料而不是新增
+                const existingIndex = completedParksData.findIndex(park => park.parkName === parkName);
+                if (existingIndex !== -1) {
+                    completedParksData[existingIndex] = newCompletedPark;
+                } else {
+                    completedParksData.push(newCompletedPark);
+                }
+                
+                // 重新渲染完成備查表格
+                renderCompletedTable(completedParksData);
+                
+                // 更新計數
+                updatePendingCount();
+                
+                alert(`${parkName} 已完成備查作業，已更新完成備查清單`);
+            }
+        }
+        
+        // 更新待備查清單計數
+        function updatePendingCount() {
+            const pendingRows = document.querySelectorAll('#pending table tbody tr');
+            const countBadge = document.querySelector('.card-header .badge.bg-primary');
+            if (countBadge) {
+                countBadge.textContent = `${pendingRows.length} 個公園`;
+            }
+        }
+        
+        // 初始化完成備查查詢資料
+        function initializeCompletedData() {
+            // 模擬資料 - 這裡應該從API或資料庫獲取
+            completedParksData = [
+                {
+                    id: 1,
+                    district: '西屯區',
+                    parkName: '秋紅谷景觀生態公園',
+                    playgroundCount: 2,
+                    inspectionReportCount: 3,
+                    reviewType: '新設',
+                    reviewDate: '2023-06-15',
+                    documentNumber: 'TC-PK-2023-005'
+                },
+                {
+                    id: 2,
+                    district: '太平區',
+                    parkName: '坪林森林公園',
+                    playgroundCount: 1,
+                    inspectionReportCount: 2,
+                    reviewType: '變更',
+                    reviewDate: '2023-06-18',
+                    documentNumber: 'TC-PK-2023-008'
+                },
+                {
+                    id: 3,
+                    district: '清水區',
+                    parkName: '鰲峰山公園',
+                    playgroundCount: 3,
+                    inspectionReportCount: 5,
+                    reviewType: '新設',
+                    reviewDate: '2023-06-20',
+                    documentNumber: 'TC-PK-2023-012'
+                },
+                {
+                    id: 4,
+                    district: '南屯區',
+                    parkName: '文心森林公園',
+                    playgroundCount: 2,
+                    inspectionReportCount: 4,
+                    reviewType: '變更',
+                    reviewDate: '2023-06-22',
+                    documentNumber: 'TC-PK-2023-015'
+                },
+                {
+                    id: 5,
+                    district: '后里區',
+                    parkName: '后里運動公園',
+                    playgroundCount: 1,
+                    inspectionReportCount: 1,
+                    reviewType: '新設',
+                    reviewDate: '2023-06-25',
+                    documentNumber: 'TC-PK-2023-018'
+                },
+                {
+                    id: 6,
+                    district: '北區',
+                    parkName: '台中公園',
+                    playgroundCount: 1,
+                    inspectionReportCount: 2,
+                    reviewType: '新設',
+                    reviewDate: '2023-07-01',
+                    documentNumber: 'TC-PK-2023-022'
+                },
+                {
+                    id: 7,
+                    district: '豐原區',
+                    parkName: '豐原葫蘆墩公園',
+                    playgroundCount: 2,
+                    inspectionReportCount: 3,
+                    reviewType: '變更',
+                    reviewDate: '2023-07-05',
+                    documentNumber: 'TC-PK-2023-025'
+                },
+                {
+                    id: 8,
+                    district: '大里區',
+                    parkName: '大里運動公園',
+                    playgroundCount: 1,
+                    inspectionReportCount: 2,
+                    reviewType: '新設',
+                    reviewDate: '2023-07-10',
+                    documentNumber: 'TC-PK-2023-028'
+                }
+            ];
+            
+            // 初始化歷次檢驗報告紀錄資料
+            initializeHistoryData();
+            
+            // 初始化歷次備查紀錄資料
+            initializeReviewHistoryData();
+            
+            // 初始渲染
+            renderCompletedTable(completedParksData);
+        }
+        
+        // 初始化歷次檢驗報告紀錄資料
+        function initializeHistoryData() {
+            // 模擬資料結構：包含現有和已刪除的檢驗報告
+            historyData = {
+                '豐樂雕塑公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-10', fileUploaded: true, deleted: false },
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-15', fileUploaded: true, deleted: true }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-15', fileUploaded: true, deleted: true, deleteDate: '2023-05-20' }
+                        ]
+                    },
+                    'B區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-12', fileUploaded: true, deleted: false },
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-10', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    }
+                },
+                '台中公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-15', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    }
+                },
+                '秋紅谷景觀生態公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-10', fileUploaded: true, deleted: false },
+                            { id: 3, inspectionItem: '檢驗報告項目3', inspectionDate: '2023-03-20', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-15', fileUploaded: true, deleted: true, deleteDate: '2023-06-01' }
+                        ]
+                    },
+                    'B區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-12', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-10', fileUploaded: true, deleted: true, deleteDate: '2023-05-25' }
+                        ]
+                    }
+                },
+                '坪林森林公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-15', fileUploaded: true, deleted: false },
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-20', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    }
+                },
+                '鰲峰山公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-18', fileUploaded: true, deleted: false },
+                            { id: 3, inspectionItem: '檢驗報告項目3', inspectionDate: '2023-03-30', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-25', fileUploaded: true, deleted: true, deleteDate: '2023-06-05' }
+                        ]
+                    },
+                    'B區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-20', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    },
+                    'C區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-22', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-28', fileUploaded: true, deleted: true, deleteDate: '2023-06-10' }
+                        ]
+                    }
+                },
+                '文心森林公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-25', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: [
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-30', fileUploaded: true, deleted: true, deleteDate: '2023-06-15' }
+                        ]
+                    },
+                    'B區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-28', fileUploaded: true, deleted: false },
+                            { id: 2, inspectionItem: '檢驗報告項目2', inspectionDate: '2023-05-05', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    }
+                },
+                '后里運動公園': {
+                    'A區': {
+                        active: [
+                            { id: 1, inspectionItem: '檢驗報告項目1', inspectionDate: '2023-06-01', fileUploaded: true, deleted: false }
+                        ],
+                        deleted: []
+                    }
+                }
+            };
+        }
+        
+        // 初始化歷次備查紀錄資料
+        function initializeReviewHistoryData() {
+            reviewHistoryData = {
+                '秋紅谷景觀生態公園': [
+                    { id: 1, reviewType: '新設', reviewDate: '2023-06-15', documentNumber: 'TC-PK-2023-005', isLatest: true },
+                    { id: 2, reviewType: '新設', reviewDate: '2022-05-10', documentNumber: 'TC-PK-2022-012', isLatest: false },
+                    { id: 3, reviewType: '變更', reviewDate: '2021-08-22', documentNumber: 'TC-PK-2021-045', isLatest: false }
+                ],
+                '坪林森林公園': [
+                    { id: 1, reviewType: '變更', reviewDate: '2023-06-18', documentNumber: 'TC-PK-2023-008', isLatest: true },
+                    { id: 2, reviewType: '新設', reviewDate: '2021-11-05', documentNumber: 'TC-PK-2021-078', isLatest: false }
+                ],
+                '鰲峰山公園': [
+                    { id: 1, reviewType: '新設', reviewDate: '2023-06-20', documentNumber: 'TC-PK-2023-012', isLatest: true },
+                    { id: 2, reviewType: '變更', reviewDate: '2022-03-15', documentNumber: 'TC-PK-2022-025', isLatest: false },
+                    { id: 3, reviewType: '變更', reviewDate: '2021-09-30', documentNumber: 'TC-PK-2021-062', isLatest: false }
+                ],
+                '文心森林公園': [
+                    { id: 1, reviewType: '變更', reviewDate: '2023-06-22', documentNumber: 'TC-PK-2023-015', isLatest: true },
+                    { id: 2, reviewType: '變更', reviewDate: '2022-07-18', documentNumber: 'TC-PK-2022-038', isLatest: false },
+                    { id: 3, reviewType: '新設', reviewDate: '2020-12-10', documentNumber: 'TC-PK-2020-095', isLatest: false }
+                ],
+                '后里運動公園': [
+                    { id: 1, reviewType: '新設', reviewDate: '2023-06-25', documentNumber: 'TC-PK-2023-018', isLatest: true }
+                ],
+                '台中公園': [
+                    { id: 1, reviewType: '新設', reviewDate: '2023-07-01', documentNumber: 'TC-PK-2023-022', isLatest: true },
+                    { id: 2, reviewType: '變更', reviewDate: '2022-09-12', documentNumber: 'TC-PK-2022-051', isLatest: false }
+                ],
+                '豐原葫蘆墩公園': [
+                    { id: 1, reviewType: '變更', reviewDate: '2023-07-05', documentNumber: 'TC-PK-2023-025', isLatest: true },
+                    { id: 2, reviewType: '變更', reviewDate: '2022-04-20', documentNumber: 'TC-PK-2022-029', isLatest: false },
+                    { id: 3, reviewType: '新設', reviewDate: '2021-02-15', documentNumber: 'TC-PK-2021-018', isLatest: false }
+                ],
+                '大里運動公園': [
+                    { id: 1, reviewType: '新設', reviewDate: '2023-07-10', documentNumber: 'TC-PK-2023-028', isLatest: true }
+                ]
+            };
+        }
+        
+        // 創建初始備查紀錄
+        function createInitialReviewHistory(parkName, reviewData) {
+            if (!reviewHistoryData[parkName]) {
+                reviewHistoryData[parkName] = [];
+            }
+            
+            // 設置為最新紀錄
+            const newRecord = {
+                id: reviewHistoryData[parkName].length + 1,
+                reviewType: reviewData.reviewType,
+                reviewDate: reviewData.reviewDate,
+                documentNumber: reviewData.documentNumber,
+                isLatest: true
+            };
+            
+            // 如果有舊紀錄，將它們標記為非最新
+            reviewHistoryData[parkName].forEach(record => {
+                record.isLatest = false;
+            });
+            
+            reviewHistoryData[parkName].unshift(newRecord); // 添加到開頭，最新的在最上面
+        }
+        
+        // 更新備查紀錄
+        function updateReviewHistory(parkName, newReviewData) {
+            if (!reviewHistoryData[parkName]) {
+                createInitialReviewHistory(parkName, newReviewData);
+                return;
+            }
+            
+            // 創建新紀錄
+            const newRecord = {
+                id: reviewHistoryData[parkName].length + 1,
+                reviewType: newReviewData.reviewType,
+                reviewDate: newReviewData.reviewDate,
+                documentNumber: newReviewData.documentNumber,
+                isLatest: true
+            };
+            
+            // 將所有舊紀錄標記為非最新
+            reviewHistoryData[parkName].forEach(record => {
+                record.isLatest = false;
+            });
+            
+            // 添加新紀錄到開頭
+            reviewHistoryData[parkName].unshift(newRecord);
+        }
+        
+        // 顯示歷次備查紀錄
+        function showReviewHistory(parkName) {
+            document.getElementById('reviewHistoryParkName').textContent = parkName;
+            
+            const historyRecords = reviewHistoryData[parkName] || [];
+            const tbody = document.getElementById('reviewHistoryTableBody');
+            
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (historyRecords.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">無歷次備查紀錄</td>
+                    </tr>
+                `;
+            } else {
+                historyRecords.forEach((record, index) => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${record.reviewType}</td>
+                        <td>${record.reviewDate}</td>
+                        <td>${record.documentNumber}</td>
+                        <td>
+                            ${record.isLatest ? '<span class="latest-review-badge">最新紀錄</span>' : ''}
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            }
+        }
+        
+        // 下載檔案功能
+        function downloadFile(fileType, parkName, playgroundCode) {
+            const fileName = getFileName(fileType, parkName, playgroundCode);
+            alert(`開始下載: ${fileName}`);
+            
+            // 這裡應該實現實際的檔案下載邏輯
+            // 例如：window.location.href = `/api/download/${fileType}/${parkName}/${playgroundCode}`;
+        }
+        
+        // 下載檢驗報告
+        function downloadInspectionReport(inspectionItem, inspectionDate, parkName, playgroundCode) {
+            const fileName = `${inspectionItem}_${inspectionDate}_${parkName}_${playgroundCode}.pdf`;
+            alert(`開始下載檢驗報告: ${fileName}`);
+            
+            // 這裡應該實現實際的檔案下載邏輯
+        }
+        
+        // 獲取檔案名稱
+        function getFileName(fileType, parkName, playgroundCode) {
+            const fileTypeNames = {
+                'basicForm': '兒童遊戲場基本資料表',
+                'guarantee': '廠商出具合格保證書',
+                'selfCheck': '自主檢查表(附表2)',
+                'floorPlan': '兒童遊戲場平面圖',
+                'managerCert': '兒童遊戲場管理人員證書'
+            };
+            
+            const typeName = fileTypeNames[fileType] || fileType;
+            return `${parkName}_${playgroundCode}_${typeName}.pdf`;
+        }
+        
+        // 渲染完成備查查詢表格
+        function renderCompletedTable(data) {
+            const tbody = document.getElementById('completedTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            data.forEach((park, index) => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${park.district}</td>
+                    <td>
+                        <span class="completed-park-name" data-bs-toggle="modal" data-bs-target="#viewRegistrationModal" 
+                              data-playground-count="${park.playgroundCount}" data-park-name="${park.parkName}">
+                            ${park.parkName}
+                        </span>
+                    </td>
+                    <td>${park.playgroundCount}</td>
+                    <td>${park.inspectionReportCount}</td>
+                    <td>${park.reviewType}</td>
+                    <td>${park.reviewDate}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-info review-history-btn" onclick="showReviewHistory('${park.parkName}')" data-bs-toggle="modal" data-bs-target="#reviewHistoryModal">
+                            <i class="fas fa-history me-1"></i>查看歷次備查紀錄
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            // 更新計數
+            document.getElementById('completedCount').textContent = `${data.length} 個公園`;
+            document.getElementById('filterResultCount').textContent = `顯示 ${data.length} 筆資料`;
+            document.getElementById('totalRecords').textContent = data.length;
+            document.getElementById('pageStart').textContent = 1;
+            document.getElementById('pageEnd').textContent = data.length;
+            
+            // 重新綁定點擊事件
+            document.querySelectorAll('.completed-park-name').forEach(element => {
+                element.addEventListener('click', function() {
+                    const parkName = this.getAttribute('data-park-name') || this.textContent;
+                    const playgroundCount = parseInt(this.getAttribute('data-playground-count')) || 
+                                          parseInt(this.closest('tr').querySelector('td:nth-child(4)').textContent);
+                    
+                    document.getElementById('viewCurrentParkName').textContent = parkName;
+                    
+                    // 根據遊戲場數量生成檢視模式的群組
+                    generateViewPlaygroundGroups(playgroundCount, parkName);
+                });
+            });
+        }
+        
+        // 套用查詢條件
+        function applyCompletedFilter() {
+            const districtFilter = document.getElementById('completedDistrictFilter')?.value || '';
+            const searchKeyword = document.getElementById('completedSearchInput')?.value.toLowerCase() || '';
+            const dateStart = document.getElementById('completedDateStart')?.value || '';
+            const dateEnd = document.getElementById('completedDateEnd')?.value || '';
+            
+            // 篩選資料
+            let filteredData = completedParksData.filter(park => {
+                // 行政區篩選
+                if (districtFilter && park.district !== districtFilter) {
+                    return false;
+                }
+                
+                // 關鍵字搜尋
+                if (searchKeyword && !park.parkName.toLowerCase().includes(searchKeyword)) {
+                    return false;
+                }
+                
+                // 日期區間篩選
+                if (dateStart || dateEnd) {
+                    const reviewDate = new Date(park.reviewDate);
+                    const startDate = dateStart ? new Date(dateStart) : null;
+                    const endDate = dateEnd ? new Date(dateEnd) : null;
+                    
+                    if (startDate && endDate) {
+                        return reviewDate >= startDate && reviewDate <= endDate;
+                    } else if (startDate) {
+                        return reviewDate >= startDate;
+                    } else if (endDate) {
+                        return reviewDate <= endDate;
+                    }
+                }
+                
+                return true;
+            });
+            
+            // 渲染篩選後的資料
+            renderCompletedTable(filteredData);
+        }
+        
+        // 重設查詢條件
+        function resetCompletedFilter() {
+            // 重設表單值
+            document.getElementById('completedDistrictFilter').value = '';
+            document.getElementById('completedSearchInput').value = '';
+            document.getElementById('completedDateStart').value = '';
+            document.getElementById('completedDateEnd').value = '';
+            
+            // 重新渲染全部資料
+            renderCompletedTable(completedParksData);
+        }
+        
+        // 匯出完成備查查詢清單
+        document.getElementById('exportCompletedBtn')?.addEventListener('click', function() {
+            alert('匯出功能將開啟，可下載篩選後的資料清單');
+        });
+        
+        // 模擬加入待備查作業功能
+        document.getElementById('addToPending')?.addEventListener('click', function() {
+            alert('已將選擇的公園加入待備查清單！');
+        });
+        
+        // 檔案上傳區域點擊事件
+        document.querySelectorAll('.file-upload-area').forEach(area => {
+            area.addEventListener('click', function() {
+                alert('開啟檔案選擇對話框');
+            });
+        });
+        
+        // 行政區篩選功能
+        document.getElementById('districtFilter')?.addEventListener('change', function() {
+            filterParks();
+        });
+        
+        // 關鍵字搜尋功能
+        document.getElementById('searchInput')?.addEventListener('input', function() {
+            filterParks();
+        });
+        
+        function filterParks() {
+            const selectedDistrict = document.getElementById('districtFilter').value;
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase();
+            const parkItems = document.querySelectorAll('.park-item');
+            
+            parkItems.forEach(item => {
+                const district = item.querySelector('.park-district').textContent;
+                const parkName = item.querySelector('.park-name').textContent.toLowerCase();
+                
+                const districtMatch = selectedDistrict === '全部行政區' || district === selectedDistrict;
+                const keywordMatch = parkName.includes(searchKeyword);
+                
+                if (districtMatch && keywordMatch) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+        
+        // 點擊公園名稱顯示公園資料
+        document.querySelectorAll('.park-name').forEach(name => {
+            name.addEventListener('click', function() {
+                const parkName = this.getAttribute('data-park');
+                document.getElementById('detailParkName').textContent = parkName;
+                
+                // 根據公園名稱設置公園資料
+                setParkData(parkName);
+            });
+        });
+        
+        // 點擊待備查清單中的公園名稱或案件登錄按鈕
+        document.querySelectorAll('.park-name-link, .register-btn').forEach(element => {
+            element.addEventListener('click', function() {
+                const parkName = this.textContent || this.closest('tr').querySelector('.park-name-link').textContent;
+                const playgroundCount = parseInt(this.getAttribute('data-playground-count')) || 
+                                      parseInt(this.closest('tr').querySelector('td:nth-child(4)').textContent);
+                
+                document.getElementById('currentParkName').textContent = parkName;
+                
+                // 根據遊戲場數量生成群組
+                generatePlaygroundGroups(playgroundCount, parkName);
+            });
+        });
+        
+        // 點擊完成備查查詢清單中的公園名稱
+        document.querySelectorAll('.completed-park-name').forEach(element => {
+            element.addEventListener('click', function() {
+                const parkName = this.getAttribute('data-park-name') || this.textContent;
+                const playgroundCount = parseInt(this.getAttribute('data-playground-count')) || 
+                                      parseInt(this.closest('tr').querySelector('td:nth-child(4)').textContent);
+                
+                document.getElementById('viewCurrentParkName').textContent = parkName;
+                
+                // 根據遊戲場數量生成檢視模式的群組
+                generateViewPlaygroundGroups(playgroundCount, parkName);
+            });
+        });
+        
+        // 設置公園資料的函數
+        function setParkData(parkName) {
+            const details = {
+                '文心森林公園': {
+                    district: '南屯區',
+                    playgroundCount: '2'
+                },
+                '豐樂雕塑公園': {
+                    district: '南屯區',
+                    playgroundCount: '3'
+                },
+                '台中公園': {
+                    district: '北區',
+                    playgroundCount: '2'
+                },
+                '秋紅谷景觀生態公園': {
+                    district: '西屯區',
+                    playgroundCount: '2'
+                },
+                '坪林森林公園': {
+                    district: '太平區',
+                    playgroundCount: '1'
+                }
+            };
+            
+            const parkDetail = details[parkName] || {
+                district: '未知',
+                playgroundCount: '0'
+            };
+            
+            document.getElementById('detailDistrict').textContent = parkDetail.district;
+            document.getElementById('detailPlaygroundCount').textContent = parkDetail.playgroundCount;
+        }
+        
+        // 根據遊戲場數量生成群組 (待備查作業使用)
+        function generatePlaygroundGroups(count, parkName) {
+            const groupsContainer = document.getElementById('playgroundGroups');
+            groupsContainer.innerHTML = '';
+            
+            // 初始化資料
+            if (!playgroundGroupsData[parkName]) {
+                playgroundGroupsData[parkName] = [];
+                for (let i = 0; i < count; i++) {
+                    playgroundGroupsData[parkName].push({
+                        playgroundCode: `${String.fromCharCode(65 + i)}區`,
+                        playgroundAlias: '',
+                        inspectionItems: [
+                            {
+                                id: 1,
+                                inspectionItem: '檢驗報告項目1',
+                                inspectionDate: `2023-05-${10 + i}`,
+                                fileUploaded: false,
+                                deleted: false
+                            },
+                            {
+                                id: 2,
+                                inspectionItem: '檢驗報告項目2',
+                                inspectionDate: `2023-04-${15 + i}`,
+                                fileUploaded: false,
+                                deleted: false
+                            }
+                        ],
+                        basicInfo: {
+                            basicForm: { uploaded: false },
+                            guarantee: { uploaded: false },
+                            selfCheck: { uploaded: false },
+                            floorPlan: { uploaded: false },
+                            managerCert: { uploaded: false }
+                        }
+                    });
+                }
+            }
+            
+            // 生成每個遊戲場區的內容
+            playgroundGroupsData[parkName].forEach((playground, playgroundIndex) => {
+                const group = document.createElement('div');
+                group.className = 'group-container';
+                group.setAttribute('data-playground-index', playgroundIndex);
+                group.setAttribute('data-park-name', parkName);
+                
+                group.innerHTML = `
+                    <div class="group-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <h5 class="mb-0">兒童遊戲場 ${playground.playgroundCode}</h5>
+                            <div class="playground-alias-container">
+                                <input type="text" class="form-control form-control-sm" 
+                                       placeholder="輸入遊戲場別名 (如: 搖搖馬區)" 
+                                       value="${playground.playgroundAlias}"
+                                       onchange="updatePlaygroundAlias('${parkName}', ${playgroundIndex}, this.value)">
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary history-btn" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="showHistory('${parkName}', '${playground.playgroundCode}')">
+                                <i class="fas fa-history me-1"></i>歷次檢驗報告紀錄
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="inspection-section-title">合格檢驗報告項目</h6>
+                        <div id="inspection-items-${parkName}-${playgroundIndex}">
+                            <!-- 檢驗報告項目將由JavaScript動態生成 -->
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="addInspectionItem('${parkName}', ${playgroundIndex})">
+                            <i class="fas fa-plus me-1"></i>新增檢驗報告項目
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h6 class="inspection-section-title">其他備查文件</h6>
+                        <div class="file-list-container">
+                            <div class="file-upload-card">
+                                <label class="form-label">兒童遊戲場基本資料表</label>
+                                <div class="file-upload-area" onclick="uploadFile('basicForm', '${parkName}', ${playgroundIndex})">
+                                    ${playground.basicInfo.basicForm.uploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">兒童遊戲場基本資料表</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">兒童遊戲場基本資料表</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                            
+                            <div class="file-upload-card">
+                                <label class="form-label">廠商出具合格保證書</label>
+                                <div class="file-upload-area" onclick="uploadFile('guarantee', '${parkName}', ${playgroundIndex})">
+                                    ${playground.basicInfo.guarantee.uploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">廠商出具合格保證書</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">廠商出具合格保證書</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                            
+                            <div class="file-upload-card">
+                                <label class="form-label">自主檢查表(附表2)</label>
+                                <div class="file-upload-area" onclick="uploadFile('selfCheck', '${parkName}', ${playgroundIndex})">
+                                    ${playground.basicInfo.selfCheck.uploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">自主檢查表(附表2)</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">自主檢查表(附表2)</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                            
+                            <div class="file-upload-card">
+                                <label class="form-label">兒童遊戲場平面圖</label>
+                                <div class="file-upload-area" onclick="uploadFile('floorPlan', '${parkName}', ${playgroundIndex})">
+                                    ${playground.basicInfo.floorPlan.uploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">兒童遊戲場平面圖</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">兒童遊戲場平面圖</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                            
+                            <div class="file-upload-card">
+                                <label class="form-label">兒童遊戲場管理人員證書</label>
+                                <div class="file-upload-area" onclick="uploadFile('managerCert', '${parkName}', ${playgroundIndex})">
+                                    ${playground.basicInfo.managerCert.uploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">兒童遊戲場管理人員證書</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">兒童遊戲場管理人員證書</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                groupsContainer.appendChild(group);
+                
+                // 生成檢驗報告項目
+                generateInspectionItems(parkName, playgroundIndex);
+            });
+        }
+        
+        // 更新遊戲場別名
+        function updatePlaygroundAlias(parkName, playgroundIndex, alias) {
+            if (playgroundGroupsData[parkName] && playgroundGroupsData[parkName][playgroundIndex]) {
+                playgroundGroupsData[parkName][playgroundIndex].playgroundAlias = alias;
+            }
+        }
+        
+        // 生成檢驗報告項目
+        function generateInspectionItems(parkName, playgroundIndex) {
+            const container = document.getElementById(`inspection-items-${parkName}-${playgroundIndex}`);
+            if (!container) return;
+            
+            const playgroundData = playgroundGroupsData[parkName][playgroundIndex];
+            container.innerHTML = '';
+            
+            // 只顯示未刪除的項目
+            const activeItems = playgroundData.inspectionItems.filter(item => !item.deleted);
+            
+            activeItems.forEach((item, itemIndex) => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'inspection-item';
+                itemElement.innerHTML = `
+                    <div class="inspection-item-header">
+                        <div class="inspection-item-number">檢驗報告項目 ${itemIndex + 1}</div>
+                        <div class="inspection-actions">
+                            ${itemIndex > 0 ? `<button class="btn btn-sm btn-outline-danger" onclick="removeInspectionItem('${parkName}', ${playgroundIndex}, ${item.id})">
+                                <i class="fas fa-times"></i> 刪除
+                            </button>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">檢驗報告項目名稱</label>
+                                <input type="text" class="form-control" 
+                                       value="${item.inspectionItem}"
+                                       onchange="updateInspectionItemField('${parkName}', ${playgroundIndex}, ${item.id}, 'inspectionItem', this.value)">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">檢驗報告合格日期</label>
+                                <input type="date" class="form-control" 
+                                       value="${item.inspectionDate}"
+                                       onchange="updateInspectionItemField('${parkName}', ${playgroundIndex}, ${item.id}, 'inspectionDate', this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label">檢驗報告上傳</label>
+                                <div class="file-upload-area ${item.fileUploaded ? 'view-mode' : ''}" 
+                                     onclick="${!item.fileUploaded ? `uploadInspectionFile('${parkName}', ${playgroundIndex}, ${item.id})` : ''}">
+                                    ${item.fileUploaded ? 
+                                        `<div class="file-status">
+                                            <i class="fas fa-check-circle fa-2x"></i>
+                                            <p class="mb-1">檢驗報告</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                        </div>` : 
+                                        `<i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                        <p class="mb-1">檢驗報告</p>
+                                        <small class="text-muted">點擊或拖曳檔案至此區域上傳</small>`}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemElement);
+            });
+        }
+        
+        // 新增檢驗報告項目
+        function addInspectionItem(parkName, playgroundIndex) {
+            if (!playgroundGroupsData[parkName][playgroundIndex]) return;
+            
+            const playgroundData = playgroundGroupsData[parkName][playgroundIndex];
+            const newId = Math.max(...playgroundData.inspectionItems.map(item => item.id)) + 1;
+            
+            playgroundData.inspectionItems.push({
+                id: newId,
+                inspectionItem: `檢驗報告項目${newId}`,
+                inspectionDate: '2023-06-01',
+                fileUploaded: false,
+                deleted: false
+            });
+            
+            generateInspectionItems(parkName, playgroundIndex);
+        }
+        
+        // 移除檢驗報告項目（標記為已刪除）
+        function removeInspectionItem(parkName, playgroundIndex, itemId) {
+            if (!playgroundGroupsData[parkName][playgroundIndex]) return;
+            
+            const playgroundData = playgroundGroupsData[parkName][playgroundIndex];
+            const itemIndex = playgroundData.inspectionItems.findIndex(item => item.id === itemId);
+            
+            if (itemIndex === -1) return;
+            
+            // 將項目標記為已刪除
+            playgroundData.inspectionItems[itemIndex].deleted = true;
+            playgroundData.inspectionItems[itemIndex].deleteDate = new Date().toISOString().split('T')[0];
+            
+            // 更新歷史紀錄資料
+            updateHistoryData(parkName, playgroundData.playgroundCode, playgroundData.inspectionItems[itemId - 1]);
+            
+            // 重新生成檢驗報告項目
+            generateInspectionItems(parkName, playgroundIndex);
+        }
+        
+        // 更新檢驗報告項目字段
+        function updateInspectionItemField(parkName, playgroundIndex, itemId, field, value) {
+            if (playgroundGroupsData[parkName] && 
+                playgroundGroupsData[parkName][playgroundIndex]) {
+                
+                const itemIndex = playgroundGroupsData[parkName][playgroundIndex].inspectionItems.findIndex(item => item.id === itemId);
+                
+                if (itemIndex !== -1) {
+                    playgroundGroupsData[parkName][playgroundIndex].inspectionItems[itemIndex][field] = value;
+                }
+            }
+        }
+        
+        // 更新歷史紀錄資料
+        function updateHistoryData(parkName, playgroundCode, inspectionItem) {
+            if (!historyData[parkName]) {
+                historyData[parkName] = {};
+            }
+            
+            if (!historyData[parkName][playgroundCode]) {
+                historyData[parkName][playgroundCode] = {
+                    active: [],
+                    deleted: []
+                };
+            }
+            
+            const playgroundHistory = historyData[parkName][playgroundCode];
+            
+            if (inspectionItem.deleted) {
+                // 添加到已刪除列表
+                const existingIndex = playgroundHistory.deleted.findIndex(item => item.id === inspectionItem.id);
+                if (existingIndex === -1) {
+                    playgroundHistory.deleted.push({...inspectionItem});
+                } else {
+                    playgroundHistory.deleted[existingIndex] = {...inspectionItem};
+                }
+                
+                // 從現有列表中移除
+                playgroundHistory.active = playgroundHistory.active.filter(item => item.id !== inspectionItem.id);
+            } else {
+                // 添加到現有列表
+                const existingIndex = playgroundHistory.active.findIndex(item => item.id === inspectionItem.id);
+                if (existingIndex === -1) {
+                    playgroundHistory.active.push({...inspectionItem});
+                } else {
+                    playgroundHistory.active[existingIndex] = {...inspectionItem};
+                }
+                
+                // 從已刪除列表中移除
+                playgroundHistory.deleted = playgroundHistory.deleted.filter(item => item.id !== inspectionItem.id);
+            }
+        }
+        
+        // 上傳檔案
+        function uploadFile(fileType, parkName, playgroundIndex) {
+            alert(`開啟檔案選擇對話框 - ${getFileTypeName(fileType)}`);
+            // 這裡應該實現實際的檔案上傳邏輯
+            if (playgroundGroupsData[parkName] && playgroundGroupsData[parkName][playgroundIndex]) {
+                playgroundGroupsData[parkName][playgroundIndex].basicInfo[fileType].uploaded = true;
+                
+                // 重新生成群組以更新上傳狀態
+                generatePlaygroundGroups(playgroundGroupsData[parkName].length, parkName);
+            }
+        }
+        
+        // 獲取檔案類型名稱
+        function getFileTypeName(fileType) {
+            const fileTypeNames = {
+                'basicForm': '兒童遊戲場基本資料表',
+                'guarantee': '廠商出具合格保證書',
+                'selfCheck': '自主檢查表(附表2)',
+                'floorPlan': '兒童遊戲場平面圖',
+                'managerCert': '兒童遊戲場管理人員證書'
+            };
+            return fileTypeNames[fileType] || fileType;
+        }
+        
+        // 上傳檢驗報告檔案
+        function uploadInspectionFile(parkName, playgroundIndex, itemId) {
+            alert(`開啟檔案選擇對話框 - 檢驗報告`);
+            // 這裡應該實現實際的檔案上傳邏輯
+            if (playgroundGroupsData[parkName] && 
+                playgroundGroupsData[parkName][playgroundIndex]) {
+                
+                const itemIndex = playgroundGroupsData[parkName][playgroundIndex].inspectionItems.findIndex(item => item.id === itemId);
+                
+                if (itemIndex !== -1) {
+                    playgroundGroupsData[parkName][playgroundIndex].inspectionItems[itemIndex].fileUploaded = true;
+                    generateInspectionItems(parkName, playgroundIndex);
+                }
+            }
+        }
+        
+        // 儲存遊戲場資料
+        document.getElementById('savePlaygroundDataBtn')?.addEventListener('click', function() {
+            const parkName = document.getElementById('currentParkName').textContent;
+            alert(`已儲存 ${parkName} 的資料`);
+        });
+        
+        // 顯示歷次檢驗報告紀錄
+        function showHistory(parkName, playgroundCode) {
+            document.getElementById('historyPlaygroundName').textContent = playgroundCode;
+            
+            // 獲取歷次檢驗報告紀錄資料
+            const playgroundHistory = historyData[parkName]?.[playgroundCode] || { active: [], deleted: [] };
+            const activeRecords = playgroundHistory.active || [];
+            const deletedRecords = playgroundHistory.deleted || [];
+            
+            // 渲染現有檢驗報告紀錄表格
+            const tbody = document.getElementById('historyTableBody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (activeRecords.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">無現有檢驗報告紀錄</td>
+                    </tr>
+                `;
+            } else {
+                activeRecords.forEach((record, index) => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${record.inspectionItem}</td>
+                        <td>${record.inspectionDate}</td>
+                        <td>
+                            <div class="file-actions-container">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInspectionReport('${record.inspectionItem}', '${record.inspectionDate}')">
+                                    <i class="fas fa-eye me-1"></i>檢視
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="downloadInspectionReport('${record.inspectionItem}', '${record.inspectionDate}', '${parkName}', '${playgroundCode}')">
+                                    <i class="fas fa-download me-1"></i>下載
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+            }
+            
+            // 渲染已刪除檢驗報告紀錄表格
+            const deletedTbody = document.getElementById('deletedHistoryTableBody');
+            if (!deletedTbody) return;
+            
+            deletedTbody.innerHTML = '';
+            
+            if (deletedRecords.length === 0) {
+                deletedTbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">無已刪除檢驗報告紀錄</td>
+                    </tr>
+                `;
+            } else {
+                deletedRecords.forEach((record, index) => {
+                    const row = document.createElement('tr');
+                    const deleteDate = record.deleteDate ? record.deleteDate : '未知';
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${record.inspectionItem}</td>
+                        <td>${record.inspectionDate}</td>
+                        <td>
+                            <div class="file-actions-container">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewInspectionReport('${record.inspectionItem}', '${record.inspectionDate}')">
+                                    <i class="fas fa-eye me-1"></i>檢視
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="downloadInspectionReport('${record.inspectionItem}', '${record.inspectionDate}', '${parkName}', '${playgroundCode}')">
+                                    <i class="fas fa-download me-1"></i>下載
+                                </button>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="deleted-badge">已刪除 (${deleteDate})</span>
+                        </td>
+                    `;
+                    
+                    deletedTbody.appendChild(row);
+                });
+            }
+        }
+        
+        // 檢視檢驗報告
+        function viewInspectionReport(inspectionItem, inspectionDate) {
+            alert(`檢視 ${inspectionItem} 的檢驗報告 (合格日期: ${inspectionDate})`);
+        }
+        
+        // 根據遊戲場數量生成檢視模式的群組 (完成備查查詢區使用)
+        function generateViewPlaygroundGroups(count, parkName) {
+            const groupsContainer = document.getElementById('viewPlaygroundGroups');
+            groupsContainer.innerHTML = '';
+            
+            // 模擬資料 - 根據公園名稱提供不同的資料
+            const parkData = {
+                '秋紅谷景觀生態公園': {
+                    playgrounds: [
+                        {
+                            code: 'A區',
+                            alias: '溜滑梯區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-10', fileUploaded: true },
+                                { inspectionItem: '檢驗報告項目3', inspectionDate: '2023-03-20', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        },
+                        {
+                            code: 'B區',
+                            alias: '鞦韆區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-12', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        }
+                    ],
+                    totalInspectionReports: 3
+                },
+                '坪林森林公園': {
+                    playgrounds: [
+                        {
+                            code: 'A區',
+                            alias: '沙坑區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-15', fileUploaded: true },
+                                { inspectionItem: '檢驗報告項目2', inspectionDate: '2023-04-20', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        }
+                    ],
+                    totalInspectionReports: 2
+                },
+                '鰲峰山公園': {
+                    playgrounds: [
+                        {
+                            code: 'A區',
+                            alias: '攀爬區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-18', fileUploaded: true },
+                                { inspectionItem: '檢驗報告項目3', inspectionDate: '2023-03-30', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        },
+                        {
+                            code: 'B區',
+                            alias: '彈跳床區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-20', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        },
+                        {
+                            code: 'C區',
+                            alias: '搖搖馬區',
+                            inspectionItems: [
+                                { inspectionItem: '檢驗報告項目1', inspectionDate: '2023-05-22', fileUploaded: true }
+                            ],
+                            basicInfo: {
+                                basicForm: { uploaded: true },
+                                guarantee: { uploaded: true },
+                                selfCheck: { uploaded: true },
+                                floorPlan: { uploaded: true },
+                                managerCert: { uploaded: true }
+                            }
+                        }
+                    ],
+                    totalInspectionReports: 5
+                }
+            };
+            
+            const data = parkData[parkName] || { playgrounds: [], totalInspectionReports: 0 };
+            
+            // 如果沒有特定資料，生成預設資料
+            if (data.playgrounds.length === 0) {
+                for (let i = 0; i < count; i++) {
+                    data.playgrounds.push({
+                        code: `${String.fromCharCode(65 + i)}區`,
+                        alias: i === 0 ? '搖搖馬區' : i === 1 ? '溜滑梯區' : '鞦韆區',
+                        inspectionItems: [
+                            { inspectionItem: `檢驗報告項目1`, inspectionDate: `2023-05-${10 + i}`, fileUploaded: true }
+                        ],
+                        basicInfo: {
+                            basicForm: { uploaded: true },
+                            guarantee: { uploaded: true },
+                            selfCheck: { uploaded: true },
+                            floorPlan: { uploaded: true },
+                            managerCert: { uploaded: true }
+                        }
+                    });
+                }
+                data.totalInspectionReports = count;
+            }
+            
+            // 生成每個遊戲場區的檢視內容
+            data.playgrounds.forEach((playground, index) => {
+                const group = document.createElement('div');
+                group.className = 'group-container';
+                
+                // 生成檢驗報告項目HTML
+                let inspectionItemsHtml = '';
+                playground.inspectionItems.forEach((item, itemIndex) => {
+                    inspectionItemsHtml += `
+                        <div class="inspection-item mb-3">
+                            <div class="inspection-item-header">
+                                <div class="inspection-item-number">檢驗報告項目 ${itemIndex + 1}</div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="view-mode-label">檢驗報告項目名稱</div>
+                                    <div class="view-mode-value">${item.inspectionItem}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="view-mode-label">檢驗報告合格日期</div>
+                                    <div class="view-mode-value">${item.inspectionDate}</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="view-mode-label">檢驗報告上傳</div>
+                                    <div class="file-upload-area view-mode">
+                                        <div class="file-download-area">
+                                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                            <p class="mb-1">檢驗報告</p>
+                                            <small class="text-muted">檔案已上傳</small>
+                                            <button class="btn btn-sm btn-success inspection-download-btn mt-2" onclick="downloadInspectionReport('${item.inspectionItem}', '${item.inspectionDate}', '${parkName}', '${playground.code}')">
+                                                <i class="fas fa-download me-1"></i>下載檢驗報告
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // 生成其他備查文件HTML
+                const fileListHtml = `
+                    <div class="file-list-container">
+                        <div class="file-upload-card">
+                            <label class="form-label">兒童遊戲場基本資料表</label>
+                            <div class="file-upload-area view-mode">
+                                <div class="file-download-area">
+                                    <i class="fas fa-file-pdf fa-2x text-danger mb-2"></i>
+                                    <p class="mb-1">兒童遊戲場基本資料表</p>
+                                    <small class="text-muted">檔案已上傳</small>
+                                    <button class="btn btn-sm btn-primary file-download-btn" onclick="downloadFile('basicForm', '${parkName}', '${playground.code}')">
+                                        <i class="fas fa-download me-1"></i>下載檔案
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-upload-card">
+                            <label class="form-label">廠商出具合格保證書</label>
+                            <div class="file-upload-area view-mode">
+                                <div class="file-download-area">
+                                    <i class="fas fa-file-contract fa-2x text-warning mb-2"></i>
+                                    <p class="mb-1">廠商出具合格保證書</p>
+                                    <small class="text-muted">檔案已上傳</small>
+                                    <button class="btn btn-sm btn-primary file-download-btn" onclick="downloadFile('guarantee', '${parkName}', '${playground.code}')">
+                                        <i class="fas fa-download me-1"></i>下載檔案
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-upload-card">
+                            <label class="form-label">自主檢查表(附表2)</label>
+                            <div class="file-upload-area view-mode">
+                                <div class="file-download-area">
+                                    <i class="fas fa-clipboard-check fa-2x text-info mb-2"></i>
+                                    <p class="mb-1">自主檢查表(附表2)</p>
+                                    <small class="text-muted">檔案已上傳</small>
+                                    <button class="btn btn-sm btn-primary file-download-btn" onclick="downloadFile('selfCheck', '${parkName}', '${playground.code}')">
+                                        <i class="fas fa-download me-1"></i>下載檔案
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-upload-card">
+                            <label class="form-label">兒童遊戲場平面圖</label>
+                            <div class="file-upload-area view-mode">
+                                <div class="file-download-area">
+                                    <i class="fas fa-map fa-2x text-success mb-2"></i>
+                                    <p class="mb-1">兒童遊戲場平面圖</p>
+                                    <small class="text-muted">檔案已上傳</small>
+                                    <button class="btn btn-sm btn-primary file-download-btn" onclick="downloadFile('floorPlan', '${parkName}', '${playground.code}')">
+                                        <i class="fas fa-download me-1"></i>下載檔案
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="file-upload-card">
+                            <label class="form-label">兒童遊戲場管理人員證書</label>
+                            <div class="file-upload-area view-mode">
+                                <div class="file-download-area">
+                                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
+                                    <p class="mb-1">兒童遊戲場管理人員證書</p>
+                                    <small class="text-muted">檔案已上傳</small>
+                                    <button class="btn btn-sm btn-primary file-download-btn" onclick="downloadFile('managerCert', '${parkName}', '${playground.code}')">
+                                        <i class="fas fa-download me-1"></i>下載檔案
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                group.innerHTML = `
+                    <div class="group-header">
+                        <div class="d-flex align-items-center gap-3">
+                            <h5 class="mb-0">兒童遊戲場 ${playground.code}</h5>
+                            ${playground.alias ? `<span class="badge bg-info">${playground.alias}</span>` : ''}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary history-btn" data-bs-toggle="modal" data-bs-target="#historyModal" onclick="showHistory('${parkName}', '${playground.code}')">
+                                <i class="fas fa-history me-1"></i>歷次檢驗報告紀錄
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="inspection-section-title">合格檢驗報告項目 (共 ${playground.inspectionItems.length} 項)</h6>
+                        ${inspectionItemsHtml}
+                    </div>
+                    
+                    <div>
+                        <h6 class="inspection-section-title">其他備查文件</h6>
+                        ${fileListHtml}
+                    </div>
+                `;
+                
+                groupsContainer.appendChild(group);
+            });
+        }
+        
+        // 完成備查查詢區查詢事件監聽
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化完成備查查詢區資料
+            initializeCompletedData();
+            
+            // 套用查詢按鈕
+            document.getElementById('applyFilterBtn')?.addEventListener('click', applyCompletedFilter);
+            
+            // 重設查詢按鈕
+            document.getElementById('resetFilterBtn')?.addEventListener('click', resetCompletedFilter);
+            
+            // 關鍵字搜尋輸入監聽
+            document.getElementById('completedSearchInput')?.addEventListener('input', function() {
+                applyCompletedFilter();
+            });
+            
+            // 行政區篩選監聽
+            document.getElementById('completedDistrictFilter')?.addEventListener('change', applyCompletedFilter);
+            
+            // 日期範圍監聽
+            document.getElementById('completedDateStart')?.addEventListener('change', applyCompletedFilter);
+            document.getElementById('completedDateEnd')?.addEventListener('change', applyCompletedFilter);
+            
+            // 匯出按鈕事件
+            document.getElementById('exportCompletedBtn')?.addEventListener('click', function() {
+                alert('匯出功能將開啟，可下載篩選後的資料清單');
+            });
+            
+            // 匯出待備查清單
+            document.getElementById('exportPendingBtn')?.addEventListener('click', function() {
+                alert('待備查清單匯出功能將開啟');
+            });
+        });
+    </script>
+</body>
+</html>
