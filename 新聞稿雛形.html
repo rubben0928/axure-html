@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建設局新聞稿AI輔助工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f9fc;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #0a5e9e 0%, #0a8ac9 100%);
+            color: white;
+            padding: 25px 0;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            background: white;
+            color: #0a5e9e;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .logo-text p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        .version {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        h2 {
+            color: #0a5e9e;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeff5;
+            font-weight: 600;
+        }
+        
+        h3 {
+            color: #0a8ac9;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .module-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .module-card {
+            background: #f8fbfe;
+            border-left: 5px solid #0a5e9e;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(10, 94, 158, 0.1);
+        }
+        
+        .module-card.active {
+            background: #eef6ff;
+            border-left-color: #ff9800;
+        }
+        
+        .module-icon {
+            font-size: 1.5rem;
+            color: #0a5e9e;
+            margin-bottom: 10px;
+        }
+        
+        .module-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .module-desc {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .rules-list {
+            background: #f8fbfe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .rule-icon {
+            color: #0a8ac9;
+            margin-right: 10px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #0a5e9e;
+        }
+        
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #d1dce5;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #0a8ac9;
+            box-shadow: 0 0 0 3px rgba(10, 138, 201, 0.1);
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #0a5e9e;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn:hover {
+            background: #0a8ac9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .output-container {
+            margin-top: 40px;
+            display: none;
+        }
+        
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .output-content {
+            background: #f8fbfe;
+            border-radius: 8px;
+            padding: 25px;
+            border: 1px solid #eaeff5;
+            white-space: pre-line;
+            line-height: 1.7;
+        }
+        
+        .output-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .highlight {
+            background-color: #fffacd;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eaeff5;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .input-fields {
+            background: #f8fbfe;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .field-group {
+            margin-bottom: 20px;
+        }
+        
+        .field-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .field-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .field-icon {
+            color: #0a8ac9;
+            font-size: 1rem;
+        }
+        
+        @media (max-width: 992px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .btn-group, .output-actions {
+                flex-direction: column;
+            }
+            
+            .module-cards {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .module-card {
+                min-width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>建設局新聞稿AI輔助工具</h1>
+                        <p>智能撰寫 • 風格一致 • 效率提升</p>
+                    </div>
+                </div>
+                <div class="version">
+                    版本 1.0 | 建設局專用
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="dashboard">
+            <div class="sidebar">
+                <h2><i class="fas fa-th-large"></i> 新聞稿模組</h2>
+                
+                <div class="module-cards">
+                    <div class="module-card active" data-module="A">
+                        <div class="module-icon">
+                            <i class="fas fa-hard-hat"></i>
+                        </div>
+                        <div class="module-title">模組A：工程建設／開工／完工</div>
+                        <div class="module-desc">適用於道路、橋樑、公園等公共工程建設新聞稿撰寫，包含開工、施工進度、完工啟用等階段。</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="B">
+                        <div class="module-icon">
+                            <i class="fas fa-award"></i>
+                        </div>
+                        <div class="module-title">模組B：獲獎／評鑑成果</div>
+                        <div class="module-desc">適用於建設局獲得國內外獎項、評鑑優等或特殊榮譽時之新聞稿撰寫。</div>
+                    </div>
+                    
+                    <div class="module-card" data-module="C">
+                        <div class="module-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="module-title">模組C：澄清／輿情回應</div>
+                        <div class="module-desc">適用於網路謠言澄清、政策誤解說明、輿情回應等需要理性溝通之新聞稿。</div>
+                    </div>
+                </div>
+                
+                <div class="rules-list">
+                    <h3><i class="fas fa-list-check"></i> 核心規範提醒</h3>
+                    
+                    <div class="rule-item">
+                        <div class="rule-icon"><i class="fas fa-check-circle"></i></div>
+                        <div>全文約600字，依5W1H架構自然鋪陳</div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-icon"><i class="fas fa-check-circle"></i></div>
+                        <div>語氣中立、專業、口語化，適合市民閱讀</div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-icon"><i class="fas fa-check-circle"></i></div>
+                        <div>必須包含發言人或局長引述</div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-icon"><i class="fas fa-check-circle"></i></div>
+                        <div>標題只能一個，不可有逗號或兩個驚嘆號</div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-icon"><i class="fas fa-check-circle"></i></div>
+                        <div><span class="highlight">「臺中」改「台中」，「本次」改「此次」</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <h2><i class="fas fa-edit"></i> 新聞稿生成器</h2>
+                
+                <div class="form-group">
+                    <label for="newsTitle">新聞標題（請提供關鍵資訊）</label>
+                    <input type="text" id="newsTitle" placeholder="例如：中區綠空廊道二期工程完工啟用 打造都市生態廊帶">
+                </div>
+                
+                <div class="input-fields" id="inputFields">
+                    <!-- 動態生成輸入欄位 -->
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn" id="generateBtn">
+                        <i class="fas fa-robot"></i> 生成新聞稿
+                    </button>
+                    <button class="btn btn-secondary" id="clearBtn">
+                        <i class="fas fa-broom"></i> 清除內容
+                    </button>
+                </div>
+                
+                <div class="output-container" id="outputContainer">
+                    <div class="output-header">
+                        <h3><i class="fas fa-file-alt"></i> 生成結果</h3>
+                        <div id="charCount">字數：0/600</div>
+                    </div>
+                    
+                    <div class="output-content" id="outputContent">
+                        <!-- 生成的新聞稿將顯示在這裡 -->
+                    </div>
+                    
+                    <div class="output-actions">
+                        <button class="btn" id="copyBtn">
+                            <i class="fas fa-copy"></i> 複製內容
+                        </button>
+                        <button class="btn btn-secondary" id="friendlyVersionBtn">
+                            <i class="fas fa-users"></i> 親民口吻版
+                        </button>
+                        <button class="btn btn-secondary" id="summaryVersionBtn">
+                            <i class="fas fa-file-contract"></i> 簡短摘要版
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i> 內容已複製到剪貼簿！
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>台中市政府建設局 新聞稿AI輔助工具 &copy; 2023</p>
+            <p>注意：本工具生成內容需經人工審核確認後方可發布</p>
+            <p>最後更新：2023年10月15日</p>
+        </div>
+    </footer>
+    
+    <script>
+        // 模組欄位配置
+        const moduleFields = {
+            'A': [
+                { id: 'projectName', label: '工程名稱', icon: 'fa-hammer', placeholder: '例如：中區綠空廊道二期工程' },
+                { id: 'location', label: '工程地點', icon: 'fa-map-marker-alt', placeholder: '例如：台中市中區建國路至民權路段' },
+                { id: 'date', label: '時間/日期', icon: 'fa-calendar-alt', placeholder: '例如：2023年10月15日開工，預計2024年6月完工' },
+                { id: 'budget', label: '工程經費', icon: 'fa-money-bill-wave', placeholder: '例如：總經費約新台幣2,500萬元' },
+                { id: 'features', label: '工程特色', icon: 'fa-star', placeholder: '例如：保留舊鐵道元素、新增夜間照明、設置休憩座椅等' },
+                { id: 'benefits', label: '主要效益', icon: 'fa-chart-line', placeholder: '例如：改善區域交通、提升都市景觀、增加綠化空間' },
+                { id: 'quote', label: '局長/發言人引述', icon: 'fa-comment-dots', placeholder: '例如：建設局長表示，此工程將為市民帶來更優質的生活環境...' }
+            ],
+            'B': [
+                { id: 'awardName', label: '獎項名稱', icon: 'fa-trophy', placeholder: '例如：2023年國家卓越建設獎' },
+                { id: 'organizer', label: '主辦單位', icon: 'fa-building', placeholder: '例如：中華民國不動產協進會' },
+                { id: 'date', label: '獲獎日期', icon: 'fa-calendar-alt', placeholder: '例如：2023年9月20日' },
+                { id: 'project', label: '獲獎項目', icon: 'fa-project-diagram', placeholder: '例如：台中市綠川水環境改善計畫' },
+                { id: 'criteria', label: '評選標準', icon: 'fa-check-circle', placeholder: '例如：創新性、永續性、對環境影響等' },
+                { id: 'significance', label: '獲獎意義', icon: 'fa-award', placeholder: '例如：代表台中市在都市景觀改造方面的努力獲得肯定' },
+                { id: 'quote', label: '局長/發言人引述', icon: 'fa-comment-dots', placeholder: '例如：建設局長表示，這個獎項是對市府團隊最大的鼓勵...' }
+            ],
+            'C': [
+                { id: 'issue', label: '澄清事項', icon: 'fa-exclamation-triangle', placeholder: '例如：澄清網路謠傳「某工程延宕是因預算不足」的說法' },
+                { id: 'facts', label: '事實真相', icon: 'fa-clipboard-check', placeholder: '例如：工程按原定進度進行，預計將如期完工' },
+                { id: 'evidence', label: '數據佐證', icon: 'fa-chart-bar', placeholder: '例如：目前工程進度已達85%，預算執行率92%' },
+                { id: 'policy', label: '政策背景', icon: 'fa-file-contract', placeholder: '例如：此工程依公共工程採購法相關規定辦理' },
+                { id: 'position', label: '市府立場', icon: 'fa-balance-scale', placeholder: '例如：市府一貫秉持公開透明原則推動各項建設' },
+                { id: 'followup', label: '後續作為', icon: 'fa-forward', placeholder: '例如：將持續透過官方管道發布工程最新進度' },
+                { id: 'quote', label: '發言人引述', icon: 'fa-comment-dots', placeholder: '例如：發言人強調，市府所有工程均依法辦理，資訊公開透明...' }
+            ]
+        };
+
+        // 模組切換功能
+        document.querySelectorAll('.module-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // 移除所有卡片的active類別
+                document.querySelectorAll('.module-card').forEach(c => {
+                    c.classList.remove('active');
+                });
+                
+                // 為點擊的卡片添加active類別
+                this.classList.add('active');
+                
+                // 根據模組類型更新輸入欄位
+                const module = this.getAttribute('data-module');
+                updateInputFields(module);
+            });
+        });
+
+        // 更新輸入欄位
+        function updateInputFields(module) {
+            const inputFields = document.getElementById('inputFields');
+            const fields = moduleFields[module];
+            
+            let html = '';
+            fields.forEach(field => {
+                html += `
+                    <div class="field-group">
+                        <label for="${field.id}">
+                            <i class="fas ${field.icon} field-icon"></i>
+                            ${field.label}
+                        </label>
+                        <textarea id="${field.id}" placeholder="${field.placeholder}" rows="3"></textarea>
+                    </div>
+                `;
+            });
+            
+            inputFields.innerHTML = html;
+        }
+
+        // 生成新聞稿功能
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            // 獲取當前選中的模組
+            const activeModule = document.querySelector('.module-card.active').getAttribute('data-module');
+            const title = document.getElementById('newsTitle').value.trim();
+            
+            // 獲取所有輸入欄位的值
+            const fieldValues = {};
+            const fields = moduleFields[activeModule];
+            let allFieldsEmpty = true;
+            
+            fields.forEach(field => {
+                const value = document.getElementById(field.id).value.trim();
+                fieldValues[field.id] = value;
+                if (value) allFieldsEmpty = false;
+            });
+            
+            if (!title || allFieldsEmpty) {
+                alert('請填寫標題和至少一項內容重點！');
+                return;
+            }
+            
+            // 顯示載入狀態
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
+            this.disabled = true;
+            
+            // 模擬AI生成過程
+            setTimeout(() => {
+                const generatedContent = generateNewsContent(activeModule, title, fieldValues);
+                
+                // 顯示結果
+                document.getElementById('outputContent').textContent = generatedContent;
+                document.getElementById('outputContainer').style.display = 'block';
+                
+                // 計算字數
+                const charCount = generatedContent.length;
+                document.getElementById('charCount').textContent = `字數：${charCount}/600`;
+                
+                // 恢復按鈕狀態
+                this.innerHTML = originalText;
+                this.disabled = false;
+                
+                // 滾動到結果區域
+                document.getElementById('outputContainer').scrollIntoView({ behavior: 'smooth' });
+            }, 1500);
+        });
+
+        // 生成新聞稿內容的模擬函數
+        function generateNewsContent(module, title, fieldValues) {
+            const dateStr = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+            let content = '';
+            
+            // 根據模組類型生成不同內容
+            if (module === 'A') {
+                content = `台中市政府新聞稿
+
+${title}
+
+發布單位：台中市政府建設局
+發布日期：${dateStr}
+
+台中市政府持續推動公共建設，${fieldValues.projectName ? `此次「${fieldValues.projectName}」` : '此次工程'}體現市府對基礎建設的重視與投入。${fieldValues.location ? `工程位於${fieldValues.location}，` : ''}${fieldValues.date ? `於${fieldValues.date}。` : ''}
+
+${fieldValues.budget ? `此次工程總經費${fieldValues.budget}，` : ''}${fieldValues.features ? `工程特色包括${fieldValues.features}。` : ''}${fieldValues.benefits ? `預期效益為${fieldValues.benefits}，` : ''}將為市民帶來實質改善。
+
+建設局長陳大田表示，${fieldValues.quote || '此次工程從規劃到執行，市府團隊均秉持專業與用心，以最高標準進行各項作業，確保工程品質符合市民期待。'}
+
+此次工程執行過程中所遇到的挑戰，市府團隊均以積極態度面對並尋求最佳解決方案。工程完成後預期將帶來多項正面效益，包括改善交通動線、提升公共安全及美化都市景觀等面向。
+
+市府表示，未來將持續關注各項公共建設的維護與管理，確保設施長期發揮應有功能。同時也感謝市民在工程期間的配合與體諒，市府團隊將繼續以市民福祉為優先，推動各項有利台中發展的建設工作。`;
+                
+            } else if (module === 'B') {
+                content = `台中市政府新聞稿
+
+${title}
+
+發布單位：台中市政府建設局
+發布日期：${dateStr}
+
+台中市政府建設局近日獲得重要獎項肯定，${fieldValues.awardName ? `榮獲「${fieldValues.awardName}」，` : ''}${fieldValues.organizer ? `由${fieldValues.organizer}主辦，` : ''}${fieldValues.date ? `於${fieldValues.date}頒發。` : ''}
+
+${fieldValues.project ? `此次獲獎項目為「${fieldValues.project}」，` : ''}${fieldValues.criteria ? `評選標準包括${fieldValues.criteria}。` : ''}${fieldValues.significance ? `此次獲獎意義在於${fieldValues.significance}。` : ''}
+
+建設局長陳大田表示，${fieldValues.quote || '此次獲獎是市府團隊共同努力的成果，感謝所有同仁的付出與市民的支持。市府將以此為動力，持續提升各項建設品質，為市民提供更優質的公共服務與設施。'}
+
+此次獎項評選過程嚴謹，台中市能夠脫穎而出，顯示市府在相關領域的規劃與執行能力已達一定水準。獲獎項目具有示範意義，其成功經驗可作為未來其他建設的參考。
+
+市府指出，榮譽的背後是持續的努力與堅持，未來將持續精進各項市政工作。建設局將以此次獲獎為契機，檢視現行作業流程，尋求更優化的執行方式，確保市政建設品質持續提升。`;
+                
+            } else if (module === 'C') {
+                content = `台中市政府新聞稿
+
+${title}
+
+發布單位：台中市政府建設局
+發布日期：${dateStr}
+
+針對近日外界關注議題，台中市政府建設局提出說明。${fieldValues.issue ? `關於「${fieldValues.issue}」，` : ''}市府一向重視資訊透明度與公共溝通，對於市民關心的事項均會積極說明，確保正確資訊傳達。
+
+${fieldValues.facts ? `事實真相為：${fieldValues.facts}。` : ''}${fieldValues.evidence ? `相關數據佐證：${fieldValues.evidence}。` : ''}${fieldValues.policy ? `政策背景：${fieldValues.policy}。` : ''}
+
+建設局發言人表示，${fieldValues.quote || '市府各項政策與建設均依相關法規與專業評估執行，過程公開透明。對於外界不同看法，市府予以尊重，並願意就事實部分進行理性溝通，以促進公共議題的建設性討論。'}
+
+此次澄清說明的重點在於呈現事實全貌，避免片段資訊導致誤解。市府已就相關議題進行完整檢視，確認各項作業均符合規定並以公共利益為優先考量。
+
+${fieldValues.position ? `市府立場：${fieldValues.position}。` : ''}${fieldValues.followup ? `後續作為：${fieldValues.followup}。` : ''}市府強調，公共建設的推動需要兼顧多元面向，包括專業評估、法規遵循及民意溝通等。`;
+            }
+            
+            // 確保使用正確的用詞
+            content = content.replace(/臺中/g, '台中').replace(/本次/g, '此次');
+            
+            // 添加用戶提供的內容作為參考
+            content += `\n\n【根據您提供的資訊，以上新聞稿已按照${module}模組規範生成。請人工審核內容並調整細節部分。】`;
+            
+            return content;
+        }
+        
+        // 清除內容功能
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            document.getElementById('newsTitle').value = '';
+            
+            // 清除所有輸入欄位
+            const fields = document.querySelectorAll('#inputFields textarea');
+            fields.forEach(field => {
+                field.value = '';
+            });
+            
+            document.getElementById('outputContainer').style.display = 'none';
+        });
+        
+        // 複製內容功能
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const content = document.getElementById('outputContent').textContent;
+            
+            navigator.clipboard.writeText(content).then(() => {
+                // 顯示通知
+                const notification = document.getElementById('notification');
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            });
+        });
+        
+        // 親民口吻版功能（模擬）
+        document.getElementById('friendlyVersionBtn').addEventListener('click', function() {
+            alert('親民口吻版功能需連接後端AI服務，此為示範介面。實際應用中，系統將根據原始新聞稿生成更口語化、親民的版本。');
+        });
+        
+        // 簡短摘要版功能（模擬）
+        document.getElementById('summaryVersionBtn').addEventListener('click', function() {
+            alert('簡短摘要版功能需連接後端AI服務，此為示範介面。實際應用中，系統將生成約300字的重點摘要版本。');
+        });
+        
+        // 初始化
+        updateInputFields('A');
+    </script>
+</body>
+</html>
