@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兒童遊戲場維護管理系統 - 台中市待維護區</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f9ff;
+            color: #333;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(13, 71, 161, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 批量操作區域樣式 */
+        .batch-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 10px;
+            border: 1px solid #bbdefb;
+        }
+        
+        .batch-selectors {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .batch-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .batch-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .batch-checkbox label {
+            font-weight: 600;
+            color: #1565c0;
+            cursor: pointer;
+        }
+        
+        .batch-action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .batch-action-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .batch-remove-btn {
+            background: #1e88e5;
+            color: white;
+        }
+        
+        .batch-remove-btn:hover {
+            background: #1565c0;
+        }
+        
+        .batch-cancel-btn {
+            background: #f0f0f0;
+            color: #555;
+        }
+        
+        .batch-cancel-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        /* 表格中選擇框的樣式 */
+        .select-checkbox {
+            text-align: center;
+        }
+        
+        .select-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex-grow: 1;
+        }
+        
+        /* 指示燈區域 */
+        .indicator-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-right: 20px;
+            padding: 8px 15px;
+            background: #f8fafd;
+            border-radius: 8px;
+            border: 1px solid #e1e8f0;
+        }
+        
+        .indicator-title {
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+        
+        .indicators {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .indicator-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        
+        .indicator-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .indicator-light {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .red-light {
+            background-color: #f44336;
+            box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+        }
+        
+        .yellow-light {
+            background-color: #ff9800;
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+        }
+        
+        .green-light {
+            background-color: #4caf50;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+        }
+        
+        .indicator-text {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: #f8fafd;
+            border-radius: 8px;
+            padding: 8px 15px;
+            border: 1px solid #e1e8f0;
+            min-width: 200px;
+        }
+        
+        .search-box input {
+            border: none;
+            background: transparent;
+            padding: 8px;
+            width: 100%;
+            outline: none;
+            font-size: 1rem;
+        }
+        
+        .date-filter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-filter label {
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+        
+        .date-input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        
+        .filter-btn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: #1565c0;
+        }
+        
+        .reset-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.3s;
+        }
+        
+        .reset-btn:hover {
+            background: #f57c00;
+        }
+        
+        .export-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+            white-space: nowrap;
+        }
+        
+        .export-btn:hover {
+            background: #388e3c;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        thead {
+            background: #e3f2fd;
+        }
+        
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #1565c0;
+            border-bottom: 2px solid #bbdefb;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        th:hover {
+            background-color: #d4e7fa;
+        }
+        
+        th i {
+            margin-left: 5px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        
+        td {
+            padding: 16px 12px;
+            border-bottom: 1px solid #eef5ff;
+        }
+        
+        tr:hover {
+            background-color: #f8fbff;
+        }
+        
+        /* 表格中的定檢燈號樣式 */
+        .inspection-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 auto;
+        }
+        
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        /* 更新檢驗結果狀態樣式 */
+        .result-qualified {
+            background-color: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .result-improving-L1 {
+            background-color: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .result-improving-L2 {
+            background-color: #fff3e0;
+            color: #ff9800;
+            border-left: 3px solid #ff9800;
+        }
+        
+        .result-improving-L3 {
+            background-color: #ffebee;
+            color: #f44336;
+            border-left: 3px solid #f44336;
+        }
+        
+        .result-completed-improvement {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .register-btn {
+            background-color: #1e88e5;
+            color: white;
+        }
+        
+        .register-btn:hover {
+            background-color: #1565c0;
+        }
+        
+        .delete-btn {
+            background-color: #ffebee;
+            color: #d32f2f;
+            margin-left: 8px;
+        }
+        
+        .delete-btn:hover {
+            background-color: #ffcdd2;
+        }
+        
+        .playground-row {
+            background-color: #f9f9f9;
+            border-left: 3px solid #bbdefb;
+            padding: 5px 0;
+        }
+        
+        .playground-row:last-child {
+            border-bottom: none;
+        }
+        
+        .playground-row td {
+            padding: 12px 12px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1100px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eef5ff;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #1565c0;
+            font-weight: 700;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close-btn:hover {
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        .info-field {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #f8fafd;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .park-info {
+            font-weight: 600;
+            color: #1565c0;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #1e88e5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
+        }
+        
+        .readonly-field {
+            background-color: #f5f5f5;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .editable-field {
+            background-color: white;
+            color: #333;
+        }
+        
+        .playground-section {
+            background: #f8fafd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #1e88e5;
+        }
+        
+        .playground-title {
+            font-weight: 700;
+            color: #1565c0;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 改善分級選擇器樣式 */
+        .improvement-level-group {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+        
+        .improvement-level-group h4 {
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .level-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .level-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .level-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .level-badge-L1 {
+            background-color: #fff3e0;
+            color: #ff9800;
+        }
+        
+        .level-badge-L2 {
+            background-color: #ffecb3;
+            color: #ff8f00;
+        }
+        
+        .level-badge-L3 {
+            background-color: #ffcdd2;
+            color: #f44336;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(to right, #1e88e5, #0d47a1);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 136, 229, 0.3);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #888;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #bbdefb;
+        }
+        
+        .empty-state p {
+            font-size: 1.2rem;
+        }
+        
+        .upload-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            border: 1px dashed #bbdefb;
+        }
+        
+        .upload-btn {
+            background: #1e88e5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.3s;
+            margin-bottom: 10px;
+        }
+        
+        .upload-btn:hover {
+            background: #1565c0;
+        }
+        
+        .file-list {
+            margin-top: 10px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            border: 1px solid #eef5ff;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-grow: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            color: #333;
+            word-break: break-all;
+        }
+        
+        .file-size {
+            color: #777;
+            font-size: 0.9rem;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .file-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            padding: 4px;
+            border-radius: 4px;
+        }
+        
+        .file-action-btn:hover {
+            background: #f0f0f0;
+        }
+        
+        .district-select {
+            min-width: 150px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #d32f2f;
+        }
+        
+        .optional-field::after {
+            content: " (選填)";
+            color: #777;
+            font-size: 0.9rem;
+            font-weight: normal;
+        }
+        
+        .form-note {
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 5px;
+        }
+        
+        /* 每個遊戲場的儲存按鈕樣式 */
+        .playground-save-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+        
+        .playground-save-btn:hover {
+            background: #388e3c;
+        }
+        
+        /* 新增：遊戲場區域標籤 */
+        .playground-area-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e3f2fd;
+            color: #1565c0;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        /* 新增：檢驗報告計數標籤 */
+        .report-count-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e8f5e9;
+            color: #388e3c;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        
+        /* 新增：日期顯示區塊樣式 */
+        .date-display {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f8fafd;
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        /* 新增：排檢狀態選擇器樣式 */
+        .inspection-arrangement-group {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+        }
+        
+        .inspection-arrangement-options {
+            display: flex;
+            gap: 25px;
+            margin-top: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            .container {
+                padding: 0 10px;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box, .date-filter {
+                width: 100%;
+            }
+            
+            .date-filter {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .indicator-section {
+                width: 100%;
+                margin-right: 0;
+                justify-content: center;
+            }
+            
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+            
+            .indicators {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 5px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-child"></i> 台中市兒童遊戲場維護管理系統</h1>
+            <p class="subtitle">管理台中市各行政區兒童遊戲場的待維護檢驗記錄，確保遊戲設施符合安全標準，提供兒童安全遊憩環境</p>
+        </header>
+        
+        <!-- 待維護區內容 -->
+        <div class="batch-actions" id="batch-actions" style="display: none;">
+            <div class="batch-selectors">
+                <div class="batch-checkbox">
+                    <input type="checkbox" id="select-all-pending" onchange="toggleSelectAllPending(this.checked)">
+                    <label for="select-all-pending">全選</label>
+                </div>
+                <span id="selected-count">已選擇 0 個公園</span>
+            </div>
+            <div class="batch-action-buttons">
+                <button class="batch-action-btn batch-cancel-btn" onclick="clearAllSelections()">
+                    <i class="fas fa-times"></i> 取消選擇
+                </button>
+                <button class="batch-action-btn batch-remove-btn" onclick="batchRemoveFromPending()">
+                    <i class="fas fa-check-circle"></i> 批量解除列管
+                </button>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="filter-section">
+                <!-- 指示燈區域 -->
+                <div class="indicator-section">
+                    <div class="indicator-title">定檢狀態篩選：</div>
+                    <div class="indicators">
+                        <div class="indicator-item">
+                            <input type="checkbox" id="red-light-filter" class="indicator-checkbox" onchange="applyLightFilter()">
+                            <span class="indicator-light red-light"></span>
+                            <span class="indicator-text">已超過檢驗期限</span>
+                        </div>
+                        <div class="indicator-item">
+                            <input type="checkbox" id="yellow-light-filter" class="indicator-checkbox" onchange="applyLightFilter()">
+                            <span class="indicator-light yellow-light"></span>
+                            <span class="indicator-text">預定檢驗日期在六個月內</span>
+                        </div>
+                        <div class="indicator-item">
+                            <input type="checkbox" id="green-light-filter" class="indicator-checkbox" onchange="applyLightFilter()">
+                            <span class="indicator-light green-light"></span>
+                            <span class="indicator-text">距離檢驗日期超過六個月</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-pending" placeholder="搜尋公園名稱..." oninput="filterPendingData()">
+                </div>
+                
+                <div class="district-filter">
+                    <select id="district-filter" class="district-select" onchange="filterPendingData()">
+                        <option value="">所有行政區</option>
+                        <!-- 行政區選項將由 JavaScript 動態生成 -->
+                    </select>
+                </div>
+                
+                <div class="date-filter">
+                    <label>預定檢驗日期區間：</label>
+                    <input type="date" id="date-start" class="date-input" onchange="filterPendingData()">
+                    <span>至</span>
+                    <input type="date" id="date-end" class="date-input" onchange="filterPendingData()">
+                    <button class="filter-btn" id="filter-date" onclick="filterPendingData()">
+                        <i class="fas fa-filter"></i> 篩選
+                    </button>
+                    <button class="reset-btn" id="reset-filter" onclick="resetFilters()">
+                        <i class="fas fa-redo"></i> 重設
+                    </button>
+                </div>
+            </div>
+            <button class="export-btn" id="export-pending" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> 匯出 Excel
+            </button>
+        </div>
+        
+        <div class="table-container">
+            <table id="pending-table">
+                <thead>
+                    <tr>
+                        <th class="select-checkbox"><input type="checkbox" id="select-all-header" onchange="toggleSelectAllFromHeader(this.checked)"></th>
+                        <th onclick="sortTable('serial')">序號 <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('district')">行政區 <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('parkName')">公園名稱 <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('playgroundArea')">遊戲場區域(檢驗報告編號) <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('light')">定檢燈號 <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('plannedDate')">預定檢驗日期 <i class="fas fa-sort"></i></th>
+                        <th onclick="sortTable('result')">檢驗結果 <i class="fas fa-sort"></i></th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="pending-tbody">
+                    <!-- 待維護資料會由 JavaScript 動態生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- 登錄維護模態視窗（待維護區使用，可編輯） -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">登錄維護記錄</h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <form id="maintenance-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required-field">公園名稱</label>
+                        <div class="info-field park-info" id="park-name-display"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-field">行政區</label>
+                        <div class="info-field" id="district-display"></div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required-field">遊戲場區域數</label>
+                        <div class="info-field" id="playground-area-count-display"></div>
+                        <p class="form-note">每個遊戲場區域可能有多個檢驗報告</p>
+                    </div>
+                </div>
+                
+                <div id="playgrounds-container">
+                    <!-- 遊戲場檢驗表會由 JavaScript 動態生成 -->
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 檢視報告模態視窗 -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">檢驗報告檢視</h2>
+                <button class="close-btn" id="close-report-modal">&times;</button>
+            </div>
+            <div id="report-content">
+                <!-- 報告內容會由 JavaScript 動態生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 台中市行政區列表
+        const taichungDistricts = [
+            "中區", "東區", "南區", "西區", "北區", "北屯區", "西屯區", "南屯區",
+            "太平區", "大里區", "霧峰區", "烏日區", "豐原區", "后里區", "石岡區",
+            "東勢區", "和平區", "新社區", "潭子區", "大雅區", "神岡區", "大肚區",
+            "沙鹿區", "龍井區", "梧棲區", "清水區", "大甲區", "外埔區", "大安區"
+        ];
+        
+        // 公園名稱列表（用於隨機生成資料）
+        const parkNames = [
+            "文心森林公園", "秋紅谷生態公園", "豐樂雕塑公園", "台中公園", "東英公園",
+            "美術館園區兒童遊戲場", "中正公園", "雙十園區", "英才公園", "北屯兒童公園",
+            "南屯兒童公園", "西屯兒童公園", "太平坪林公園", "大里兒童公園", "霧峰省議會公園",
+            "烏日高鐵公園", "豐原葫蘆墩公園", "后里馬場公園", "石岡土牛運動公園", "東勢河濱公園",
+            "新社花海公園", "潭子運動公園", "大雅公園", "神岡運動公園", "大肚環保公園",
+            "沙鹿公園", "龍井運動公園", "梧棲運動公園", "清水鰲峰山公園", "大甲運動公園",
+            "外埔公園", "大安濱海公園"
+        ];
+        
+        // 遊戲場區域代號
+        const playgroundAreas = ["A", "B", "C", "D", "E", "F"];
+        
+        // 模擬資料 - 台中市轄區及公園
+        let playgroundsData = [];
+        
+        // 儲存上傳的檔案
+        const uploadedFiles = {};
+        
+        // 新增：被選擇的公園ID陣列
+        let selectedParkIds = [];
+        
+        // 排序狀態
+        let currentSortColumn = '';
+        let currentSortDirection = 'asc';
+        
+        // DOM 元素
+        const pendingTbody = document.getElementById('pending-tbody');
+        const registerModal = document.getElementById('register-modal');
+        const reportModal = document.getElementById('report-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeReportModalBtn = document.getElementById('close-report-modal');
+        const searchPendingInput = document.getElementById('search-pending');
+        const exportPendingBtn = document.getElementById('export-pending');
+        const dateStartInput = document.getElementById('date-start');
+        const dateEndInput = document.getElementById('date-end');
+        const districtFilter = document.getElementById('district-filter');
+        
+        // 當前正在編輯的公園 ID
+        let currentParkId = null;
+        let currentArea = null;
+        let currentReportNumber = null;
+        
+        // 隨機生成公園資料函數（每個遊戲場區域可有多個檢驗報告）
+        function generateRandomParkData() {
+            const today = new Date();
+            const parks = [];
+            
+            // 生成12個隨機公園
+            for (let i = 0; i < 12; i++) {
+                const parkId = i + 1;
+                const districtIndex = Math.floor(Math.random() * taichungDistricts.length);
+                const parkNameIndex = Math.floor(Math.random() * parkNames.length);
+                
+                // 隨機決定遊戲場區域數量 (1-4個)
+                const playgroundAreaCount = Math.floor(Math.random() * 4) + 1;
+                const selectedAreas = playgroundAreas.slice(0, playgroundAreaCount);
+                
+                // 儲存所有檢驗報告（每個遊戲場區域可能有多個報告）
+                const allReports = [];
+                
+                // 為每個遊戲場區域生成報告
+                selectedAreas.forEach((area, areaIndex) => {
+                    // 每個區域隨機生成1-3個檢驗報告
+                    const reportCount = Math.floor(Math.random() * 3) + 1;
+                    
+                    for (let j = 0; j < reportCount; j++) {
+                        const reportId = `${parkId}-${area}-${j+1}`;
+                        
+                        // 隨機選擇燈號狀態
+                        const lightOptions = ["red-light", "yellow-light", "green-light"];
+                        const lightIndex = Math.floor(Math.random() * lightOptions.length);
+                        const light = lightOptions[lightIndex];
+                        
+                        // 根據燈號生成相應的檢驗日期
+                        let plannedDate;
+                        
+                        // 根據燈號生成日期
+                        if (light === "red-light") {
+                            // 紅燈：已過期（1-90天前）
+                            const daysAgo = Math.floor(Math.random() * 90) + 1;
+                            plannedDate = new Date(today);
+                            plannedDate.setDate(today.getDate() - daysAgo);
+                        } else if (light === "yellow-light") {
+                            // 黃燈：未來6個月內（1-180天後）
+                            const daysAfter = Math.floor(Math.random() * 180) + 1;
+                            plannedDate = new Date(today);
+                            plannedDate.setDate(today.getDate() + daysAfter);
+                        } else {
+                            // 綠燈：未來超過6個月（181-365天後）
+                            const daysAfter = Math.floor(Math.random() * 185) + 181;
+                            plannedDate = new Date(today);
+                            plannedDate.setDate(today.getDate() + daysAfter);
+                        }
+                        
+                        // 格式化日期
+                        const plannedDateStr = plannedDate.toISOString().split('T')[0];
+                        
+                        // 隨機決定是否已完成
+                        const isCompleted = Math.random() > 0.5; // 50%機率已完成
+                        
+                        // 隨機生成檢驗報告數量
+                        const actualReportCount = isCompleted ? 1 : 0;
+                        
+                        // 隨機決定檢驗結果
+                        const resultOptions = ["檢驗合格", "改善中, L1-例行維護", "改善中, L2-1個月內處理", "改善中, L3-3個月內處理", "已完成改善"];
+                        let result = resultOptions[Math.floor(Math.random() * resultOptions.length)];
+                        
+                        // 根據檢驗結果設置燈號
+                        let finalLight = light;
+                        if (result === "檢驗合格" || result === "已完成改善") {
+                            finalLight = "green-light";
+                        } else if (result.includes("改善中")) {
+                            if (result.includes("L3")) {
+                                finalLight = "red-light";
+                            } else {
+                                finalLight = "red-light";
+                            }
+                        }
+                        
+                        // 計算實際檢驗日期
+                        let actualDate = "";
+                        if (isCompleted) {
+                            actualDate = new Date(plannedDate);
+                            const daysAgo = Math.floor(Math.random() * 10); // 0-9天前
+                            actualDate.setDate(actualDate.getDate() - daysAgo);
+                            actualDate = actualDate.toISOString().split('T')[0];
+                        }
+                        
+                        allReports.push({
+                            id: reportId,
+                            parkId: parkId,
+                            area: area,
+                            reportNumber: j + 1,
+                            light: finalLight,
+                            plannedDate: plannedDateStr,
+                            actualDate: actualDate,
+                            result: result,
+                            isCompleted: isCompleted,
+                            reportCount: actualReportCount,
+                            areaIndex: areaIndex + 1 // 區域編號
+                        });
+                    }
+                });
+                
+                parks.push({
+                    id: parkId,
+                    district: taichungDistricts[districtIndex],
+                    parkName: parkNames[parkNameIndex],
+                    playgroundAreaCount: playgroundAreaCount,
+                    playgroundAreas: selectedAreas,
+                    reports: allReports, // 所有檢驗報告
+                    totalReportCount: allReports.length // 總報告數
+                });
+            }
+            
+            // 特別添加您提到的示例：沙鹿區東勢河濱公園
+            parks.push({
+                id: parks.length + 1,
+                district: "沙鹿區",
+                parkName: "東勢河濱公園",
+                playgroundAreaCount: 3,
+                playgroundAreas: ["A", "B", "C"],
+                reports: [
+                    // A區有1個檢驗報告
+                    {
+                        id: `${parks.length + 1}-A-1`,
+                        parkId: parks.length + 1,
+                        area: "A",
+                        reportNumber: 1,
+                        light: "yellow-light",
+                        plannedDate: "2024-08-15",
+                        actualDate: "2024-08-10",
+                        result: "檢驗合格",
+                        isCompleted: true,
+                        reportCount: 1,
+                        areaIndex: 1
+                    },
+                    // B區有1個檢驗報告
+                    {
+                        id: `${parks.length + 1}-B-1`,
+                        parkId: parks.length + 1,
+                        area: "B",
+                        reportNumber: 1,
+                        light: "red-light",
+                        plannedDate: "2024-07-30",
+                        actualDate: "",
+                        result: "改善中, L3-3個月內處理",
+                        isCompleted: false,
+                        reportCount: 0,
+                        areaIndex: 2
+                    },
+                    // C區有2個檢驗報告
+                    {
+                        id: `${parks.length + 1}-C-1`,
+                        parkId: parks.length + 1,
+                        area: "C",
+                        reportNumber: 1,
+                        light: "green-light",
+                        plannedDate: "2024-12-10",
+                        actualDate: "",
+                        result: "",
+                        isCompleted: false,
+                        reportCount: 0,
+                        areaIndex: 3
+                    },
+                    {
+                        id: `${parks.length + 1}-C-2`,
+                        parkId: parks.length + 1,
+                        area: "C",
+                        reportNumber: 2,
+                        light: "yellow-light",
+                        plannedDate: "2024-11-20",
+                        actualDate: "2024-11-15",
+                        result: "改善中, L1-例行維護",
+                        isCompleted: true,
+                        reportCount: 1,
+                        areaIndex: 3
+                    }
+                ],
+                totalReportCount: 4
+            });
+            
+            return parks;
+        }
+        
+        // 獲取隨機過去日期
+        function getRandomPastDate(baseDate, asString = false) {
+            const date = new Date(baseDate);
+            const daysAgo = Math.floor(Math.random() * 10); // 0-9天前
+            date.setDate(date.getDate() - daysAgo);
+            
+            return asString ? date.toISOString().split('T')[0] : date.toISOString().split('T')[0];
+        }
+        
+        // 初始化頁面
+        function init() {
+            const today = new Date();
+            
+            // 隨機生成公園資料
+            playgroundsData = generateRandomParkData();
+            
+            // 設定待維護區預設日期範圍 (最近三個月)
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            const twoMonthsLater = new Date(today);
+            twoMonthsLater.setMonth(today.getMonth() + 2);
+            
+            dateStartInput.value = oneMonthAgo.toISOString().split('T')[0];
+            dateEndInput.value = twoMonthsLater.toISOString().split('T')[0];
+            
+            // 填充行政區下拉選單
+            populateDistrictSelect(districtFilter);
+            
+            // 新增：初始化選擇陣列
+            selectedParkIds = [];
+            
+            renderPendingTable();
+            setupEventListeners();
+        }
+        
+        // 填充行政區下拉選單
+        function populateDistrictSelect(selectElement) {
+            selectElement.innerHTML = '<option value="">所有行政區</option>';
+            taichungDistricts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                selectElement.appendChild(option);
+            });
+        }
+        
+        // 計算定檢燈號
+        function calculateInspectionLight(plannedDate) {
+            if (!plannedDate) return 'green-light'; // 如果沒有日期，預設綠燈
+            
+            const today = new Date();
+            const planned = new Date(plannedDate);
+            
+            // 清除時間部分，只比較日期
+            today.setHours(0, 0, 0, 0);
+            planned.setHours(0, 0, 0, 0);
+            
+            // 計算日期差異（毫秒）
+            const diffTime = planned - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // 如果已過期，紅燈
+            if (diffDays < 0) {
+                return 'red-light';
+            } 
+            // 如果距離檢驗日期在6個月內（180天），黃燈
+            else if (diffDays <= 180) {
+                return 'yellow-light';
+            }
+            // 如果距離檢驗日期超過6個月，綠燈
+            else {
+                return 'green-light';
+            }
+        }
+        
+        // 獲取燈號提示文字
+        function getLightTooltip(plannedDate) {
+            if (!plannedDate) return "無檢驗日期";
+            
+            const today = new Date();
+            const planned = new Date(plannedDate);
+            
+            // 清除時間部分，只比較日期
+            today.setHours(0, 0, 0, 0);
+            planned.setHours(0, 0, 0, 0);
+            
+            // 計算日期差異（毫秒）
+            const diffTime = planned - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) {
+                return `已超過檢驗期限 ${Math.abs(diffDays)} 天`;
+            } else if (diffDays <= 180) {
+                return `距離檢驗日期還有 ${diffDays} 天（六個月內）`;
+            } else {
+                return `距離檢驗日期超過六個月（${diffDays} 天）`;
+            }
+        }
+        
+        // 根據檢驗結果獲取CSS類
+        function getResultClass(result) {
+            if (!result) return '';
+            
+            if (result === "檢驗合格") {
+                return 'result-qualified';
+            } else if (result === "已完成改善") {
+                return 'result-completed-improvement';
+            } else if (result.includes("改善中")) {
+                if (result.includes("L1")) {
+                    return 'result-improving-L1';
+                } else if (result.includes("L2")) {
+                    return 'result-improving-L2';
+                } else if (result.includes("L3")) {
+                    return 'result-improving-L3';
+                } else {
+                    return 'result-improving-L1';
+                }
+            }
+            return '';
+        }
+        
+        // 渲染待維護表格 - 每個檢驗報告獨立一行
+        function renderPendingTable(data = playgroundsData) {
+            pendingTbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                pendingTbody.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-check"></i>
+                                <p>目前沒有待維護的遊戲場</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                updateBatchActions();
+                return;
+            }
+            
+            // 計算總行數（每個檢驗報告一行）
+            let rowIndex = 0;
+            
+            data.forEach(park => {
+                // 為每個檢驗報告創建一行
+                park.reports.forEach((report, reportIndex) => {
+                    const row = document.createElement('tr');
+                    
+                    // 決定行背景色（交替）
+                    if (rowIndex % 2 === 0) {
+                        row.style.backgroundColor = '#f9f9f9';
+                    }
+                    
+                    // 檢查此公園是否已被選擇
+                    const isChecked = selectedParkIds.includes(park.id);
+                    
+                    // 判斷這是否是該公園的第一行
+                    const isFirstRowForPark = reportIndex === 0;
+                    
+                    row.innerHTML = `
+                        <td class="select-checkbox">
+                            ${isFirstRowForPark ? 
+                                `<input type="checkbox" class="park-checkbox" data-park-id="${park.id}" ${isChecked ? 'checked' : ''} onchange="toggleParkSelection(${park.id}, this.checked)">` 
+                                : ''}
+                        </td>
+                        <td>${park.id}</td>
+                        <td>${park.district}</td>
+                        <td>${park.parkName}</td>
+                        <td>
+                            ${report.area}區 (${report.reportNumber})
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="inspection-light ${report.light}" title="${getLightTooltip(report.plannedDate)}"></span>
+                        </td>
+                        <td>${formatDate(report.plannedDate)}</td>
+                        <td>
+                            <span class="status-badge ${getResultClass(report.result)}">
+                                ${report.result || "未檢驗"}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="action-btn register-btn" onclick="openRegisterModal(${park.id}, '${report.area}', ${report.reportNumber})">登錄維護</button>
+                        </td>
+                    `;
+                    pendingTbody.appendChild(row);
+                    rowIndex++;
+                });
+            });
+            
+            // 更新批量操作區域
+            updateBatchActions();
+        }
+        
+        // 表格排序功能
+        function sortTable(column) {
+            // 更新排序圖標
+            updateSortIcons(column);
+            
+            // 獲取當前排序方向
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            
+            // 複製數據進行排序
+            const sortedData = [...playgroundsData];
+            
+            sortedData.sort((a, b) => {
+                let aValue, bValue;
+                
+                switch(column) {
+                    case 'serial':
+                        aValue = a.id;
+                        bValue = b.id;
+                        break;
+                    case 'district':
+                        aValue = a.district;
+                        bValue = b.district;
+                        break;
+                    case 'parkName':
+                        aValue = a.parkName;
+                        bValue = b.parkName;
+                        break;
+                    case 'playgroundArea':
+                        // 按遊戲場區域排序
+                        aValue = a.playgroundAreas.join(',');
+                        bValue = b.playgroundAreas.join(',');
+                        break;
+                    case 'light':
+                        // 按燈號排序（紅>黃>綠）
+                        aValue = getLightPriority(a);
+                        bValue = getLightPriority(b);
+                        break;
+                    case 'plannedDate':
+                        // 按最早的預定檢驗日期排序
+                        aValue = getEarliestPlannedDate(a);
+                        bValue = getEarliestPlannedDate(b);
+                        break;
+                    case 'result':
+                        // 按檢驗結果排序
+                        aValue = getResultPriority(a);
+                        bValue = getResultPriority(b);
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                // 排序
+                if (aValue < bValue) {
+                    return currentSortDirection === 'asc' ? -1 : 1;
+                }
+                if (aValue > bValue) {
+                    return currentSortDirection === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            renderPendingTable(sortedData);
+        }
+        
+        // 獲取燈號優先級（紅>黃>綠）
+        function getLightPriority(park) {
+            const lights = park.reports.map(r => r.light);
+            
+            // 檢查是否有紅燈
+            if (lights.includes('red-light')) return 1;
+            // 檢查是否有黃燈
+            if (lights.includes('yellow-light')) return 2;
+            // 其他為綠燈
+            return 3;
+        }
+        
+        // 獲取最早的預定檢驗日期
+        function getEarliestPlannedDate(park) {
+            const dates = park.reports.map(r => r.plannedDate).filter(d => d);
+            if (dates.length === 0) return '9999-12-31'; // 沒有日期的排最後
+            return dates.sort()[0];
+        }
+        
+        // 獲取檢驗結果優先級
+        function getResultPriority(park) {
+            const results = park.reports.map(r => r.result);
+            
+            // 檢查是否有改善中
+            if (results.some(r => r && r.includes("改善中"))) return 2;
+            // 檢查是否有合格
+            if (results.some(r => r && r.includes("合格"))) return 1;
+            // 檢查是否有已完成改善
+            if (results.some(r => r && r.includes("已完成改善"))) return 3;
+            // 未檢驗
+            return 4;
+        }
+        
+        // 更新排序圖標
+        function updateSortIcons(column) {
+            // 清除所有圖標
+            const headers = document.querySelectorAll('th');
+            headers.forEach(header => {
+                const icon = header.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-sort';
+                }
+            });
+            
+            // 設置當前排序列的圖標
+            const currentHeader = document.querySelector(`th[onclick="sortTable('${column}')"]`);
+            if (currentHeader) {
+                const icon = currentHeader.querySelector('i');
+                if (icon) {
+                    icon.className = currentSortColumn === column && currentSortDirection === 'asc' ? 
+                        'fas fa-sort-up' : 'fas fa-sort-down';
+                }
+            }
+        }
+        
+        // 新增：切換公園選擇狀態
+        function toggleParkSelection(parkId, isChecked) {
+            if (isChecked) {
+                if (!selectedParkIds.includes(parkId)) {
+                    selectedParkIds.push(parkId);
+                }
+            } else {
+                selectedParkIds = selectedParkIds.filter(id => id !== parkId);
+            }
+            
+            updateBatchActions();
+            updateSelectAllCheckbox();
+        }
+        
+        // 新增：從表頭全選/取消全選
+        function toggleSelectAllFromHeader(isChecked) {
+            const checkboxes = document.querySelectorAll('.park-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+                const parkId = parseInt(checkbox.getAttribute('data-park-id'));
+                toggleParkSelection(parkId, isChecked);
+            });
+        }
+        
+        // 新增：從批量操作區域全選/取消全選
+        function toggleSelectAllPending(isChecked) {
+            toggleSelectAllFromHeader(isChecked);
+        }
+        
+        // 新增：更新全選核取方塊狀態
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('.park-checkbox');
+            const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+            const headerCheckbox = document.getElementById('select-all-header');
+            const batchCheckbox = document.getElementById('select-all-pending');
+            
+            if (headerCheckbox) headerCheckbox.checked = allChecked;
+            if (batchCheckbox) batchCheckbox.checked = allChecked;
+        }
+        
+        // 新增：更新批量操作區域顯示
+        function updateBatchActions() {
+            const batchActions = document.getElementById('batch-actions');
+            const selectedCount = document.getElementById('selected-count');
+            
+            if (selectedParkIds.length > 0) {
+                batchActions.style.display = 'flex';
+                selectedCount.textContent = `已選擇 ${selectedParkIds.length} 個公園`;
+            } else {
+                batchActions.style.display = 'none';
+            }
+        }
+        
+        // 新增：清除所有選擇
+        function clearAllSelections() {
+            selectedParkIds = [];
+            const checkboxes = document.querySelectorAll('.park-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            updateBatchActions();
+            updateSelectAllCheckbox();
+        }
+        
+        // 新增：批量解除列管（移除公園）
+        function batchRemoveFromPending() {
+            if (selectedParkIds.length === 0) {
+                alert('請先選擇要解除列管的公園');
+                return;
+            }
+            
+            // 確認操作
+            if (!confirm(`確定要將 ${selectedParkIds.length} 個公園解除列管嗎？`)) {
+                return;
+            }
+            
+            // 對每個選中的公園進行處理
+            selectedParkIds.sort((a, b) => b - a); // 從大到小排序，避免刪除時索引錯誤
+            
+            selectedParkIds.forEach(parkId => {
+                const parkIndex = playgroundsData.findIndex(item => item.id === parkId);
+                if (parkIndex !== -1) {
+                    // 從待維護清單中移除
+                    playgroundsData.splice(parkIndex, 1);
+                }
+            });
+            
+            // 重新編號待維護清單
+            playgroundsData.forEach((item, index) => {
+                item.id = index + 1;
+            });
+            
+            // 清除選擇
+            clearAllSelections();
+            
+            // 更新顯示
+            renderPendingTable();
+            
+            // 顯示成功訊息
+            alert(`已成功將 ${selectedParkIds.length} 個公園解除列管`);
+        }
+        
+        // 篩選待維護資料
+        function filterPendingData() {
+            let filteredData = playgroundsData;
+            
+            // 文字搜尋
+            const searchTerm = searchPendingInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredData = filteredData.filter(item => 
+                    item.parkName.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // 行政區篩選
+            const selectedDistrict = districtFilter.value;
+            if (selectedDistrict) {
+                filteredData = filteredData.filter(item => 
+                    item.district === selectedDistrict
+                );
+            }
+            
+            // 日期區間篩選
+            const startDate = dateStartInput.value;
+            const endDate = dateEndInput.value;
+            
+            if (startDate && endDate) {
+                filteredData = filteredData.filter(item => {
+                    // 檢查是否有任何檢驗報告的預定檢驗日期落在區間內
+                    return item.reports.some(report => {
+                        const plannedDate = report.plannedDate;
+                        return plannedDate >= startDate && plannedDate <= endDate;
+                    });
+                });
+            }
+            
+            // 燈號篩選 - 修改為互斥篩選
+            const redLightChecked = document.getElementById('red-light-filter').checked;
+            const yellowLightChecked = document.getElementById('yellow-light-filter').checked;
+            const greenLightChecked = document.getElementById('green-light-filter').checked;
+            
+            // 如果沒有任何燈號被勾選，顯示所有
+            if (!redLightChecked && !yellowLightChecked && !greenLightChecked) {
+                renderPendingTable(filteredData);
+                return;
+            }
+            
+            // 根據勾選的燈號篩選 - 只顯示符合勾選燈號的檢驗報告
+            // 先篩選公園
+            filteredData = filteredData.filter(item => {
+                // 檢查公園是否有任何檢驗報告符合選中的燈號
+                return item.reports.some(report => {
+                    if (redLightChecked && report.light === 'red-light') return true;
+                    if (yellowLightChecked && report.light === 'yellow-light') return true;
+                    if (greenLightChecked && report.light === 'green-light') return true;
+                    
+                    return false;
+                });
+            });
+            
+            // 然後篩選檢驗報告，只保留符合勾選燈號的報告
+            const filteredReportsData = filteredData.map(park => {
+                // 複製公園資料
+                const parkCopy = {...park};
+                // 篩檢驗報告
+                parkCopy.reports = park.reports.filter(report => {
+                    if (redLightChecked && report.light === 'red-light') return true;
+                    if (yellowLightChecked && report.light === 'yellow-light') return true;
+                    if (greenLightChecked && report.light === 'green-light') return true;
+                    
+                    return false;
+                });
+                return parkCopy;
+            }).filter(park => park.reports.length > 0); // 只保留還有報告的公園
+            
+            renderPendingTable(filteredReportsData);
+        }
+        
+        // 應用燈號篩選
+        function applyLightFilter() {
+            // 檢查是否有其他燈號被選中，如果是，取消選中
+            const redLightChecked = document.getElementById('red-light-filter').checked;
+            const yellowLightChecked = document.getElementById('yellow-light-filter').checked;
+            const greenLightChecked = document.getElementById('green-light-filter').checked;
+            
+            // 如果當前勾選的是紅燈，取消其他燈號
+            if (redLightChecked) {
+                document.getElementById('yellow-light-filter').checked = false;
+                document.getElementById('green-light-filter').checked = false;
+            }
+            // 如果當前勾選的是黃燈，取消其他燈號
+            else if (yellowLightChecked) {
+                document.getElementById('red-light-filter').checked = false;
+                document.getElementById('green-light-filter').checked = false;
+            }
+            // 如果當前勾選的是綠燈，取消其他燈號
+            else if (greenLightChecked) {
+                document.getElementById('red-light-filter').checked = false;
+                document.getElementById('yellow-light-filter').checked = false;
+            }
+            
+            filterPendingData();
+        }
+        
+        // 重設所有篩選
+        function resetFilters() {
+            searchPendingInput.value = '';
+            districtFilter.value = '';
+            
+            const today = new Date();
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(today.getMonth() - 1);
+            const twoMonthsLater = new Date(today);
+            twoMonthsLater.setMonth(today.getMonth() + 2);
+            
+            dateStartInput.value = oneMonthAgo.toISOString().split('T')[0];
+            dateEndInput.value = twoMonthsLater.toISOString().split('T')[0];
+            
+            // 重設燈號篩選
+            document.getElementById('red-light-filter').checked = false;
+            document.getElementById('yellow-light-filter').checked = false;
+            document.getElementById('green-light-filter').checked = false;
+            
+            renderPendingTable(playgroundsData);
+        }
+        
+        // 匯出到Excel
+        function exportToExcel() {
+            alert('待維護清單已匯出為 Excel 檔案');
+        }
+        
+        // 設置事件監聽器
+        function setupEventListeners() {
+            // 關閉模態視窗
+            closeModalBtn.addEventListener('click', () => {
+                registerModal.style.display = 'none';
+            });
+            
+            closeReportModalBtn.addEventListener('click', () => {
+                reportModal.style.display = 'none';
+            });
+            
+            // 點擊模態視窗外部關閉
+            window.addEventListener('click', (e) => {
+                if (e.target === registerModal) {
+                    registerModal.style.display = 'none';
+                }
+                if (e.target === reportModal) {
+                    reportModal.style.display = 'none';
+                }
+            });
+        }
+        
+        // 開啟登錄維護模態視窗
+        function openRegisterModal(parkId, area, reportNumber) {
+            const park = playgroundsData.find(item => item.id === parkId);
+            if (!park) return;
+            
+            currentParkId = parkId;
+            currentArea = area;
+            currentReportNumber = reportNumber;
+            
+            // 初始化上傳檔案儲存空間
+            const reportKey = `${parkId}-${area}-${reportNumber}`;
+            if (!uploadedFiles[reportKey]) {
+                uploadedFiles[reportKey] = [];
+            }
+            
+            // 填充公園資訊
+            document.getElementById('park-name-display').textContent = park.parkName;
+            document.getElementById('district-display').textContent = park.district;
+            document.getElementById('playground-area-count-display').textContent = `${park.playgroundAreaCount} 個區域`;
+            
+            // 獲取當前檢驗報告的資料
+            const currentReport = park.reports.find(r => 
+                r.parkId === parkId && r.area === area && r.reportNumber === parseInt(reportNumber)
+            );
+            
+            // 更新遊戲場檢驗表單
+            updatePlaygroundSections(park, currentReport);
+            
+            registerModal.style.display = 'flex';
+        }
+        
+        // 更新遊戲場檢驗表單
+        function updatePlaygroundSections(park, currentReport) {
+            const playgroundsContainer = document.getElementById('playgrounds-container');
+            playgroundsContainer.innerHTML = '';
+            
+            // 首先顯示所有遊戲場區域的總覽
+            const overviewSection = document.createElement('div');
+            overviewSection.className = 'playground-section';
+            overviewSection.innerHTML = `
+                <div class="playground-title">
+                    公園檢驗報告總覽
+                </div>
+                <div style="margin-bottom: 15px; padding: 10px; background: #e8f5e9; border-radius: 6px; color: #388e3c;">
+                    <i class="fas fa-info-circle"></i> 此公園共有 ${park.playgroundAreaCount} 個遊戲場區域，總計 ${park.totalReportCount} 個檢驗報告
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+                    <thead>
+                        <tr style="background: #e3f2fd;">
+                            <th style="padding: 10px; text-align: left;">遊戲場區域(檢驗報告編號)</th>
+                            <th style="padding: 10px; text-align: left;">檢驗報告數量</th>
+                            <th style="padding: 10px; text-align: left;">檢驗結果</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${park.playgroundAreas.map(area => {
+                            const areaReports = park.reports.filter(r => r.area === area);
+                            const completedCount = areaReports.filter(r => r.isCompleted).length;
+                            const totalCount = areaReports.length;
+                            const resultSummary = areaReports.length > 0 ? areaReports[0].result || "未檢驗" : "未檢驗";
+                            return `
+                                <tr>
+                                    <td style="padding: 10px;">
+                                        ${area}區 (${areaReports.map(r => r.reportNumber).join(', ')})
+                                    </td>
+                                    <td style="padding: 10px;">${totalCount} 個報告</td>
+                                    <td style="padding: 10px;">
+                                        <span class="status-badge ${getResultClass(resultSummary)}">
+                                            ${resultSummary}
+                                        </span>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            playgroundsContainer.appendChild(overviewSection);
+            
+            // 顯示當前正在編輯的檢驗報告
+            const reportKey = `${currentReport.parkId}-${currentReport.area}-${currentReport.reportNumber}`;
+            
+            const reportSection = document.createElement('div');
+            reportSection.className = 'playground-section';
+            reportSection.innerHTML = `
+                <div class="playground-title">
+                    正在編輯：${currentReport.area}區 (檢驗報告編號: ${currentReport.reportNumber})
+                </div>
+                
+                <!-- 新增：排檢狀態選擇 -->
+                <div class="inspection-arrangement-group">
+                    <label class="required-field">排檢狀態</label>
+                    <div class="inspection-arrangement-options">
+                        <div class="radio-option">
+                            <input type="radio" id="arranged-yes" name="arrangement" value="已排檢" ${currentReport.actualDate ? "checked" : ""} onchange="toggleArrangementStatus()">
+                            <label for="arranged-yes">已排檢</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="arranged-no" name="arrangement" value="未排檢" ${!currentReport.actualDate ? "checked" : ""} onchange="toggleArrangementStatus()">
+                            <label for="arranged-no">未排檢</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="required-field">預定檢驗日期</label>
+                        <div class="date-display">${formatDate(currentReport.plannedDate)}</div>
+                        <p class="form-note">此日期為系統預設日期，無法修改</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="optional-field" id="report-date-label">報告核發日期</label>
+                        <input type="date" id="report-date" value="${currentReport.actualDate || ''}" class="editable-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="required-field">檢驗結果</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="result-qualified" name="result" value="合格" ${currentReport.result === "檢驗合格" ? "checked" : ""} required onchange="toggleImprovementLevels()">
+                            <label for="result-qualified">合格</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="result-improving" name="result" value="改善中" ${currentReport.result && currentReport.result.includes("改善中") ? "checked" : ""} onchange="toggleImprovementLevels()">
+                            <label for="result-improving">改善中</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="result-completed" name="result" value="已完成改善" ${currentReport.result === "已完成改善" ? "checked" : ""} onchange="toggleImprovementLevels()">
+                            <label for="result-completed">已完成改善</label>
+                        </div>
+                    </div>
+                    
+                    <!-- 改善分級選擇器 -->
+                    <div class="improvement-level-group" id="improvement-level-group">
+                        <h4>改善期程分級：</h4>
+                        <div class="level-options">
+                            <div class="level-option">
+                                <input type="radio" id="level-L1" name="improvement-level" value="L1" ${currentReport.result && currentReport.result.includes("L1") ? "checked" : ""}>
+                                <label for="level-L1">L1-例行維護 <span class="level-badge level-badge-L1">低優先級</span></label>
+                            </div>
+                            <div class="level-option">
+                                <input type="radio" id="level-L2" name="improvement-level" value="L2" ${currentReport.result && currentReport.result.includes("L2") ? "checked" : ""}>
+                                <label for="level-L2">L2-1個月內處理 <span class="level-badge level-badge-L2">中優先級</span></label>
+                            </div>
+                            <div class="level-option">
+                                <input type="radio" id="level-L3" name="improvement-level" value="L3" ${currentReport.result && currentReport.result.includes("L3") ? "checked" : ""}>
+                                <label for="level-L3">L3-3個月內處理 <span class="level-badge level-badge-L3">高優先級</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="upload-container">
+                    <label class="required-field">檢驗報告上傳</label>
+                    <p class="form-note">必須上傳至少一份檢驗報告才能標記為完成</p>
+                    <button type="button" class="upload-btn" onclick="triggerFileUpload()">
+                        <i class="fas fa-upload"></i> 上傳檔案
+                    </button>
+                    <input type="file" id="file-upload" multiple style="display:none" onchange="handleFileUpload('${reportKey}', this)">
+                    <div class="file-list" id="file-list-${reportKey}">
+                        ${uploadedFiles[reportKey] && uploadedFiles[reportKey].length > 0 ? 
+                            uploadedFiles[reportKey].map(file => `
+                                <div class="file-item">
+                                    <div class="file-info">
+                                        <i class="fas fa-file-alt" style="color:#1e88e5;"></i>
+                                        <div>
+                                            <div class="file-name">${file.name}</div>
+                                            <div class="file-size">${file.size} • ${formatDate(file.date)}</div>
+                                        </div>
+                                    </div>
+                                    <div class="file-actions">
+                                        <button class="file-action-btn" onclick="viewUploadedFile('${reportKey}', ${file.id})" title="檢視">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="file-action-btn" onclick="removeUploadedFile('${reportKey}', ${file.id})" title="刪除">
+                                            <i class="fas fa-trash" style="color:#d32f2f;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('') : 
+                            '<div style="color:#888; font-style:italic;">尚未上傳任何檔案</div>'
+                        }
+                    </div>
+                </div>
+                <button type="button" class="playground-save-btn" onclick="saveReportRecord(${currentReport.parkId}, '${currentReport.area}', ${currentReport.reportNumber})">
+                    <i class="fas fa-save"></i> 儲存檢驗報告 ${currentReport.reportNumber}
+                </button>
+            `;
+            playgroundsContainer.appendChild(reportSection);
+            
+            // 初始化改善分級選擇器的顯示狀態
+            toggleImprovementLevels();
+            toggleArrangementStatus();
+        }
+        
+        // 切換排檢狀態
+        function toggleArrangementStatus() {
+            const arrangedYes = document.getElementById('arranged-yes');
+            const reportDateLabel = document.getElementById('report-date-label');
+            const reportDateInput = document.getElementById('report-date');
+            
+            if (arrangedYes.checked) {
+                reportDateLabel.innerHTML = '報告核發日期 <span style="color:#d32f2f;">*</span>';
+                reportDateInput.required = true;
+            } else {
+                reportDateLabel.innerHTML = '報告核發日期 <span style="color:#777;">(選填)</span>';
+                reportDateInput.required = false;
+            }
+        }
+        
+        // 切換改善分級選擇器的顯示
+        function toggleImprovementLevels() {
+            const improvingRadio = document.getElementById('result-improving');
+            const improvementLevelGroup = document.getElementById('improvement-level-group');
+            
+            if (improvingRadio.checked) {
+                improvementLevelGroup.style.display = 'block';
+                // 確保至少選擇一個改善分級
+                const levelRadios = document.querySelectorAll('input[name="improvement-level"]');
+                if (!Array.from(levelRadios).some(radio => radio.checked)) {
+                    document.getElementById('level-L1').checked = true;
+                }
+            } else {
+                improvementLevelGroup.style.display = 'none';
+            }
+        }
+        
+        // 觸發檔案上傳
+        function triggerFileUpload() {
+            document.getElementById('file-upload').click();
+        }
+        
+        // 處理檔案上傳
+        function handleFileUpload(reportKey, input) {
+            const files = input.files;
+            if (!files || files.length === 0) return;
+            
+            // 確保有儲存空間
+            if (!uploadedFiles[reportKey]) {
+                uploadedFiles[reportKey] = [];
+            }
+            
+            // 將檔案加入清單
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const fileId = Date.now() + i; // 簡單的 ID 生成
+                
+                uploadedFiles[reportKey].push({
+                    id: fileId,
+                    name: file.name,
+                    size: formatFileSize(file.size),
+                    date: new Date().toISOString().split('T')[0],
+                    fileObject: file // 儲存檔案物件以供下載
+                });
+            }
+            
+            // 更新檔案列表顯示
+            updateFileList(reportKey);
+            
+            // 清空 input 以便再次上傳相同檔案
+            input.value = '';
+        }
+        
+        // 更新檔案列表顯示
+        function updateFileList(reportKey) {
+            const fileListElement = document.getElementById(`file-list-${reportKey}`);
+            const files = uploadedFiles[reportKey] || [];
+            
+            if (files.length === 0) {
+                fileListElement.innerHTML = '<div style="color:#888; font-style:italic;">尚未上傳任何檔案</div>';
+                return;
+            }
+            
+            let fileListHTML = '';
+            files.forEach((file, index) => {
+                fileListHTML += `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="fas fa-file-alt" style="color:#1e88e5;"></i>
+                            <div>
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-size">${file.size} • ${formatDate(file.date)}</div>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="file-action-btn" onclick="viewUploadedFile('${reportKey}', ${file.id})" title="檢視">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="file-action-btn" onclick="removeUploadedFile('${reportKey}', ${file.id})" title="刪除">
+                                <i class="fas fa-trash" style="color:#d32f2f;"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            fileListElement.innerHTML = fileListHTML;
+        }
+        
+        // 儲存檢驗報告記錄
+        function saveReportRecord(parkId, area, reportNumber) {
+            const park = playgroundsData.find(item => item.id === parkId);
+            if (!park) return;
+            
+            const reportKey = `${parkId}-${area}-${reportNumber}`;
+            const currentReport = park.reports.find(r => 
+                r.parkId === parkId && r.area === area && r.reportNumber === parseInt(reportNumber)
+            );
+            
+            if (!currentReport) return;
+            
+            // 獲取表單數據
+            const arrangedYes = document.getElementById('arranged-yes').checked;
+            const reportDateInput = document.getElementById('report-date');
+            const reportDate = arrangedYes ? reportDateInput.value : "";
+            
+            // 檢查排檢狀態
+            if (arrangedYes && !reportDate) {
+                alert('已排檢狀態下，報告核發日期為必填項目');
+                return;
+            }
+            
+            const selectedRadio = document.querySelector('input[name="result"]:checked');
+            const resultValue = selectedRadio ? selectedRadio.value : "";
+            
+            // 檢查是否有選擇檢驗結果
+            if (!resultValue) {
+                alert('檢驗結果為必填項目，請選擇"合格"、"改善中"或"已完成改善"');
+                return;
+            }
+            
+            // 處理改善分級
+            let finalResult = resultValue;
+            if (resultValue === "改善中") {
+                const levelRadio = document.querySelector('input[name="improvement-level"]:checked');
+                if (!levelRadio) {
+                    alert('請選擇改善期程分級');
+                    return;
+                }
+                const levelValue = levelRadio.value;
+                
+                if (levelValue === "L1") {
+                    finalResult = "改善中, L1-例行維護";
+                } else if (levelValue === "L2") {
+                    finalResult = "改善中, L2-1個月內處理";
+                } else if (levelValue === "L3") {
+                    finalResult = "改善中, L3-3個月內處理";
+                }
+            } else if (resultValue === "合格") {
+                finalResult = "檢驗合格";
+            }
+            
+            // 檢查是否有上傳檔案
+            const hasFiles = uploadedFiles[reportKey] && uploadedFiles[reportKey].length > 0;
+            
+            if (!hasFiles) {
+                alert('必須上傳至少一份檢驗報告檔案');
+                return;
+            }
+            
+            // 更新檢驗報告數據
+            currentReport.actualDate = reportDate;
+            currentReport.result = finalResult;
+            
+            // 更新燈號
+            if (finalResult === "檢驗合格" || finalResult === "已完成改善") {
+                currentReport.light = "green-light";
+            } else if (finalResult.includes("改善中")) {
+                if (finalResult.includes("L3")) {
+                    currentReport.light = "red-light";
+                } else {
+                    currentReport.light = "red-light";
+                }
+            } else {
+                currentReport.light = calculateInspectionLight(currentReport.plannedDate);
+            }
+            
+            // 更新完成狀態
+            currentReport.isCompleted = true;
+            
+            // 重新渲染表格
+            renderPendingTable();
+            
+            // 顯示成功訊息
+            alert(`已成功儲存 ${area}區 檢驗報告 ${reportNumber} 的記錄`);
+            
+            // 關閉模態視窗
+            registerModal.style.display = 'none';
+        }
+        
+        // 檢視已上傳的檔案
+        function viewUploadedFile(reportKey, fileId) {
+            const files = uploadedFiles[reportKey] || [];
+            const file = files.find(f => f.id === fileId);
+            
+            if (!file) {
+                alert('找不到指定的檔案');
+                return;
+            }
+            
+            document.getElementById('report-content').innerHTML = `
+                <div class="playground-section">
+                    <div class="playground-title">檢驗報告檢視</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>檔案名稱</label>
+                            <input type="text" value="${file.name}" readonly class="readonly-field">
+                        </div>
+                        <div class="form-group">
+                            <label>檔案大小</label>
+                            <input type="text" value="${file.size}" readonly class="readonly-field">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>上傳日期</label>
+                            <input type="text" value="${formatDate(file.date)}" readonly class="readonly-field">
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding: 20px; background: #f5f9ff; border-radius: 8px; text-align: center;">
+                        <i class="fas fa-file-pdf" style="font-size: 3rem; color: #d32f2f; margin-bottom: 15px;"></i>
+                        <p style="margin-bottom: 10px;">此為預覽功能，實際系統會顯示檔案內容</p>
+                        <p style="color: #777;">檔案類型: ${file.name.endsWith('.pdf') ? 'PDF 檢驗報告' : '檢驗文件'}</p>
+                        <div style="margin-top: 20px;">
+                            <button class="view-report-btn" onclick="downloadFile('${file.name}')">
+                                <i class="fas fa-download"></i> 下載檔案
+                            </button>
+                            <button class="view-report-btn" style="background: #ff9800; margin-left: 10px;" onclick="printFile()">
+                                <i class="fas fa-print"></i> 列印
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            reportModal.style.display = 'flex';
+        }
+        
+        // 下載檔案（模擬）
+        function downloadFile(filename) {
+            alert(`模擬下載檔案: ${filename}\n\n在實際系統中，此功能會下載實際的檔案。`);
+        }
+        
+        // 列印檔案（模擬）
+        function printFile() {
+            alert('模擬列印功能\n\n在實際系統中，此功能會開啟列印對話框。');
+        }
+        
+        // 刪除已上傳的檔案
+        function removeUploadedFile(reportKey, fileId) {
+            if (!confirm('確定要刪除此檔案嗎？')) return;
+            
+            if (uploadedFiles[reportKey]) {
+                uploadedFiles[reportKey] = uploadedFiles[reportKey].filter(f => f.id !== fileId);
+                
+                // 更新檔案列表顯示
+                updateFileList(reportKey);
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return "未設定";
+            const date = new Date(dateString);
+            return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+        }
+        
+        // 格式化檔案大小
+        function formatFileSize(bytes) {
+            if (!bytes || bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // 初始化頁面
+        window.onload = init;
+    </script>
+</body>
+</html>
