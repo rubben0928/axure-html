@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程管控表 - 指定燈號狀態版</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; }
+        body { background-color: #f4f7f9; color: #333; line-height: 1.6; padding: 20px; margin: 0; }
+        
+        .container { max-width: 1700px; margin: 0 auto; background-color: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        
+        header { text-align: center; border-bottom: 3px solid #34495e; padding-bottom: 20px; margin-bottom: 20px; }
+        
+        /* 狀態圖例說明 */
+        .legend { display: flex; gap: 25px; justify-content: center; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 8px; border: 1px dashed #ccc; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.95em; font-weight: 600; }
+        
+        .admin-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 18px 25px;
+            border-left: 6px solid #2c3e50;
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+        .date-tag { 
+            font-weight: bold; 
+            color: #2c3e50; 
+            background: #d6eaf8; 
+            padding: 5px 12px; 
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .date-range .date-tag {
+            background: #d6eaf8;
+        }
+        .date-range .date-tag:first-child {
+            background: #c9e4f5;
+        }
+        .date-range .date-tag:last-child {
+            background: #e3f0fa;
+        }
+        .range-separator {
+            color: #7f8c8d;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        /* 設定圖示樣式 */
+        .setting-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: #ecf0f1;
+            border-radius: 50%;
+            margin-left: 12px;
+            color: #34495e;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid #bdc3c7;
+        }
+        .setting-icon:hover {
+            background-color: #3498db;
+            color: white;
+            transform: rotate(30deg);
+            border-color: #2980b9;
+        }
+        .setting-icon i {
+            font-size: 16px;
+        }
+        
+        /* 彈窗遮罩 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 設定彈窗 */
+        .setting-modal {
+            background-color: white;
+            border-radius: 12px;
+            width: 450px;
+            max-width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .modal-header h3 i {
+            color: #3498db;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #95a5a6;
+            transition: color 0.2s;
+        }
+        
+        .close-btn:hover {
+            color: #e74c3c;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .date-setting {
+            margin-bottom: 25px;
+        }
+        
+        .date-setting label {
+            display: block;
+            margin-bottom: 8px;
+            color: #34495e;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .date-setting label i {
+            color: #3498db;
+            margin-right: 6px;
+            width: 18px;
+        }
+        
+        .date-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .date-input-group input[type="date"] {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #d0d7dd;
+            border-radius: 6px;
+            font-size: 0.95em;
+            transition: border-color 0.2s;
+        }
+        
+        .date-input-group input[type="date"]:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .date-input-group span {
+            color: #7f8c8d;
+            font-weight: bold;
+        }
+        
+        .current-range {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .current-range p {
+            margin: 5px 0;
+            color: #2c3e50;
+        }
+        
+        .current-range .range-display {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #ecf0f1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95em;
+        }
+        
+        .modal-btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .modal-btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .modal-btn-secondary {
+            background-color: #ecf0f1;
+            color: #34495e;
+        }
+        
+        .modal-btn-secondary:hover {
+            background-color: #bdc3c7;
+        }
+
+        .controls { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+        .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-success { background-color: #27ae60; color: white; }
+        .btn-primary { background-color: #3498db; color: white; width: 100%; }
+        .btn-primary.saved { background-color: #2ecc71; }
+        
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { background-color: #34495e; color: white; padding: 15px; font-size: 0.9em; border: 1px solid #2c3e50; }
+        td { padding: 12px; border: 1px solid #eee; vertical-align: top; text-align: center; transition: all 0.2s; }
+        
+        /* --- 最新儲存列框選樣式 --- */
+        tr.latest-saved-row {
+            background-color: #f0faff !important; 
+            outline: 3px solid #3498db; 
+            outline-offset: -3px;
+            position: relative;
+            z-index: 5;
+        }
+        .latest-badge {
+            background: #3498db;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        /* --- 燈號樣式 --- */
+        .status-indicator { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-top: 5px; border: 1px solid rgba(0,0,0,0.1); }
+        .status-overdue { background-color: #e74c3c; box-shadow: 0 0 6px #e74c3c; } /* 紅燈：逾期未填寫 */
+        .status-completed { background-color: #2ecc71; box-shadow: 0 0 6px #2ecc71; } /* 綠燈：已完成 */
+        .status-in-progress { background-color: #f1c40f; box-shadow: 0 0 6px #f1c40f; } /* 黃燈：辦理區間 */
+        .status-not-reached { background-color: #bdc3c7; } /* 灰燈：時間未屆 */
+
+        /* 拿掉單位標籤 */
+        .dept-label { display: none; }
+        
+        .date-input, .description-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em; }
+        .description-input { min-height: 80px; }
+        
+        .update-time-tag { font-size: 0.7em; color: #95a5a6; display: block; margin-top: 8px; text-align: right; }
+        .file-list { text-align: left; margin-top: 5px; }
+        .uploaded-file { font-size: 0.75em; background: #fff; border: 1px solid #ddd; margin: 2px 0; padding: 4px; border-radius: 3px; display: flex; justify-content: space-between; }
+        .delete-file { color: #e74c3c; cursor: pointer; }
+        
+        /* 跨列合併儲存格的樣式 - 用於各類標題列 */
+        .section-header td {
+            background-color: #e9ecef !important;
+        }
+        .colspan-cell {
+            text-align: left !important;
+            padding: 15px !important;
+            background-color: #f0f3f5;
+            font-weight: 600;
+            color: #2c3e50;
+            border: 1px solid #d0d7dd;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        /* 免填 checkbox 樣式 */
+        .skip-checkbox {
+            margin-left: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+        .skip-checkbox input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .skip-checkbox label {
+            cursor: pointer;
+        }
+
+        /* 免填時的淡化效果 */
+        .skipped-row .date-input,
+        .skipped-row .description-input,
+        .skipped-row .btn-primary {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .skipped-row .status-indicator {
+            opacity: 0.5;
+        }
+        
+        /* 整批免填控制區 */
+        .batch-skip-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: 20px;
+            background-color: #e9ecef;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .batch-skip-control span {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .batch-skip-control .skip-checkbox {
+            margin-left: 0;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏗️ 在建工程重點項目期程管控表</h1>
+    </header>
+
+    <div class="legend">
+        <div class="legend-item"><span class="status-indicator status-overdue"></span> 逾期未填寫</div>
+        <div class="legend-item"><span class="status-indicator status-in-progress"></span> 辦理區間</div>
+        <div class="legend-item"><span class="status-indicator status-completed"></span> 已完成</div>
+        <div class="legend-item"><span class="status-indicator status-not-reached"></span> 時間未屆</div>
+    </div>
+
+    <div class="admin-banner">
+        <div>
+            <span style="color: #7f8c8d;"><i class="fas fa-building"></i> 期程表管控單位：</span>
+            <strong>建設局企劃科</strong>
+        </div>
+        <div style="display: flex; align-items: center;">
+            <span style="color: #7f8c8d;"><i class="fas fa-calendar-alt"></i> 資料回報區間：</span>
+            <div class="date-range" style="margin-left: 8px;">
+                <span class="date-tag" id="startDateDisplay">115年04月01日</span>
+                <span class="range-separator">～</span>
+                <span class="date-tag" id="endDateDisplay">115年04月23日</span>
+            </div>
+            <div class="setting-icon" onclick="openDateSettingModal()" title="點擊設定回報時間區間">
+                <i class="fas fa-cog"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-success" onclick="exportExcel()">
+            <i class="fas fa-file-excel"></i> 匯出報表
+        </button>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th width="85">項次/狀態</th>
+                    <th width="120">佐證資料</th>
+                    <th width="240">檢核項目</th>
+                    <th width="125">預定開始</th>
+                    <th width="125">預定完成</th>
+                    <th width="125">實際開始</th>
+                    <th width="125">實際完成</th>
+                    <th width="300">辦況說明</th>
+                    <th width="100">操作</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 日期設定彈窗 -->
+<div class="modal-overlay" id="dateSettingModal">
+    <div class="setting-modal">
+        <div class="modal-header">
+            <h3>
+                <i class="fas fa-calendar-alt"></i>
+                設定資料回報時間
+            </h3>
+            <button class="close-btn" onclick="closeDateSettingModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="date-setting">
+                <label>
+                    <i class="fas fa-play-circle"></i>
+                    開始日期
+                </label>
+                <input type="date" id="startDateInput" class="date-input" value="2026-04-01">
+            </div>
+            
+            <div class="date-setting">
+                <label>
+                    <i class="fas fa-stop-circle"></i>
+                    結束日期
+                </label>
+                <input type="date" id="endDateInput" class="date-input" value="2026-04-23">
+            </div>
+            
+            <div class="current-range">
+                <p><i class="fas fa-info-circle" style="color: #3498db;"></i> 目前設定區間：</p>
+                <div class="range-display">
+                    <span id="previewStart">115年04月01日</span>
+                    <span>～</span>
+                    <span id="previewEnd">115年04月23日</span>
+                </div>
+            </div>
+            
+            <p style="color: #7f8c8d; font-size: 0.9em; margin: 10px 0 0;">
+                <i class="fas fa-clock"></i> 設定後將影響燈號判斷邏輯
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" onclick="closeDateSettingModal()">取消</button>
+            <button class="modal-btn modal-btn-primary" onclick="saveDateRange()">儲存設定</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+    let lastSavedId = null; 
+    const todayStr = "2026-03-03"; // 模擬目前系統日期
+    
+    // 日期區間變數
+    let reportStartDate = "2026-04-01";
+    let reportEndDate = "2026-04-23";
+
+    // 定義所有檢核項目
+    const checkData = [
+        // === 第一區：竣工前準備 (項次1-3) ===
+        { id: 1, title: "竣工日前2週準備照片及新聞稿送企劃科潤稿", pS: "", pE: "2026-02-28", hideDetail: false, isHeader: false, noStartDate: true, noActualStart: true },
+        { id: 2, title: "初驗及正驗派驗人員最遲應於竣工前10日簽准", pS: "", pE: "2026-03-05", hideDetail: false, isHeader: false, noStartDate: true, noActualStart: true },
+        { id: 3, title: "竣工日(本日需發新聞稿)", pS: "", pE: "2026-03-20", hideDetail: false, isHeader: false, noStartDate: true, noActualStart: true },
+        
+        // 使用執照取得前重點工項 (標題列)
+        { id: 'A', title: "使用執照取得前重點工項掛件項目(第1~4項須於竣工前40日向目的事業主管機關完成掛件)", pS: "", pE: "", hideDetail: true, isHeader: true },
+        
+        // 使用執照子項目 (項次4-8) - 無免填功能
+        { id: 4, title: "昇降設備竣工許可掛件及取得許可", pS: "2026-03-10", pE: "2026-04-10", hideDetail: false, isHeader: false },
+        { id: 5, title: "汙水設備許可掛件及取得許可", pS: "2026-03-15", pE: "2026-04-15", hideDetail: false, isHeader: false },
+        { id: 6, title: "消防安全設備竣工查驗掛件及取得許可", pS: "2026-04-01", pE: "2026-04-10", hideDetail: false, isHeader: false },
+        { id: 7, title: "無障礙設施竣工勘檢掛件及取得許可", pS: "2026-04-10", pE: "2026-04-20", hideDetail: false, isHeader: false },
+        { id: 8, title: "門牌初編申請及取得", pS: "2026-04-15", pE: "2026-04-30", hideDetail: false, isHeader: false },
+        
+        // 空汙費結算及相關 (項次9-11) - 無免填功能
+        { id: 9, title: "空汙費結算", pS: "2026-05-01", pE: "2026-05-15", hideDetail: false, isHeader: false },
+        { id: 10, title: "主體工程/消防/室內裝修材料證明書彙整並確認數量、位置與圖片是否相符", pS: "2026-05-01", pE: "2026-05-30", hideDetail: false, isHeader: false },
+        { id: 11, title: "使用執照申請及取得", pS: "2026-05-01", pE: "2026-06-01", hideDetail: false, isHeader: false },
+        
+        // 台電標題列 - 無整批免填功能
+        { id: 'B', title: "台電(至少竣工前6個月啟動報竣前置作業)", pS: "", pE: "", hideDetail: true, isHeader: true },
+        // 台電子項目 (項次12-16) - 無免填功能
+        { id: 12, title: "受電室安檢(外線設計施工前置作業)", pS: "2026-03-01", pE: "2026-04-30", hideDetail: false, isHeader: false },
+        { id: 13, title: "外線設計掛件(外線設計施工前置作業)", pS: "2026-01-15", pE: "2026-03-15", hideDetail: false, isHeader: false },
+        { id: 14, title: "繳費(線路補助費)", pS: "2026-03-01", pE: "2026-04-01", hideDetail: false, isHeader: false },
+        { id: 15, title: "外線施工", pS: "2026-04-01", pE: "2026-05-30", hideDetail: false, isHeader: false },
+        { id: 16, title: "正式裝錶送電", pS: "2026-06-01", pE: "2026-06-30", hideDetail: false, isHeader: false },
+        
+        // 自來水標題列 - 無整批免填功能
+        { id: 'C', title: "自來水(至少竣工前6個月啟動報竣前置作業)", pS: "", pE: "", hideDetail: true, isHeader: true },
+        // 自來水子項目 (項次17-20) - 無免填功能
+        { id: 17, title: "內線圖預審及試壓(外線設計施工前置作業)", pS: "2026-01-01", pE: "2026-02-28", hideDetail: false, isHeader: false },
+        { id: 18, title: "繳費(線路補助費)", pS: "2026-02-15", pE: "2026-03-15", hideDetail: false, isHeader: false },
+        { id: 19, title: "外線施工(若臨時水的管路是日後正式管則免填)", pS: "2026-03-01", pE: "2026-05-30", hideDetail: false, isHeader: false, hasSkipOption: true },
+        { id: 20, title: "正式裝錶送水", pS: "2026-06-01", pE: "2026-06-30", hideDetail: false, isHeader: false },
+        
+        // NCC電信標題列 - 有整批免填功能
+        { id: 'D', title: "NCC電信(至少竣工前6個月啟動報竣前置作業，若無項目則免填)", pS: "", pE: "", hideDetail: true, isHeader: true, hasBatchSkip: true },
+        // 電信子項目 (項次21-26) - 每個都有獨立免填，且受整批控制
+        { id: 21, title: "備妥電信設備檢測紀錄表及竣工檢查報告(外線設計施工前置作業)", pS: "2026-02-01", pE: "2026-03-15", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        { id: 22, title: "NCC竣工掛件", pS: "2026-03-01", pE: "2026-04-15", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        { id: 23, title: "中華電信現勘內線預留", pS: "2026-03-15", pE: "2026-04-30", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        { id: 24, title: "中華電信外線設計", pS: "2026-01-15", pE: "2026-02-28", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        { id: 25, title: "中華電信外線施工", pS: "2026-03-01", pE: "2026-05-30", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        { id: 26, title: "電信外管完成裝設", pS: "2026-05-01", pE: "2026-06-15", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'D' },
+        
+        // 瓦斯標題列 - 有整批免填功能
+        { id: 'E', title: "瓦斯(至少竣工前6個月啟動報竣前置作業，若無項目則免填)", pS: "", pE: "", hideDetail: true, isHeader: true, hasBatchSkip: true },
+        // 瓦斯子項目 (項次27-30) - 每個都有獨立免填，且受整批控制
+        { id: 27, title: "竣工掛件", pS: "2026-03-01", pE: "2026-04-15", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'E' },
+        { id: 28, title: "外線設計", pS: "2026-01-15", pE: "2026-02-28", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'E' },
+        { id: 29, title: "外線施工", pS: "2026-03-01", pE: "2026-05-30", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'E' },
+        { id: 30, title: "瓦斯外管完成裝設", pS: "2026-05-01", pE: "2026-06-15", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'E' },
+        
+        // 綠建築標章等標題列 - 有整批免填功能
+        { id: 'F', title: "綠建築標章、智慧建築標章及建築能效標示取得(至少使用執照取得後4個月內或依契約規定時間取得，若無項目則免填)", pS: "", pE: "", hideDetail: true, isHeader: true, hasBatchSkip: true },
+        // 子項目 (項次31-33) - 每個都有獨立免填，且受整批控制
+        { id: 31, title: "綠建築標章掛件及取得", pS: "2026-06-01", pE: "2026-08-31", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'F' },
+        { id: 32, title: "智慧建築標章掛件及取得", pS: "2026-06-01", pE: "2026-08-31", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'F' },
+        { id: 33, title: "建築能效標示掛件及取得", pS: "2026-06-01", pE: "2026-08-31", hideDetail: false, isHeader: false, hasSkipOption: true, batchGroup: 'F' },
+        
+        // 驗收點交標題列
+        { id: 'G', title: "驗收、點交期程(驗收期程建議4個月、點交期程建議7日)", pS: "", pE: "", hideDetail: true, isHeader: true },
+        // 驗收點交子項目 (項次34-37)
+        { id: 34, title: "查核金額以上函報上級機關(府)派驗", pS: "2026-07-01", pE: "2026-07-15", hideDetail: false, isHeader: false },
+        { id: 35, title: "正式驗收", pS: "2026-07-01", pE: "2026-10-31", hideDetail: false, isHeader: false },
+        { id: 36, title: "點交完成", pS: "2026-11-01", pE: "2026-11-07", hideDetail: false, isHeader: false },
+        { id: 37, title: "點交完成發新聞稿", pS: "", pE: "2026-11-08", hideDetail: false, isHeader: false, noStartDate: true, noActualStart: true }
+    ];
+
+    // 初始化 state
+    let state = checkData.map(d => ({
+        ...d,
+        aS: "",
+        aE: "",
+        desc: "",
+        files: [],
+        hasUploaded: false,
+        lastUpdated: "尚未存檔",
+        skipEnabled: d.hasSkipOption ? false : undefined,
+        batchSkipEnabled: d.hasBatchSkip ? false : undefined  // 整批免填狀態
+    }));
+
+    // 格式化日期顯示 (YYYY-MM-DD 轉 115年MM月DD日)
+    function formatDisplayDate(dateStr) {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split('-');
+        const rocYear = parseInt(year) - 1911;
+        return `${rocYear}年${month}月${day}日`;
+    }
+
+    // 更新日期顯示
+    function updateDateDisplay() {
+        document.getElementById('startDateDisplay').textContent = formatDisplayDate(reportStartDate);
+        document.getElementById('endDateDisplay').textContent = formatDisplayDate(reportEndDate);
+        document.getElementById('previewStart').textContent = formatDisplayDate(reportStartDate);
+        document.getElementById('previewEnd').textContent = formatDisplayDate(reportEndDate);
+        
+        document.getElementById('startDateInput').value = reportStartDate;
+        document.getElementById('endDateInput').value = reportEndDate;
+    }
+
+    // 開啟設定視窗
+    function openDateSettingModal() {
+        document.getElementById('startDateInput').value = reportStartDate;
+        document.getElementById('endDateInput').value = reportEndDate;
+        document.getElementById('previewStart').textContent = formatDisplayDate(reportStartDate);
+        document.getElementById('previewEnd').textContent = formatDisplayDate(reportEndDate);
+        
+        document.getElementById('dateSettingModal').style.display = 'flex';
+    }
+
+    // 關閉設定視窗
+    function closeDateSettingModal() {
+        document.getElementById('dateSettingModal').style.display = 'none';
+    }
+
+    // 儲存日期設定
+    function saveDateRange() {
+        const newStartDate = document.getElementById('startDateInput').value;
+        const newEndDate = document.getElementById('endDateInput').value;
+        
+        if (!newStartDate || !newEndDate) {
+            alert('請填寫完整的日期區間');
+            return;
+        }
+        
+        if (newStartDate > newEndDate) {
+            alert('開始日期不能晚於結束日期');
+            return;
+        }
+        
+        reportStartDate = newStartDate;
+        reportEndDate = newEndDate;
+        
+        updateDateDisplay();
+        closeDateSettingModal();
+    }
+
+    // 點擊外部關閉視窗
+    window.onclick = function(event) {
+        const modal = document.getElementById('dateSettingModal');
+        if (event.target === modal) {
+            closeDateSettingModal();
+        }
+    }
+
+    // 切換整批免填狀態
+    function toggleBatchSkip(headerId) {
+        const headerIdx = state.findIndex(s => s.id === headerId);
+        if (!state[headerIdx].hasBatchSkip) return;
+        
+        const newBatchState = !state[headerIdx].batchSkipEnabled;
+        state[headerIdx].batchSkipEnabled = newBatchState;
+        
+        // 找出所有屬於這個群組的子項目，更新它們的免填狀態
+        state.forEach((item, index) => {
+            if (item.batchGroup === headerId) {
+                state[index].skipEnabled = newBatchState;
+                if (newBatchState) {
+                    state[index].aS = "";
+                    state[index].aE = "";
+                    state[index].desc = "";
+                    state[index].files = [];
+                    state[index].hasUploaded = false;
+                    state[index].lastUpdated = "已免填";
+                }
+            }
+        });
+        
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById("tableBody");
+        let html = '';
+
+        for (let i = 0; i < state.length; i++) {
+            const item = state[i];
+            
+            // 標題列：跨所有欄位
+            if (item.isHeader) {
+                let titleContent = item.title;
+                
+                // 如果有整批免填功能，加入控制項
+                if (item.hasBatchSkip) {
+                    const isChecked = item.batchSkipEnabled ? 'checked' : '';
+                    titleContent = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                            <span>${item.title}</span>
+                            <div class="batch-skip-control">
+                                <span>整批免填</span>
+                                <span class="skip-checkbox">
+                                    <input type="checkbox" id="batch-skip-${item.id}" ${isChecked} onchange="toggleBatchSkip('${item.id}')">
+                                    <label for="batch-skip-${item.id}"></label>
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                    <tr id="row-${item.id}" class="section-header">
+                        <td colspan="9" class="colspan-cell">
+                            ${titleContent}
+                        </td>
+                    </tr>
+                `;
+                continue;
+            }
+            
+            // 一般列
+            const isLatest = item.id === lastSavedId;
+            const statusClass = getStatusClass(item, todayStr);
+            
+            // 決定是否禁用輸入
+            const isSkipped = item.skipEnabled === true;
+            const hasNoStartDate = item.noStartDate === true;
+            const hasNoActualStart = item.noActualStart === true;
+            
+            // 基本禁用條件：免填或未上傳檔案
+            let inputsDisabled = isSkipped ? true : (!item.hasUploaded);
+            
+            // 準備檢核項目的顯示內容（包含可能的 checkbox）
+            let titleContent = `<strong>${item.title}</strong>`;
+            if (item.hasSkipOption) {
+                // 檢查所屬群組是否已整批免填，如果是則禁用個別checkbox
+                const isBatchSkipped = item.batchGroup ? 
+                    state.find(h => h.id === item.batchGroup)?.batchSkipEnabled : false;
+                
+                titleContent = `
+                    <div style="display: flex; align-items: flex-start; gap: 8px;">
+                        <strong>${item.title}</strong>
+                        <span class="skip-checkbox">
+                            <input type="checkbox" id="skip-${item.id}" 
+                                ${item.skipEnabled ? 'checked' : ''} 
+                                ${isBatchSkipped ? 'disabled' : ''}
+                                onchange="toggleSkip(${item.id})">
+                            <label for="skip-${item.id}">免填</label>
+                        </span>
+                    </div>
+                `;
+            }
+            
+            // 處理預定開始日期顯示
+            const pSDisplay = hasNoStartDate ? '' : item.pS;
+            
+            html += `
+                <tr id="row-${item.id}" class="${isLatest ? 'latest-saved-row' : ''} ${isSkipped ? 'skipped-row' : ''}">
+                    <td>
+                        <strong>${item.id}</strong><br>
+                        <span class="status-indicator ${statusClass}"></span>
+                        ${isLatest ? '<br><span class="latest-badge">最新回報</span>' : ''}
+                    </td>
+                    <td>
+                        <button class="btn" style="background:#9b59b6; color:white; font-size:0.8em; padding:5px 10px; width:100%" 
+                                onclick="triggerUpload(${item.id})" ${isSkipped ? 'disabled' : ''}>上傳</button>
+                        <input type="file" id="file-${item.id}" style="display:none" multiple onchange="handleFile(${item.id})" ${isSkipped ? 'disabled' : ''}>
+                        <div class="file-list">
+                            ${item.files.map((f, fi) => `
+                                <div class="uploaded-file">
+                                    <span>${f.substring(0,8)}</span>
+                                    <span class="delete-file" onclick="removeFile(${item.id}, ${fi})">×</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td style="text-align:left">
+                        ${titleContent}
+                    </td>
+                    <td><input type="date" class="date-input" value="${pSDisplay}" disabled></td>
+                    <td><input type="date" class="date-input" value="${item.pE}" disabled></td>
+                    <td><input type="date" class="date-input" id="aS-${item.id}" value="${item.aS}" ${inputsDisabled || hasNoActualStart ? 'disabled' : ''}></td>
+                    <td><input type="date" class="date-input" id="aE-${item.id}" value="${item.aE}" ${inputsDisabled ? 'disabled' : ''}></td>
+                    <td style="text-align:left">
+                        <textarea class="description-input" id="desc-${item.id}" ${inputsDisabled ? 'disabled' : ''}>${item.desc}</textarea>
+                        <span class="update-time-tag"><i class="far fa-clock"></i> 最後存檔: ${item.lastUpdated}</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary ${isLatest ? 'saved' : ''}" id="save-${item.id}" onclick="save(${item.id})" 
+                            ${inputsDisabled ? 'disabled' : ''}>
+                            <i class="fas ${isLatest ? 'fa-check-circle' : 'fa-save'}"></i> ${isLatest ? '已存' : '儲存'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        tbody.innerHTML = html;
+    }
+
+    // 燈號判斷邏輯
+    function getStatusClass(item, today) {
+        if (item.isHeader) return "status-not-reached";
+        if (item.skipEnabled === true) return "status-not-reached";
+        
+        if (item.aE && item.aE !== "") return "status-completed";
+        
+        // 只有當有預定完成日期時才判斷逾期和辦理區間
+        if (item.pE && item.pE !== "") {
+            // 如果有預定開始日期才判斷辦理區間
+            if (item.pS && item.pS !== "" && today >= item.pS && today <= item.pE && (!item.aE || item.aE === "")) {
+                return "status-in-progress";
+            }
+            
+            if (today > item.pE) return "status-overdue";
+        }
+        
+        return "status-not-reached";
+    }
+
+    // 切換免填狀態
+    function toggleSkip(id) {
+        const idx = state.findIndex(s => s.id === id);
+        if (!state[idx].hasSkipOption) return;
+        
+        state[idx].skipEnabled = !state[idx].skipEnabled;
+        
+        if (state[idx].skipEnabled) {
+            state[idx].aS = "";
+            state[idx].aE = "";
+            state[idx].desc = "";
+            state[idx].files = [];
+            state[idx].hasUploaded = false;
+            state[idx].lastUpdated = "已免填";
+        }
+        
+        renderTable();
+    }
+
+    function save(id) {
+        const idx = state.findIndex(s => s.id === id);
+        if (state[idx].isHeader || state[idx].skipEnabled) return;
+        
+        // 只有當項目允許填寫實際開始日期時才儲存
+        if (!state[idx].noActualStart) {
+            state[idx].aS = document.getElementById(`aS-${id}`).value;
+        }
+        state[idx].aE = document.getElementById(`aE-${id}`).value;
+        state[idx].desc = document.getElementById(`desc-${id}`).value;
+        state[idx].lastUpdated = new Date().toLocaleString('zh-TW', {hour12:false});
+        
+        lastSavedId = id;
+        renderTable();
+    }
+
+    function triggerUpload(id) { 
+        const idx = state.findIndex(s => s.id === id);
+        if (state[idx].skipEnabled) return;
+        document.getElementById(`file-${id}`).click(); 
+    }
+
+    function handleFile(id) {
+        const files = document.getElementById(`file-${id}`).files;
+        const idx = state.findIndex(s => s.id === id);
+        if (state[idx].isHeader || state[idx].skipEnabled) return;
+        
+        for(let f of files) state[idx].files.push(f.name);
+        state[idx].hasUploaded = true;
+        renderTable();
+    }
+
+    function removeFile(id, fIdx) {
+        const idx = state.findIndex(s => s.id === id);
+        if (state[idx].isHeader || state[idx].skipEnabled) return;
+        
+        state[idx].files.splice(fIdx, 1);
+        if(state[idx].files.length === 0) state[idx].hasUploaded = false;
+        renderTable();
+    }
+
+    function exportExcel() {
+        const exportData = [
+            ["工程重點項目期程管控表"],
+            [`報表產生日期: ${todayStr}`],
+            [`資料回報區間: ${formatDisplayDate(reportStartDate)} ~ ${formatDisplayDate(reportEndDate)}`],
+            ["項次", "檢核項目", "預定開始", "預定完成", "實際開始", "實際完成", "辦況說明", "最後異動時間", "備註"]
+        ];
+        
+        state.forEach(item => {
+            if (item.isHeader) {
+                exportData.push([item.id, item.title, "", "", "", "", "", "", item.batchSkipEnabled ? "整批免填" : ""]);
+            } else {
+                const note = item.skipEnabled ? "免填" : "";
+                exportData.push([item.id, item.title, item.pS, item.pE, item.aS, item.aE, item.desc, item.lastUpdated, note]);
+            }
+        });
+        
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "期程表");
+        XLSX.writeFile(wb, "工程期程管控表_狀態燈號版.xlsx");
+    }
+
+    // 初始化
+    window.onload = function() {
+        renderTable();
+        updateDateDisplay();
+    };
+</script>
+
+</body>
+</html>
