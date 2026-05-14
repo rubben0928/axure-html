@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>農田水利署 工程AI助理 - 正式版</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: #1a2a1a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.phone {
+  width: 380px;
+  height: 700px;
+  background: #ece5dd;
+  border-radius: 44px;
+  overflow: hidden;
+  border: 8px solid #2c2c2c;
+  box-shadow: 0 0 0 1px #444, 0 40px 80px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 28px;
+  background: #2c2c2c;
+  border-radius: 0 0 18px 18px;
+  z-index: 100;
+}
+
+.status-bar {
+  background: #06C755;
+  padding: 6px 20px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+}
+
+.status-time { color: #fff; font-size: 13px; font-weight: 700; }
+.status-icons { color: #fff; font-size: 11px; display: flex; gap: 6px; }
+
+.header {
+  background: #06C755;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.header-info { flex: 1; }
+.header-name { color: #fff; font-size: 15px; font-weight: 700; }
+.header-status { color: rgba(255,255,255,0.8); font-size: 10px; margin-top: 2px; }
+
+.region-badge {
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #fff;
+  display: inline-block;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.region-badge:active { background: rgba(255,255,255,0.35); }
+
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #ece5dd;
+}
+
+/* 訊息氣泡 */
+.msg-row { display: flex; gap: 8px; align-items: flex-start; max-width: 100%; animation: fadeIn 0.2s ease; }
+.msg-row.user { flex-direction: row-reverse; }
+
+.bot-av {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #06C755;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(6,199,85,0.3);
+}
+
+.msg-time { font-size: 10px; color: #999; margin-bottom: 2px; padding: 0 2px; }
+.msg-row.user .msg-time { text-align: right; }
+
+.bubble {
+  border-radius: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  padding: 10px 14px;
+  max-width: 290px;
+  word-break: break-word;
+}
+
+.bot-bubble {
+  background: #fff;
+  border-radius: 18px 18px 18px 6px;
+  color: #1a1a1a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.user-bubble {
+  background: #dcf8c5;
+  border-radius: 18px 18px 6px 18px;
+  color: #1a1a1a;
+}
+
+/* 按鈕群組 */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn {
+  background: #fff;
+  border: 1.5px solid #06C755;
+  color: #06C755;
+  border-radius: 30px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.btn:active { transform: scale(0.96); background: #06C755; color: #fff; }
+.btn:disabled { opacity: 0.4; transform: none; }
+
+/* 卡片樣式 */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 290px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.card-header {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.card-header.green { background: #06C755; }
+.card-header.red { background: #e74c3c; }
+.card-header.dark { background: #2c3e2c; }
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 0.5px solid #f0ebe3;
+  font-size: 12px;
+  gap: 12px;
+}
+.card-row:last-child { border-bottom: none; }
+.card-col { flex-direction: column; align-items: flex-start; gap: 6px; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.badge-red { background: #ffe5e5; color: #c0392b; }
+.badge-yellow { background: #fff3cd; color: #d68910; }
+.badge-green { background: #e8f5e9; color: #1e8449; }
+
+/* 工作站統計卡片 */
+.ws-stat-card {
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+.ws-stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: #f8f6f2;
+  border-bottom: 1px solid #e8e3da;
+}
+.ws-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: #2c3e2c;
+}
+.ws-stats {
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-num {
+  font-size: 18px;
+  font-weight: 700;
+}
+.stat-label {
+  font-size: 9px;
+  color: #888;
+}
+.stat-total .stat-num { color: #06C755; }
+.stat-suspend .stat-num { color: #e67e22; }
+.stat-delay .stat-num { color: #e74c3c; }
+
+/* 管理處選擇畫面 */
+.office-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.office-btn {
+  background: #f5f0e8;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.office-btn:active { background: #06C755; color: #fff; transform: scale(0.96); }
+
+.typing-indicator {
+  display: flex;
+  gap: 6px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 20px;
+  border-radius: 20px 20px 20px 6px;
+}
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  background: #bbb;
+  border-radius: 50%;
+  animation: typing 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); background: #bbb; }
+  30% { transform: translateY(-5px); background: #06C755; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.input-bar {
+  background: #f5f0e8;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 0.5px solid rgba(0,0,0,0.08);
+}
+
+.input-field {
+  flex: 1;
+  background: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 16px;
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+}
+
+.send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #06C755;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(6,199,85,0.4);
+}
+.send-btn:active { transform: scale(0.94); }
+
+.scroll-btn {
+  position: absolute;
+  bottom: 100px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  background: #06C755;
+  border-radius: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  color: #fff;
+  font-size: 16px;
+  z-index: 50;
+}
+
+.progress-bar-bg {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.no-result-card {
+  background: #fff9f0;
+  border-left: 4px solid #f39c12;
+  padding: 12px 14px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.no-result-card strong {
+  color: #e67e22;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="notch"></div>
+  
+  <div class="status-bar">
+    <span class="status-time" id="clock">09:41</span>
+    <div class="status-icons">📶 🔋 100%</div>
+  </div>
+  
+  <div class="header">
+    <div class="header-top">
+      <div class="header-avatar">🌾</div>
+      <div class="header-info">
+        <div class="header-name">農田水利署 工程助理</div>
+        <div class="header-status">● 官方帳號 · 即時回應</div>
+      </div>
+    </div>
+    <div class="region-badge" id="regionSelectorBtn">📍 點此選擇管理處 ▼</div>
+  </div>
+  
+  <div class="chat-area" id="chatArea">
+    <div class="msg-row">
+      <div class="bot-av">🌾</div>
+      <div>
+        <div class="msg-time" id="initTime">--:--</div>
+        <div class="bubble bot-bubble">
+          <strong>👋 您好！我是農田水利署工程管理助理</strong><br><br>
+          我可以幫您查詢全台17個管理處的工程進度、落後狀況、停工清單等資訊。<br><br>
+          <strong>👉 請點擊上方「點此選擇管理處」開始</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="scroll-btn" id="scrollBtn" onclick="scrollToBottom()">↓</div>
+  
+  <div class="input-bar">
+    <input type="text" class="input-field" id="textInput" placeholder="輸入工程名稱取得完整詳細資料..." onkeydown="if(event.key==='Enter')sendMessage()">
+    <button class="send-btn" onclick="sendMessage()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+// ==================== 完整工程資料（含工作站分組）====================
+const ALL_OFFICES = [
+  "宜蘭管理處", "北基管理處", "桃園管理處", "石門管理處", "新竹管理處",
+  "苗栗管理處", "臺中管理處", "南投管理處", "彰化管理處", "雲林管理處",
+  "嘉南管理處", "高雄管理處", "屏東管理處", "臺東管理處", "花蓮管理處",
+  "七星管理處", "瑠公管理處"
+];
+
+// 各管理處對應的工作站
+const WORKSTATIONS = {
+  "宜蘭管理處": ["宜蘭工作站", "羅東工作站", "三星工作站", "蘇澳工作站"],
+  "北基管理處": ["基隆工作站", "汐止工作站", "淡水工作站", "金山工作站"],
+  "桃園管理處": ["桃園工作站", "中壢工作站", "楊梅工作站", "大園工作站", "蘆竹工作站"],
+  "石門管理處": ["石門工作站", "龍潭工作站", "大溪工作站", "復興工作站"],
+  "新竹管理處": ["新竹工作站", "竹北工作站", "竹東工作站", "湖口工作站", "新豐工作站"],
+  "苗栗管理處": ["苗栗工作站", "竹南工作站", "頭份工作站", "大湖工作站", "銅鑼工作站", "苑裡工作站"],
+  "臺中管理處": ["臺中工作站", "豐原工作站", "大甲工作站", "清水工作站", "烏日工作站", "太平工作站"],
+  "南投管理處": ["南投工作站", "草屯工作站", "埔里工作站", "竹山工作站", "集集工作站", "水里工作站"],
+  "彰化管理處": ["彰化工作站", "員林工作站", "和美工作站", "鹿港工作站", "溪湖工作站", "田中工作站"],
+  "雲林管理處": ["斗六工作站", "虎尾工作站", "斗南工作站", "西螺工作站", "北港工作站", "麥寮工作站"],
+  "嘉南管理處": ["嘉義工作站", "朴子工作站", "布袋工作站", "新營工作站", "善化工作站", "麻豆工作站", "佳里工作站"],
+  "高雄管理處": ["高雄工作站", "鳳山工作站", "岡山工作站", "旗山工作站", "美濃工作站", "大寮工作站"],
+  "屏東管理處": ["屏東工作站", "潮州工作站", "東港工作站", "恆春工作站", "萬丹工作站", "內埔工作站"],
+  "臺東管理處": ["臺東工作站", "關山工作站", "成功工作站", "大武工作站", "卑南工作站"],
+  "花蓮管理處": ["花蓮工作站", "吉安工作站", "玉里工作站", "鳳林工作站", "新城工作站", "瑞穗工作站"],
+  "七星管理處": ["七星工作站", "內湖工作站", "南港工作站", "汐止工作站"],
+  "瑠公管理處": ["瑠公工作站", "新店工作站", "深坑工作站", "石碇工作站"]
+};
+
+let projectsDatabase = {};
+let currentOffice = null;
+let isWaiting = false;
+
+function createSeededRandom(seed) {
+  let s = seed;
+  return function() {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
+function initProjectData() {
+  for (let idx = 0; idx < ALL_OFFICES.length; idx++) {
+    const office = ALL_OFFICES[idx];
+    const workstations = WORKSTATIONS[office] || [`${office}工作站`];
+    const projects = [];
+    
+    for (let wsIdx = 0; wsIdx < workstations.length; wsIdx++) {
+      const workstation = workstations[wsIdx];
+      const projectCount = 2 + (wsIdx % 4);
+      
+      for (let j = 1; j <= projectCount; j++) {
+        const r = createSeededRandom(idx * 1000 + wsIdx * 100 + j * 31 + 9999);
+        const actualBase = 40 + Math.floor(r() * 50);
+        const planBase = actualBase + (r() > 0.6 ? -8 : Math.floor(r() * 12) - 4);
+        const actual = Math.min(98, Math.max(20, actualBase));
+        const plan = Math.min(98, Math.max(20, planBase));
+        
+        const reasonsPool = ['天候影響', '材料延遲', '機具調度', '施工順利', '設計變更', '管線遷移', '居民協調', '汛期影響'];
+        const ri = Math.floor(r() * reasonsPool.length);
+        const ri2 = (ri + 1 + Math.floor(r() * (reasonsPool.length - 1))) % reasonsPool.length;
+        
+        const isSuspended = r() > 0.7;
+        let suspendReason = '', suspendDate = '', resumeDate = '';
+        if (isSuspended) {
+          const suspendList = ['管線遷移無法施工', '用地取得爭議', '豪雨災後復原', '居民抗爭協調', '材料檢驗未通過', '施工安全疑慮', '設計變更審查'];
+          suspendReason = suspendList[Math.floor(r() * suspendList.length)];
+          const sd = new Date(2025, 8, 1);
+          sd.setDate(sd.getDate() + Math.floor(r() * 120));
+          suspendDate = `${sd.getFullYear()}/${String(sd.getMonth()+1).padStart(2,'0')}/${String(sd.getDate()).padStart(2,'0')}`;
+          const rd = new Date(2026, 0, 1);
+          rd.setDate(rd.getDate() + Math.floor(r() * 80));
+          resumeDate = `${rd.getFullYear()}/${String(rd.getMonth()+1).padStart(2,'0')}/${String(rd.getDate()).padStart(2,'0')}`;
+        }
+        
+        const projectTypes = ['幹線改善', '排水工程', '蓄水設施', '灌溉渠道', '防洪工程', '生態護岸'];
+        const typeIdx = (wsIdx + j) % projectTypes.length;
+        
+        projects.push({
+          id: `${office.substring(0,2)}${idx}${wsIdx}${j}`,
+          name: `${workstation}${projectTypes[typeIdx]}${j}期`,
+          workstation: workstation,
+          actual: actual,
+          plan: plan,
+          dueDate: `2026/${5+j}/${10+j*3}`,
+          startDate: `2025/${3+j}/${5+j*2}`,
+          contractor: ['甲等營造', '乙級營造', '冠德工程', '永豐建設', '宏達營造', '宏昇建設'][(wsIdx + j) % 6],
+          budget: `${(0.6 + j * 0.3).toFixed(1)}億`,
+          reasons: [reasonsPool[ri], reasonsPool[ri2]],
+          isSuspended: isSuspended,
+          suspendReason: suspendReason,
+          suspendDate: suspendDate,
+          resumeDate: resumeDate,
+          office: office
+        });
+      }
+    }
+    projectsDatabase[office] = projects;
+  }
+}
+initProjectData();
+
+// 輔助函數
+function getCurrentTime() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+}
+
+function getProgressDiff(p) { return Math.round(p.actual - p.plan); }
+
+function getProgressBadge(p) {
+  const diff = getProgressDiff(p);
+  if (diff > 0) return `<span class="badge badge-green">超前 ${diff}%</span>`;
+  if (diff === 0) return `<span class="badge badge-yellow">符合進度</span>`;
+  if (diff >= -8) return `<span class="badge badge-yellow">落後 ${Math.abs(diff)}%</span>`;
+  return `<span class="badge badge-red">落後 ${Math.abs(diff)}%</span>`;
+}
+
+function getProgressBarColor(p) {
+  const diff = getProgressDiff(p);
+  if (diff >= 0) return '#06C755';
+  if (diff >= -8) return '#f39c12';
+  return '#e74c3c';
+}
+
+// 通用：回主選單按鈕
+function getBackToMenuBtn() {
+  return `<div class="btn-group" style="margin-top:8px;"><button class="btn" onclick="showMainMenu()">🏠 回主選單</button></div>`;
+}
+
+// ==================== 主選單 ====================
+function showMainMenu() {
+  if (!currentOffice) {
+    showOfficeSelector();
+    return;
+  }
+  
+  addBotMessage(`
+    <strong>🏠 主選單 - ${escapeHtml(currentOffice)}</strong><br>
+    請選擇查詢項目：
+    <div class="btn-group">
+      <button class="btn" onclick="queryRisk()">⚠️ 落後工程</button>
+      <button class="btn" onclick="queryWorkstationStats()">📋 工作站統計</button>
+      <button class="btn" onclick="querySummary()">📄 長官摘要</button>
+      <button class="btn" onclick="querySuspendList()">⛔ 停工清單</button>
+    </div>
+  `);
+}
+
+// ==================== 管理處選擇 ====================
+function showOfficeSelector() {
+  let btnsHtml = '';
+  ALL_OFFICES.forEach(office => {
+    btnsHtml += `<button class="office-btn" onclick="selectOffice('${escapeHtml(office)}')">🌾 ${escapeHtml(office)}</button>`;
+  });
+  addBotMessage(`
+    <strong>🏢 請選擇管理處</strong><br>
+    <div class="office-grid">${btnsHtml}</div>
+  `);
+}
+
+function selectOffice(office) {
+  if (isWaiting) return;
+  currentOffice = office;
+  document.getElementById('regionSelectorBtn').innerHTML = `📍 ${escapeHtml(office)} ▼`;
+  showMainMenu();
+}
+
+// ==================== 落後工程查詢 ====================
+function queryRisk() {
+  if (!currentOffice) { addBotMessage('⚠️ 請先選擇管理處'); return; }
+  if (isWaiting) return;
+  
+  const projects = projectsDatabase[currentOffice] || [];
+  const delayed = projects.filter(p => getProgressDiff(p) < 0);
+  
+  if (delayed.length === 0) {
+    addBotMessage(`✅ ${escapeHtml(currentOffice)} 目前沒有任何落後工程。${getBackToMenuBtn()}`);
+    return;
+  }
+  
+  let rows = '';
+  delayed.forEach(p => {
+    rows += `
+      <div class="card-row">
+        <span><strong>${escapeHtml(p.name)}</strong><br><span style="font-size:10px; color:#888;">${escapeHtml(p.workstation)}｜預定完工：${p.dueDate}</span></span>
+        ${getProgressBadge(p)}
+      </div>
+    `;
+  });
+  
+  addBotMessage(`
+    <div class="card">
+      <div class="card-header red">⚠️ ${escapeHtml(currentOffice)} 落後工程（${delayed.length}件）</div>
+      ${rows}
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// ==================== 工作站統計 ====================
+function queryWorkstationStats() {
+  if (!currentOffice) { addBotMessage('⚠️ 請先選擇管理處'); return; }
+  if (isWaiting) return;
+  
+  const projects = projectsDatabase[currentOffice] || [];
+  if (projects.length === 0) { addBotMessage(`⚠️ ${escapeHtml(currentOffice)} 暫無工程資料。${getBackToMenuBtn()}`); return; }
+  
+  const groupedStats = {};
+  projects.forEach(p => {
+    if (!groupedStats[p.workstation]) {
+      groupedStats[p.workstation] = { total: 0, suspend: 0, delay: 0 };
+    }
+    groupedStats[p.workstation].total++;
+    if (p.isSuspended) groupedStats[p.workstation].suspend++;
+    if (getProgressDiff(p) < 0) groupedStats[p.workstation].delay++;
+  });
+  
+  let statsHtml = '';
+  for (const [ws, stats] of Object.entries(groupedStats)) {
+    statsHtml += `
+      <div class="ws-stat-card">
+        <div class="ws-stat-header">
+          <span class="ws-name">🏢 ${escapeHtml(ws)}</span>
+        </div>
+        <div class="ws-stats">
+          <div class="stat-item stat-total"><div class="stat-num">${stats.total}</div><div class="stat-label">總工程</div></div>
+          <div class="stat-item stat-suspend"><div class="stat-num">${stats.suspend}</div><div class="stat-label">停工</div></div>
+          <div class="stat-item stat-delay"><div class="stat-num">${stats.delay}</div><div class="stat-label">落後</div></div>
+        </div>
+      </div>
+    `;
+  }
+  
+  addBotMessage(`
+    <div class="card">
+      <div class="card-header green">📊 ${escapeHtml(currentOffice)} 工作站工程統計</div>
+      <div class="card-body" style="padding: 8px;">${statsHtml}</div>
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// ==================== 長官摘要 ====================
+function querySummary() {
+  if (!currentOffice) { addBotMessage('⚠️ 請先選擇管理處'); return; }
+  if (isWaiting) return;
+  
+  const projects = projectsDatabase[currentOffice] || [];
+  const aheadCount = projects.filter(p => getProgressDiff(p) > 0).length;
+  const delayCount = projects.filter(p => getProgressDiff(p) < 0).length;
+  const onTimeCount = projects.filter(p => getProgressDiff(p) === 0).length;
+  const highRiskCount = projects.filter(p => getProgressDiff(p) < -10).length;
+  const suspendCount = projects.filter(p => p.isSuspended).length;
+  const total = projects.length;
+  
+  addBotMessage(`
+    <div class="card">
+      <div class="card-header dark">📄 ${escapeHtml(currentOffice)} 工程摘要報告</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1px; background:#ddd;">
+        <div style="background:#fff; padding:12px; text-align:center;"><div style="font-size:24px; font-weight:700; color:#06C755;">${aheadCount}</div><div style="font-size:10px; color:#666;">超前件數</div></div>
+        <div style="background:#fff; padding:12px; text-align:center;"><div style="font-size:24px; font-weight:700; color:#27ae60;">${onTimeCount}</div><div style="font-size:10px; color:#666;">符合件數</div></div>
+        <div style="background:#fff; padding:12px; text-align:center;"><div style="font-size:24px; font-weight:700; color:#e74c3c;">${delayCount}</div><div style="font-size:10px; color:#666;">落後件數</div></div>
+        <div style="background:#fff; padding:12px; text-align:center;"><div style="font-size:24px; font-weight:700; color:#e67e22;">${highRiskCount}</div><div style="font-size:10px; color:#666;">高風險(>10%)</div></div>
+      </div>
+      <div style="padding:10px 14px; background:#f9f6f0; font-size:12px; display:flex; justify-content:space-between;">
+        <span>📊 總案件數：${total}件</span>
+        <span>⛔ 停工案件：${suspendCount}件</span>
+      </div>
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// ==================== 停工清單 ====================
+function querySuspendList() {
+  if (!currentOffice) { addBotMessage('⚠️ 請先選擇管理處'); return; }
+  if (isWaiting) return;
+  
+  const projects = projectsDatabase[currentOffice] || [];
+  const suspended = projects.filter(p => p.isSuspended);
+  
+  if (suspended.length === 0) {
+    addBotMessage(`✅ ${escapeHtml(currentOffice)} 目前沒有停工案件。${getBackToMenuBtn()}`);
+    return;
+  }
+  
+  let listHtml = '';
+  suspended.forEach(p => {
+    listHtml += `
+      <div class="card-row" style="background:#fff8f0;">
+        <span><strong>${escapeHtml(p.name)}</strong><br><span style="font-size:10px; color:#888;">${escapeHtml(p.workstation)}</span></span>
+        <span class="badge badge-red">停工中</span>
+      </div>
+      <div class="card-row" style="font-size:11px; background:#fffaf5;"><span>📋 停工原因</span><span>${escapeHtml(p.suspendReason)}</span></div>
+      <div class="card-row" style="font-size:11px;"><span>📅 停工日期</span><span>${p.suspendDate}</span></div>
+      <div class="card-row" style="font-size:11px;"><span>🔧 預計復工</span><span style="color:#27ae60;">${p.resumeDate}</span></div>
+    `;
+  });
+  
+  addBotMessage(`
+    <div class="card">
+      <div class="card-header red">⛔ ${escapeHtml(currentOffice)} 停工清單（${suspended.length}件）</div>
+      ${listHtml}
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// ==================== 單一工程完整詳細資料 ====================
+function showFullProjectDetail(project) {
+  const progressBarColor = getProgressBarColor(project);
+  
+  let suspendHtml = '';
+  if (project.isSuspended) {
+    suspendHtml = `
+      <div class="card-row" style="background:#fff5e8;"><span>⛔ 停工原因</span><span>${escapeHtml(project.suspendReason)}</span></div>
+      <div class="card-row" style="background:#fff5e8;"><span>📅 停工日期</span><span>${project.suspendDate}</span></div>
+      <div class="card-row" style="background:#fff5e8;"><span>🔧 預定復工</span><span style="color:#2ecc71;">${project.resumeDate}</span></div>
+    `;
+  } else {
+    suspendHtml = `<div class="card-row"><span>⛔ 停工狀態</span><span style="color:#27ae60;">正常施工中 ✅</span></div>`;
+  }
+  
+  const detailHtml = `
+    <div class="card">
+      <div class="card-header green">📁 ${escapeHtml(project.name)} - 完整詳細資料</div>
+      <div class="card-row"><span>🏢 所屬工作站</span><span>${escapeHtml(project.workstation)}</span></div>
+      <div class="card-row"><span>📊 進度狀況</span>${getProgressBadge(project)}</div>
+      <div class="card-row card-col">
+        <div style="width:100%;"><div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>實際進度</span><span>${project.actual}%</span></div><div class="progress-bar-bg"><div class="progress-fill" style="width:${project.actual}%; background:${progressBarColor}"></div></div></div>
+        <div style="width:100%; margin-top:6px;"><div style="display:flex; justify-content:space-between;"><span>預定進度</span><span>${project.plan}%</span></div><div class="progress-bar-bg"><div class="progress-fill" style="width:${project.plan}%; background:#aaa;"></div></div></div>
+      </div>
+      <div class="card-row"><span>🏢 承包廠商</span><span>${escapeHtml(project.contractor)}</span></div>
+      <div class="card-row"><span>💰 合約金額</span><span>${project.budget}</span></div>
+      <div class="card-row"><span>📅 開工日期</span><span>${project.startDate}</span></div>
+      <div class="card-row"><span>🏁 預定完工</span><span>${project.dueDate}</span></div>
+      <div class="card-row"><span>⚠️ 落後/延誤原因</span><span>${escapeHtml(project.reasons.join('、'))}</span></div>
+      ${suspendHtml}
+    </div>
+    ${getBackToMenuBtn()}
+  `;
+  
+  addBotMessage(detailHtml);
+}
+
+// ==================== 多筆符合結果呈現 ====================
+function showMultipleResults(matchedProjects, searchText) {
+  let listHtml = '';
+  matchedProjects.slice(0, 5).forEach(p => {
+    listHtml += `
+      <div class="card-row" style="cursor:pointer;" onclick="quickSearchFullName('${escapeHtml(p.name)}')">
+        <span><strong>📌 ${escapeHtml(p.name)}</strong><br><span style="font-size:10px; color:#888;">${escapeHtml(p.workstation)}｜進度 ${p.actual}%</span></span>
+        ${getProgressBadge(p)}
+      </div>
+    `;
+  });
+  
+  const moreCount = matchedProjects.length - 5;
+  const moreHint = moreCount > 0 ? `<div style="padding:8px 14px; background:#f9f6f0; font-size:11px; color:#888;">✨ 還有 ${moreCount} 筆符合，請輸入更完整的工程名稱</div>` : '';
+  
+  addBotMessage(`
+    <div class="card">
+      <div class="card-header orange">🔍 找到 ${matchedProjects.length} 筆符合「${escapeHtml(searchText)}」的工程</div>
+      <div class="card-body" style="padding:0;">${listHtml}</div>
+      ${moreHint}
+    </div>
+    <div class="keyword-hint" style="margin-top:8px; background:#f0f7e8; border-left:3px solid #06C755; padding:8px 12px; border-radius:8px; font-size:11px;">
+      💡 點擊上方工程名稱可查看完整詳細資料
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// ==================== 文字查詢 ====================
+function processTextQuery(text) {
+  if (!currentOffice) {
+    addBotMessage('⚠️ 請先點擊上方綠色區域選擇管理處，才能查詢工程資訊喔！');
+    return;
+  }
+  
+  const projects = projectsDatabase[currentOffice] || [];
+  const trimmedText = text.trim();
+  
+  // 關鍵字快速查詢
+  const lowerText = trimmedText.toLowerCase();
+  if (lowerText === '落後' || lowerText === '落後工程' || lowerText === '落後案件') { queryRisk(); return; }
+  if (lowerText === '全部' || lowerText === '全部工程' || lowerText === '所有工程') { queryWorkstationStats(); return; }
+  if (lowerText === '摘要' || lowerText === '長官摘要' || lowerText === '報告') { querySummary(); return; }
+  if (lowerText === '停工' || lowerText === '停工清單' || lowerText === '停工案件') { querySuspendList(); return; }
+  if (lowerText === '主選單' || lowerText === '選單' || lowerText === 'menu') { showMainMenu(); return; }
+  
+  // 工程名稱比對（模糊比對）
+  let matchedProjects = [];
+  
+  // 完整名稱比對
+  let exactMatch = projects.find(p => p.name === trimmedText);
+  if (exactMatch) {
+    showFullProjectDetail(exactMatch);
+    return;
+  }
+  
+  // 包含比對（工程名稱包含輸入文字）
+  if (trimmedText.length >= 2) {
+    matchedProjects = projects.filter(p => p.name.includes(trimmedText));
+  }
+  
+  // 若無結果，嘗試工作站比對
+  if (matchedProjects.length === 0 && trimmedText.length >= 2) {
+    matchedProjects = projects.filter(p => p.workstation.includes(trimmedText));
+  }
+  
+  // 多筆符合（2筆以上）
+  if (matchedProjects.length >= 2) {
+    showMultipleResults(matchedProjects, trimmedText);
+    return;
+  }
+  
+  // 單筆符合
+  if (matchedProjects.length === 1) {
+    showFullProjectDetail(matchedProjects[0]);
+    return;
+  }
+  
+  // 完全查無資料
+  addBotMessage(`
+    <div class="no-result-card">
+      <strong>🔍 查無資料</strong><br>
+      目前無法在資料庫中找到「${escapeHtml(trimmedText)}」相關資訊，您可以嘗試調整關鍵字。
+    </div>
+    ${getBackToMenuBtn()}
+  `);
+}
+
+// 快速查詢完整工程名稱
+function quickSearchFullName(fullName) {
+  if (isWaiting) return;
+  document.getElementById('textInput').value = fullName;
+  sendMessage();
+}
+
+// ==================== UI 操作 ====================
+function addUserMessage(text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg-row user';
+  div.innerHTML = `<div><div class="msg-time">${getCurrentTime()}</div><div class="bubble user-bubble">${escapeHtml(text)}</div></div>`;
+  area.appendChild(div);
+  scrollToBottom();
+}
+
+function addBotMessage(contentHtml) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'msg-row';
+  div.innerHTML = `
+    <div class="bot-av">🌾</div>
+    <div>
+      <div class="msg-time">${getCurrentTime()}</div>
+      <div class="bubble bot-bubble" style="max-width:290px;">${contentHtml}</div>
+    </div>
+  `;
+  area.appendChild(div);
+  scrollToBottom();
+}
+
+function showTyping() {
+  const area = document.getElementById('chatArea');
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'msg-row';
+  typingDiv.id = 'typingIndicator';
+  typingDiv.innerHTML = `
+    <div class="bot-av">🌾</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  area.appendChild(typingDiv);
+  scrollToBottom();
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function scrollToBottom() {
+  const area = document.getElementById('chatArea');
+  area.scrollTop = area.scrollHeight;
+  const btn = document.getElementById('scrollBtn');
+  if (btn) btn.style.display = 'none';
+}
+
+function setupScrollListener() {
+  const area = document.getElementById('chatArea');
+  const btn = document.getElementById('scrollBtn');
+  area.addEventListener('scroll', () => {
+    const isNearBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 80;
+    btn.style.display = isNearBottom ? 'none' : 'flex';
+  });
+}
+
+function sendMessage() {
+  if (isWaiting) return;
+  const input = document.getElementById('textInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  
+  addUserMessage(msg);
+  isWaiting = true;
+  showTyping();
+  
+  setTimeout(() => {
+    removeTyping();
+    processTextQuery(msg);
+    isWaiting = false;
+  }, 600);
+}
+
+// 初始化
+document.getElementById('regionSelectorBtn').onclick = () => showOfficeSelector();
+
+function updateClock() {
+  const d = new Date();
+  document.getElementById('clock').innerText = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+updateClock();
+setInterval(updateClock, 30000);
+document.getElementById('initTime').innerText = getCurrentTime();
+setupScrollListener();
+setTimeout(scrollToBottom, 100);
+</script>
+</body>
+</html>
