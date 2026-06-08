@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>土地改良物查詢系統</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eef2f8;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.8rem;
+            color: #1a2c3e;
+        }
+        .query-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .page-header {
+            background: #1f4e3c;
+            padding: 1.5rem 2rem;
+            border-bottom: 4px solid #ffc857;
+        }
+        .page-header h1 {
+            color: white;
+            font-weight: 600;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-header h1 i {
+            color: #ffc857;
+            font-size: 1.8rem;
+        }
+        .filter-section {
+            background: #fefdf8;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e6edf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 160px;
+        }
+        .filter-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #5b7f8c;
+            margin-bottom: 6px;
+        }
+        .filter-item select, .filter-item input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            border: 1.5px solid #e0eef4;
+            border-radius: 14px;
+            background: white;
+            transition: 0.2s;
+        }
+        .filter-item select:focus, .filter-item input:focus {
+            border-color: #1f4e3c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(31,78,60,0.1);
+        }
+        .year-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .year-range select {
+            flex: 1;
+        }
+        .year-range span {
+            font-size: 0.8rem;
+            color: #5b7f8c;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .btn-query, .btn-export {
+            padding: 0.7rem 1.6rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-query {
+            background: #1f4e3c;
+            color: white;
+        }
+        .btn-query:hover {
+            background: #123d2e;
+        }
+        .btn-export {
+            background: #2c6e5c;
+            color: white;
+        }
+        .btn-export:hover {
+            background: #1f5546;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0 2rem 2rem 2rem;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .data-table th, .data-table td {
+            padding: 1rem 0.6rem;
+            text-align: center;
+            border-bottom: 1px solid #e9f0f5;
+        }
+        .data-table th {
+            background: #f0f6fa;
+            color: #1f3b4c;
+            font-weight: 600;
+            border-bottom: 2px solid #cbdde6;
+        }
+        .data-table tr:hover {
+            background: #fafefd;
+        }
+        .hide-col {
+            display: none;
+        }
+        .badge {
+            background: #e9f4ef;
+            color: #1f4e3c;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+        .empty-row td {
+            text-align: center;
+            padding: 2rem;
+            color: #8ba0aa;
+        }
+        /* 頁腳已移除，不再顯示任何提示文字 */
+        @media (max-width: 760px) {
+            body {
+                padding: 1rem;
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-actions {
+                justify-content: flex-end;
+            }
+            .data-table th, .data-table td {
+                padding: 0.6rem 0.3rem;
+                font-size: 0.7rem;
+            }
+            .year-range {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="query-container">
+    <div class="page-header">
+        <h1><i class="fas fa-trowel"></i> 土地改良物查詢</h1>
+    </div>
+
+    <!-- 篩選列 -->
+    <div class="filter-section">
+        <div class="filter-item">
+            <label><i class="fas fa-calendar-alt"></i> 財產取得年度區間</label>
+            <div class="year-range">
+                <select id="yearStart">
+                    <option value="">起始年</option>
+                </select>
+                <span>～</span>
+                <select id="yearEnd">
+                    <option value="">結束年</option>
+                </select>
+            </div>
+        </div>
+        <div class="filter-item">
+            <label><i class="fas fa-map-marker-alt"></i> 存置地點</label>
+            <select id="filterLocation">
+                <option value="">全部</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label><i class="fas fa-users"></i> 財產使用單位</label>
+            <select id="filterUsingDept">
+                <option value="">全部</option>
+            </select>
+        </div>
+        <div class="filter-actions">
+            <button class="btn-query" id="queryBtn"><i class="fas fa-search"></i> 查詢</button>
+            <button class="btn-export" id="exportBtn"><i class="fas fa-file-excel"></i> 匯出 Excel</button>
+        </div>
+    </div>
+
+    <!-- 資料表格區：財產編號欄位隱藏但保留於DOM -->
+    <div class="table-wrapper">
+        <table class="data-table" id="resultTable">
+            <thead>
+                <tr>
+                    <th>項次</th>
+                    <th class="hide-col">財產編號(含分號)</th>
+                    <th>財產名稱</th>
+                    <th>財產別名</th>
+                    <th>渠道名稱</th>
+                    <th>單位</th>
+                    <th>計量數</th>
+                    <th>總價(元)</th>
+                    <th>主要材質</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr class="empty-row"><td colspan="9">載入資料中...<\/tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- 已移除頁腳提示文字 -->
+</div>
+
+<script>
+    // ---------- 財產登錄模擬資料 ----------
+    const propertyData = [
+        { id:1, propertyName:"明渠", alias:"東勢堤防護岸", channel:"大甲溪灌區幹線", acquireDate:"2013-12-17", location:"銅鑼鄉", usingDept:"苗栗管理處 銅鑼工作站", material:"混凝土", specValue:117.9, specUnit:"公尺", totalPrice:3280000 },
+        { id:2, propertyName:"護岸", alias:"後龍溪右岸", channel:"後龍溪灌區", acquireDate:"2015-03-20", location:"後龍鎮", usingDept:"苗栗管理處 後龍工作站", material:"鋼筋混凝土", specValue:850.5, specUnit:"公尺", totalPrice:12500000 },
+        { id:3, propertyName:"排水溝", alias:"公館排水幹線", channel:"公館地區排水", acquireDate:"2018-07-11", location:"公館鄉", usingDept:"苗栗管理處 公館工作站", material:"混凝土", specValue:320.0, specUnit:"公尺", totalPrice:5680000 },
+        { id:4, propertyName:"圳路", alias:"苑裡圳支線", channel:"苑裡灌區", acquireDate:"2020-11-05", location:"苑裡鎮", usingDept:"苗栗管理處 苑裡工作站", material:"砌石", specValue:1240.3, specUnit:"公尺", totalPrice:18200000 },
+        { id:5, propertyName:"堤防", alias:"大湖溪堤防", channel:"大湖溪流域", acquireDate:"2016-09-22", location:"大湖鄉", usingDept:"苗栗管理處 大湖工作站", material:"混凝土", specValue:670.0, specUnit:"公尺", totalPrice:9530000 },
+        { id:6, propertyName:"明渠", alias:"銅鑼幹線", channel:"銅鑼灌區", acquireDate:"2019-02-28", location:"銅鑼鄉", usingDept:"苗栗管理處 銅鑼工作站", material:"鋼筋混凝土", specValue:210.8, specUnit:"公尺", totalPrice:4120000 },
+        { id:7, propertyName:"排水溝", alias:"三義排水", channel:"三義農田排水", acquireDate:"2021-12-10", location:"三義鄉", usingDept:"苗栗管理處 三義工作站", material:"混凝土", specValue:435.2, specUnit:"公尺", totalPrice:7210000 },
+        { id:8, propertyName:"護岸", alias:"頭份堤防", channel:"中港溪灌區", acquireDate:"2014-08-17", location:"頭份市", usingDept:"苗栗管理處 頭份工作站", material:"混凝土", specValue:932.7, specUnit:"公尺", totalPrice:14450000 },
+        { id:9, propertyName:"圳路", alias:"卓蘭圳", channel:"卓蘭灌區", acquireDate:"2017-11-20", location:"卓蘭鎮", usingDept:"苗栗管理處 卓蘭工作站", material:"混凝土", specValue:560.0, specUnit:"公尺", totalPrice:6730000 },
+        { id:10, propertyName:"護岸", alias:"通霄海堤", channel:"通霄沿海灌區", acquireDate:"2019-09-03", location:"通霄鎮", usingDept:"苗栗管理處 通霄工作站", material:"鋼筋混凝土", specValue:430.2, specUnit:"公尺", totalPrice:8350000 }
+    ];
+
+    // 苗栗縣所有鄉鎮市
+    const townships = [
+        "苗栗市", "苑裡鎮", "通霄鎮", "竹南鎮", "頭份市", "後龍鎮", "卓蘭鎮", "大湖鄉",
+        "公館鄉", "銅鑼鄉", "南庄鄉", "頭屋鄉", "三義鄉", "西湖鄉", "造橋鄉", "三灣鄉", "獅潭鄉", "泰安鄉"
+    ];
+
+    // 使用單位完整名稱
+    const fullUsingDepts = [
+        "苗栗管理處 苗栗工作站", "苗栗管理處 苑裡工作站", "苗栗管理處 通霄工作站", "苗栗管理處 竹南工作站",
+        "苗栗管理處 頭份工作站", "苗栗管理處 後龍工作站", "苗栗管理處 卓蘭工作站", "苗栗管理處 大湖工作站",
+        "苗栗管理處 公館工作站", "苗栗管理處 銅鑼工作站", "苗栗管理處 三義工作站", "苗栗管理處 西湖工作站",
+        "苗栗管理處 造橋工作站", "苗栗管理處 南庄工作站", "苗栗管理處 頭屋工作站", "苗栗管理處 三灣工作站",
+        "苗栗管理處 獅潭工作站", "苗栗管理處 泰安工作站"
+    ];
+
+    // 取得民國年份
+    function getRocYearFromDateStr(dateStr) {
+        if (!dateStr) return null;
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return null;
+        const year = parseInt(parts[0]);
+        if (isNaN(year)) return null;
+        return year - 1911;
+    }
+
+    // 格式化總價
+    function formatPrice(price) {
+        if (price === undefined || price === null) return '';
+        return price.toLocaleString('zh-TW');
+    }
+
+    // 取得年份範圍
+    function getYearRangeFromData() {
+        let years = propertyData.map(item => getRocYearFromDateStr(item.acquireDate)).filter(y => y !== null);
+        if (years.length === 0) return { min: 100, max: 115 };
+        return { min: Math.min(...years), max: Math.max(...years) };
+    }
+
+    // 產生年度下拉
+    function populateYearSelects() {
+        const range = getYearRangeFromData();
+        const startSelect = document.getElementById('yearStart');
+        const endSelect = document.getElementById('yearEnd');
+        if (!startSelect || !endSelect) return;
+        startSelect.innerHTML = '<option value="">起始年</option>';
+        endSelect.innerHTML = '<option value="">結束年</option>';
+        for (let y = range.min; y <= range.max; y++) {
+            startSelect.appendChild(new Option(`${y}年`, y));
+            endSelect.appendChild(new Option(`${y}年`, y));
+        }
+    }
+
+    // 產生存置地點下拉
+    function populateLocationSelect() {
+        const sel = document.getElementById('filterLocation');
+        if (!sel) return;
+        townships.forEach(t => sel.appendChild(new Option(t, t)));
+    }
+
+    // 產生使用單位下拉 (顯示名稱去除前綴)
+    function populateUsingDeptSelect() {
+        const sel = document.getElementById('filterUsingDept');
+        if (!sel) return;
+        fullUsingDepts.forEach(full => {
+            let display = full.startsWith("苗栗管理處 ") ? full.substring(5) : full;
+            sel.appendChild(new Option(display, full));
+        });
+    }
+
+    // 篩選資料
+    function getFilteredData() {
+        const yearStart = document.getElementById('yearStart').value;
+        const yearEnd = document.getElementById('yearEnd').value;
+        const location = document.getElementById('filterLocation').value;
+        const usingDept = document.getElementById('filterUsingDept').value;
+
+        return propertyData.filter(item => {
+            if (yearStart || yearEnd) {
+                const rocYear = getRocYearFromDateStr(item.acquireDate);
+                if (rocYear === null) return false;
+                if (yearStart && rocYear < parseInt(yearStart)) return false;
+                if (yearEnd && rocYear > parseInt(yearEnd)) return false;
+            }
+            if (location && item.location !== location) return false;
+            if (usingDept && item.usingDept !== usingDept) return false;
+            return true;
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+    }
+
+    // 渲染表格 (財產編號欄位隱藏)
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const filtered = getFilteredData();
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="9">查無符合條件之土地改良物資料<\/tr>';
+            return;
+        }
+        let html = '';
+        filtered.forEach((item, idx) => {
+            html += `<tr>
+                <td>${idx+1}<\/td>
+                <td class="hide-col"><\/td>
+                <td><span class="badge">${escapeHtml(item.propertyName)}<\/span><\/td>
+                <td>${escapeHtml(item.alias) || '—'}<\/td>
+                <td>${escapeHtml(item.channel) || '—'}<\/td>
+                <td>${escapeHtml(item.specUnit)}<\/td>
+                <td>${item.specValue}<\/td>
+                <td class="price-cell">${formatPrice(item.totalPrice)}<\/td>
+                <td>${escapeHtml(item.material)}<\/td>
+            <\/tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // 匯出 Excel (保留財產編號欄位)
+    function exportToExcel() {
+        const filtered = getFilteredData();
+        if (filtered.length === 0) {
+            alert('沒有資料可匯出，請調整篩選條件。');
+            return;
+        }
+        const headers = [
+            '項次', '財產編號(含分號)', '財產名稱', '財產別名', '渠道名稱',
+            '單位', '計量數', '總價(元)', '主要材質'
+        ];
+        const rows = filtered.map((item, idx) => [
+            idx+1, '', item.propertyName, item.alias || '', item.channel || '',
+            item.specUnit, item.specValue, item.totalPrice, item.material
+        ]);
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws['!cols'] = [{wch:6},{wch:18},{wch:12},{wch:12},{wch:14},{wch:8},{wch:10},{wch:14},{wch:12}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, '土地改良物清冊');
+        XLSX.writeFile(wb, `土地改良物清查表_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+    }
+
+    function queryData() { renderTable(); }
+
+    function init() {
+        populateYearSelects();
+        populateLocationSelect();
+        populateUsingDeptSelect();
+        renderTable();
+
+        document.getElementById('queryBtn')?.addEventListener('click', queryData);
+        document.getElementById('exportBtn')?.addEventListener('click', exportToExcel);
+        ['yearStart','yearEnd','filterLocation','filterUsingDept'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', queryData);
+        });
+    }
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>工程管理系統 · 大湖鄉雅悠圳路二期改善工程</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eef2f8;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.8rem;
+            color: #1a2c3e;
+        }
+        .project-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .project-header {
+            background: #1f4e3c;
+            padding: 1.2rem 2rem;
+            border-bottom: 4px solid #ffc857;
+        }
+        .project-header h2 {
+            color: white;
+            font-weight: 600;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .project-header h2 i {
+            color: #ffc857;
+            font-size: 1.6rem;
+        }
+        .tabs-wrapper {
+            padding: 0 2rem;
+            background: #ffffff;
+            border-bottom: 1px solid #e6edf2;
+        }
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.2rem;
+            list-style: none;
+            padding: 0.75rem 0 0 0;
+            margin: 0;
+        }
+        .tab-nav li {
+            cursor: pointer;
+            padding: 0.7rem 1.4rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 2rem 2rem 0 0;
+            transition: all 0.2s;
+            color: #4a6272;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-nav li i {
+            font-size: 0.9rem;
+        }
+        .tab-nav li:hover {
+            background: #f0f6fa;
+            color: #1f4e3c;
+        }
+        .tab-nav li.active {
+            background: #ffffff;
+            color: #1f4e3c;
+            font-weight: 600;
+            border-bottom: 3px solid #1f4e3c;
+        }
+        .sub-tabs {
+            border-top: 1px solid #eef3f7;
+        }
+        .tab-content {
+            padding: 2rem;
+            background: #ffffff;
+            min-height: 550px;
+        }
+        .tab-pane {
+            display: none;
+            animation: fade 0.2s ease;
+        }
+        .tab-pane.active-pane {
+            display: block;
+        }
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(6px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* 財產登錄表單樣式 */
+        .property-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1.25rem 1rem;
+            align-items: start;
+        }
+        .property-label {
+            font-weight: 600;
+            color: #1f3b4c;
+            background-color: #f8fafc;
+            padding: 0.65rem 1rem;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #e2edf2;
+        }
+        .property-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .property-field input, .property-field select {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            border: 1.5px solid #e0eef4;
+            border-radius: 14px;
+            background-color: #ffffff;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .property-field input:focus, .property-field select:focus {
+            border-color: #2a6b4e;
+            box-shadow: 0 0 0 3px rgba(42, 107, 78, 0.2);
+        }
+        .property-field input:disabled, .property-field select:disabled {
+            background-color: #f2f5f7;
+            color: #8ba0aa;
+            cursor: not-allowed;
+        }
+        .composite-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+        }
+        .composite-item {
+            flex: 1;
+            min-width: 130px;
+        }
+        .composite-item label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #5b7f8c;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .material-spec-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+        }
+        .material-field {
+            flex: 1.2;
+            min-width: 140px;
+        }
+        .spec-field {
+            flex: 2;
+            min-width: 200px;
+        }
+        .spec-inline {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .spec-inline input {
+            flex: 2;
+            min-width: 100px;
+        }
+        .spec-inline select {
+            flex: 1;
+            min-width: 85px;
+        }
+        .btn-group {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        .btn-outline {
+            background: #ecf3f7;
+            border: 1px solid #cbdbe2;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-primary-green {
+            background: #1f4e3c;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        small.hint {
+            font-size: 0.7rem;
+            color: #6c8d9c;
+        }
+        .currency-input {
+            text-align: right;
+        }
+
+        /* 巡查登錄專用樣式 */
+        .inspection-group {
+            background: #fefdf7;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px dashed #cbdde6;
+            padding-bottom: 0.6rem;
+        }
+        .group-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1f4e3c;
+        }
+        .btn-remove-group {
+            background: none;
+            border: none;
+            color: #b91c1c;
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            transition: 0.2s;
+        }
+        .btn-remove-group:hover {
+            background: #fee2e2;
+        }
+        .year-row {
+            margin-bottom: 1rem;
+        }
+        .year-row label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+        }
+        .year-select {
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid #cbdde6;
+            background: white;
+        }
+        .xy-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .xy-field {
+            flex: 1;
+        }
+        .xy-field label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #5b7f8c;
+            margin-bottom: 5px;
+        }
+        .xy-field input {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: 1.5px solid #e0eef4;
+            border-radius: 14px;
+        }
+        .photo-list {
+            margin: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .photo-card {
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .photo-preview {
+            width: 100px;
+            height: 100px;
+            background: #f5f7fa;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #e2edf2;
+            cursor: pointer;
+        }
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        .photo-preview .placeholder-icon {
+            font-size: 2rem;
+            color: #9bb7c4;
+        }
+        .photo-details {
+            flex: 3;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .photo-detail-field {
+            flex: 1;
+            min-width: 140px;
+        }
+        .photo-detail-field label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4f6f7d;
+            display: block;
+        }
+        .photo-detail-field input {
+            width: 100%;
+            margin-top: 4px;
+            padding: 0.4rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .btn-icon {
+            background: #ecf3f7;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+        }
+        .btn-add-photo {
+            background: #eef2fa;
+            border: 1px dashed #8fbbaf;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .group-save-btn {
+            background: #1f4e3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0 1.5rem;
+        }
+        .text-right {
+            text-align: right;
+        }
+        @media (max-width: 760px) {
+            .property-form-grid {
+                grid-template-columns: 1fr;
+            }
+            .composite-row, .material-spec-group {
+                flex-direction: column;
+            }
+            .photo-card {
+                flex-direction: column;
+            }
+            .photo-preview {
+                width: 100%;
+                height: 150px;
+            }
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="project-container">
+    <div class="project-header">
+        <h2><i class="fas fa-water"></i> 大湖鄉雅悠圳路二期改善工程</h2>
+    </div>
+
+    <!-- 上層頁籤 -->
+    <div class="tabs-wrapper">
+        <ul class="tab-nav" id="topTabs">
+            <li data-tab="top1" class="active"><i class="fas fa-folder-open"></i> 工程文件管理</li>
+            <li data-tab="top2"><i class="fas fa-clipboard-list"></i> 施工日志</li>
+            <li data-tab="top3"><i class="fas fa-chart-line"></i> S-Curve圖</li>
+            <li data-tab="top4"><i class="fas fa-coins"></i> 工程估驗</li>
+            <li data-tab="top5"><i class="fas fa-hard-hat"></i> 工程督導</li>
+            <li data-tab="top6"><i class="fas fa-search"></i> 工程查驗</li>
+        </ul>
+    </div>
+
+    <!-- 下層頁籤 -->
+    <div class="tabs-wrapper sub-tabs">
+        <ul class="tab-nav" id="bottomTabs">
+            <li data-subtab="basic"><i class="fas fa-database"></i> 基本資料</li>
+            <li data-subtab="schedule"><i class="fas fa-calendar-alt"></i> 預定期程</li>
+            <li data-subtab="execution"><i class="fas fa-chart-simple"></i> 執行狀況</li>
+            <li data-subtab="budget"><i class="fas fa-dollar-sign"></i> 預算額度</li>
+            <li data-subtab="progress"><i class="fas fa-tasks"></i> 施工進度</li>
+            <li data-subtab="acceptance"><i class="fas fa-check-double"></i> 工程驗收結算保固作業</li>
+            <li data-subtab="property"><i class="fas fa-landmark"></i> 財產登錄</li>
+            <li data-subtab="inspect" class="active"><i class="fas fa-clipboard"></i> 巡查登錄</li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="mainContentArea">
+        <!-- 基本資料頁籤 -->
+        <div class="tab-pane" data-pane="basic">
+            <div style="background:#f9fafb; border-radius: 1.2rem; padding: 2rem; text-align: center;"><i class="fas fa-building" style="font-size: 3rem;"></i><h3>📋 工程基本資料</h3><p>工程名稱：大湖鄉雅悠圳路二期改善工程<br>主管機關：農田水利署苗栗管理處<br>設計單位：禹治工程顧問有限公司</p></div>
+        </div>
+        <div class="tab-pane" data-pane="schedule"><div style="padding:1rem">開工日期：113年2月15日 → 預定完工：113年8月30日</div></div>
+        <div class="tab-pane" data-pane="execution"><div>執行進度正常，累計預定進度68%，實際70%。</div></div>
+        <div class="tab-pane" data-pane="budget"><div>總經費：新台幣 28,500,000 元</div></div>
+        <div class="tab-pane" data-pane="progress"><div>施工進度甘特圖模擬區塊</div></div>
+        <div class="tab-pane" data-pane="acceptance"><div>驗收階段尚未啟動，結算書製作中</div></div>
+        
+        <!-- ========= 財產登錄頁籤 (移除「依據農田水利法登錄設施資訊」) ========= -->
+        <div class="tab-pane" data-pane="property" id="propertyPane">
+            <div style="margin-bottom: 1rem;">
+                <h3 style="display: flex; align-items: center; gap: 10px;"><i class="fas fa-warehouse"></i> 財產登錄表單</h3>
+                <!-- 原本的說明文字已移除 -->
+            </div>
+            <form id="propertyFormIntegrated">
+                <div class="property-form-grid">
+                    <div class="property-label"><i class="fas fa-tags"></i> 財產實體分類</div>
+                    <div class="property-field">
+                        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+                            <label><input type="radio" name="entityTypeInt" value="一般實體工程" checked> 一般實體工程</label>
+                            <label><input type="radio" name="entityTypeInt" value="無實體工程(如清潔、緊急搶修...等工程)"> 無實體工程</label>
+                        </div>
+                    </div>
+                    <div class="property-label"><i class="fas fa-calendar-alt"></i> 登錄財產之購置日期</div>
+                    <div class="property-field"><input type="date" id="purchaseDateInt" value="2013-12-17"></div>
+                    <div class="property-label"><i class="fas fa-calendar-check"></i> 登錄財產之取得日期</div>
+                    <div class="property-field"><input type="date" id="acquireDateInt" value="2013-12-17"></div>
+                    <div class="property-label"><i class="fas fa-building"></i> 財產資訊</div>
+                    <div class="property-field">
+                        <div class="composite-row">
+                            <div class="composite-item">
+                                <label>財產名稱</label>
+                                <select id="propertyNameInt">
+                                    <option value="護岸">護岸</option>
+                                    <option value="明渠" selected>明渠</option>
+                                    <option value="排水溝">排水溝</option>
+                                    <option value="圳路">圳路</option>
+                                    <option value="堤防">堤防</option>
+                                </select>
+                            </div>
+                            <div class="composite-item">
+                                <label>財產別名</label>
+                                <input type="text" value="東勢堤防護岸" id="propertyAliasInt">
+                            </div>
+                            <div class="composite-item">
+                                <label>渠道名稱</label>
+                                <input type="text" value="大甲溪灌區幹線" id="channelNameInt">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="property-label"><i class="fas fa-hourglass-half"></i> 使用年限</div>
+                    <div class="property-field"><input type="number" value="30" id="usefulLifeInt" step="1"></div>
+                    <div class="property-label"><i class="fas fa-cube"></i> 主要材質／規格</div>
+                    <div class="property-field">
+                        <div class="material-spec-group">
+                            <div class="material-field">
+                                <label style="font-size:0.75rem;">主要材質</label>
+                                <select id="mainMaterialInt">
+                                    <option value="混凝土" selected>混凝土</option>
+                                    <option value="鋼筋混凝土">鋼筋混凝土</option>
+                                    <option value="砌石">砌石</option>
+                                    <option value="土堤">土堤</option>
+                                </select>
+                            </div>
+                            <div class="spec-field">
+                                <label style="font-size:0.75rem;">財產規格 (計量數+單位)</label>
+                                <div class="spec-inline">
+                                    <input type="text" id="measureValueInt" value="117.9" class="currency-input">
+                                    <select id="measureUnitInt">
+                                        <option value="公尺" selected>公尺 (m)</option>
+                                        <option value="平方公尺">平方公尺 (m²)</option>
+                                        <option value="立方公尺">立方公尺 (m³)</option>
+                                        <option value="公頃">公頃</option>
+                                    </select>
+                                </div>
+                                <small class="hint">範例：117.9 公尺</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="property-label"><i class="fas fa-map-marker-alt"></i> 存置地點</div>
+                    <div class="property-field"><input type="text" value="銅鑼鄉" id="storageLocationInt"></div>
+                    <div class="property-label"><i class="fas fa-users"></i> 財產使用單位</div>
+                    <div class="property-field">
+                        <select id="usingDepartmentInt">
+                            <option value="苗栗管理處 銅鑼工作站" selected>銅鑼工作站</option>
+                            <option value="苗栗管理處 苗栗工作站">苗栗工作站</option>
+                            <option value="苗栗管理處 苑裡工作站">苑裡工作站</option>
+                            <option value="苗栗管理處 通霄工作站">通霄工作站</option>
+                            <option value="苗栗管理處 公館工作站">公館工作站</option>
+                            <option value="苗栗管理處 三義工作站">三義工作站</option>
+                            <option value="苗栗管理處 大湖工作站">大湖工作站</option>
+                            <option value="苗栗管理處 卓蘭工作站">卓蘭工作站</option>
+                            <option value="苗栗管理處 後龍工作站">後龍工作站</option>
+                            <option value="苗栗管理處 竹南工作站">竹南工作站</option>
+                            <option value="苗栗管理處 頭份工作站">頭份工作站</option>
+                        </select>
+                    </div>
+                    <div class="property-label"><i class="fas fa-briefcase"></i> 財產管理單位</div>
+                    <div class="property-field"><input type="text" value="苗栗管理處" id="managementDeptInt"></div>
+                    <div class="property-label"><i class="fas fa-dollar-sign"></i> 總價 (新台幣/元)</div>
+                    <div class="property-field"><input type="text" id="totalPriceInt" class="currency-input" value="3,280,000"></div>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn-outline" id="resetPropertyBtnInt"><i class="fas fa-undo-alt"></i> 清除重填</button>
+                    <button type="button" class="btn-primary-green" id="submitPropertyBtnInt"><i class="fas fa-save"></i> 登錄財產</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ========= 巡查登錄頁籤 (拍照日期純日曆，無顯示民國文字；每個group獨立儲存) ========= -->
+        <div class="tab-pane active-pane" data-pane="inspect" id="inspectPane">
+            <div class="flex-between">
+                <h3><i class="fas fa-clipboard-list"></i> 巡查記錄管理</h3>
+                <button type="button" class="btn-primary-green" id="addInspectionGroupBtn"><i class="fas fa-plus"></i> 新增巡查記錄</button>
+            </div>
+            <div id="inspectionGroupsContainer"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ========== 上下層頁籤切換 ==========
+        const topTabs = document.querySelectorAll('#topTabs li');
+        topTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                topTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+        const bottomTabs = document.querySelectorAll('#bottomTabs li');
+        const panes = document.querySelectorAll('.tab-pane');
+        function switchBottomTab(subtabId) {
+            bottomTabs.forEach(li => li.classList.remove('active'));
+            const targetLi = document.querySelector(`#bottomTabs li[data-subtab="${subtabId}"]`);
+            if(targetLi) targetLi.classList.add('active');
+            panes.forEach(pane => pane.classList.remove('active-pane'));
+            const activePane = document.querySelector(`.tab-pane[data-pane="${subtabId}"]`);
+            if(activePane) activePane.classList.add('active-pane');
+        }
+        bottomTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const subtab = tab.getAttribute('data-subtab');
+                if(subtab) switchBottomTab(subtab);
+            });
+        });
+
+        // ========== 財產登錄完整功能 (保留) ==========
+        function formatNumberWithCommas(value) {
+            if (value === undefined || value === null) return '';
+            let numStr = value.toString().replace(/,/g, '');
+            if (numStr === '') return '';
+            let number = parseFloat(numStr);
+            if (isNaN(number)) return '';
+            return number.toLocaleString('zh-TW');
+        }
+        function getRawNumberFromCurrency(el) {
+            let raw = el.value.replace(/,/g, '');
+            if (raw === '') return 0;
+            let num = parseFloat(raw);
+            return isNaN(num) ? 0 : num;
+        }
+        const measureInput = document.getElementById('measureValueInt');
+        const totalPriceInput = document.getElementById('totalPriceInt');
+        function setupMeasureInput() {
+            if (!measureInput) return;
+            measureInput.addEventListener('input', function() {
+                let raw = this.value.replace(/,/g, '');
+                if (raw === '') { this.value = ''; return; }
+                let number = parseFloat(raw);
+                if (isNaN(number)) {
+                    this.value = this.value.replace(/[^0-9.]/g, '');
+                    let clean = this.value.replace(/,/g, '');
+                    let num = parseFloat(clean);
+                    if (!isNaN(num)) this.value = formatNumberWithCommas(num);
+                    else if (this.value === '') this.value = '';
+                    return;
+                }
+                this.value = formatNumberWithCommas(number);
+            });
+            measureInput.addEventListener('blur', function() {
+                if (this.value === '') this.value = '';
+                else {
+                    let num = getRawNumberFromCurrency(this);
+                    if (!isNaN(num)) this.value = formatNumberWithCommas(num);
+                    else this.value = '';
+                }
+            });
+        }
+        function setupTotalInput() {
+            if (!totalPriceInput) return;
+            totalPriceInput.addEventListener('input', function() {
+                let raw = this.value.replace(/,/g, '');
+                if (raw === '') { this.value = ''; return; }
+                let number = parseFloat(raw);
+                if (isNaN(number)) {
+                    this.value = this.value.replace(/[^0-9.]/g, '');
+                    let clean = this.value.replace(/,/g, '');
+                    let num = parseFloat(clean);
+                    if (!isNaN(num)) this.value = formatNumberWithCommas(num);
+                    else if (this.value === '') this.value = '';
+                    return;
+                }
+                this.value = formatNumberWithCommas(number);
+            });
+            totalPriceInput.addEventListener('blur', function() {
+                if (this.value === '') this.value = '';
+                else {
+                    let num = getRawNumberFromCurrency(this);
+                    if (!isNaN(num)) this.value = formatNumberWithCommas(num);
+                    else this.value = '';
+                }
+            });
+        }
+        const disabledFieldsSelectors = ['#purchaseDateInt', '#acquireDateInt', '#propertyNameInt', '#propertyAliasInt', '#channelNameInt',
+            '#usefulLifeInt', '#mainMaterialInt', '#measureValueInt', '#measureUnitInt', '#storageLocationInt',
+            '#usingDepartmentInt', '#managementDeptInt', '#totalPriceInt'];
+        function getAllDisableableFields() {
+            let elements = [];
+            disabledFieldsSelectors.forEach(sel => {
+                let el = document.querySelector(sel);
+                if(el) elements.push(el);
+            });
+            return elements;
+        }
+        function toggleFieldsDisabled() {
+            const radioNon = document.querySelector('input[name="entityTypeInt"][value="無實體工程(如清潔、緊急搶修...等工程)"]');
+            const isNonPhysical = radioNon ? radioNon.checked : false;
+            const fields = getAllDisableableFields();
+            fields.forEach(field => field.disabled = isNonPhysical);
+        }
+        function resetPropertyForm() {
+            const radioGeneral = document.querySelector('input[name="entityTypeInt"][value="一般實體工程"]');
+            if(radioGeneral) radioGeneral.checked = true;
+            const radioNon = document.querySelector('input[name="entityTypeInt"][value="無實體工程(如清潔、緊急搶修...等工程)"]');
+            if(radioNon) radioNon.checked = false;
+            toggleFieldsDisabled();
+            document.getElementById('purchaseDateInt').value = '2013-12-17';
+            document.getElementById('acquireDateInt').value = '2013-12-17';
+            document.getElementById('propertyNameInt').value = '明渠';
+            document.getElementById('propertyAliasInt').value = '東勢堤防護岸';
+            document.getElementById('channelNameInt').value = '大甲溪灌區幹線';
+            document.getElementById('usefulLifeInt').value = '30';
+            document.getElementById('mainMaterialInt').value = '混凝土';
+            if(measureInput) measureInput.value = formatNumberWithCommas(117.9);
+            document.getElementById('measureUnitInt').value = '公尺';
+            document.getElementById('storageLocationInt').value = '銅鑼鄉';
+            document.getElementById('usingDepartmentInt').value = '苗栗管理處 銅鑼工作站';
+            document.getElementById('managementDeptInt').value = '苗栗管理處';
+            if(totalPriceInput) totalPriceInput.value = formatNumberWithCommas(3280000);
+        }
+        function submitProperty() {
+            const isNonPhysical = document.querySelector('input[name="entityTypeInt"]:checked')?.value === '無實體工程(如清潔、緊急搶修...等工程)';
+            if(isNonPhysical) {
+                alert('✅ 財產登錄 (無實體工程)\n\n實體分類：無實體工程\n※ 無實體工程僅記錄分類，其餘財產細節免填。');
+                return;
+            }
+            let purchase = document.getElementById('purchaseDateInt').value;
+            let acquire = document.getElementById('acquireDateInt').value;
+            let propName = document.getElementById('propertyNameInt').value;
+            let alias = document.getElementById('propertyAliasInt').value || '無';
+            let channel = document.getElementById('channelNameInt').value || '無';
+            let life = document.getElementById('usefulLifeInt').value;
+            let material = document.getElementById('mainMaterialInt').value;
+            let measureRaw = getRawNumberFromCurrency(measureInput);
+            let measureUnit = document.getElementById('measureUnitInt').value;
+            let measureFull = (measureRaw !== 0 ? measureRaw.toLocaleString('zh-TW') : '0') + ' ' + measureUnit;
+            let location = document.getElementById('storageLocationInt').value;
+            let usingDept = document.getElementById('usingDepartmentInt').value;
+            let mgmtDept = document.getElementById('managementDeptInt').value;
+            let totalRaw = getRawNumberFromCurrency(totalPriceInput);
+            let totalFormatted = totalRaw.toLocaleString('zh-TW') + ' 元';
+            let msg = `✅ 財產登錄明細\n\n實體分類：一般實體工程\n購置日期：${purchase}\n取得日期：${acquire}\n財產名稱：${propName}\n財產別名：${alias}\n渠道名稱：${channel}\n使用年限：${life} 年\n主要材質：${material}\n財產規格：${measureFull}\n存置地點：${location}\n使用單位：${usingDept}\n管理單位：${mgmtDept}\n總價：${totalFormatted}`;
+            alert(msg);
+        }
+        const radios = document.querySelectorAll('input[name="entityTypeInt"]');
+        radios.forEach(radio => radio.addEventListener('change', toggleFieldsDisabled));
+        document.getElementById('resetPropertyBtnInt')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetPropertyForm();
+        });
+        document.getElementById('submitPropertyBtnInt')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            submitProperty();
+        });
+        setupMeasureInput();
+        setupTotalInput();
+        resetPropertyForm();
+        toggleFieldsDisabled();
+
+        // ========== 巡查登錄模組 (拍照日期純日曆，無顯示民國文字；每個group獨立儲存) ==========
+        const groupsContainer = document.getElementById('inspectionGroupsContainer');
+        let groupCounter = 0;
+        
+        const currentYear = new Date().getFullYear();
+        const currentRocYear = currentYear - 1911;
+        const rocYearOptions = () => {
+            let years = [];
+            for (let i = currentRocYear - 5; i <= currentRocYear + 5; i++) {
+                years.push(i);
+            }
+            return years;
+        };
+        
+        // 西元日期轉民國字串 (格式: ROC年/月/日)
+        function gregorianToRocString(date) {
+            if (!date) return '';
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const rocYear = year - 1911;
+            return `${rocYear}/${month.toString().padStart(2,'0')}/${day.toString().padStart(2,'0')}`;
+        }
+        
+        // 民國字串轉西元Date物件
+        function rocStringToGregorian(rocStr) {
+            if (!rocStr) return null;
+            const parts = rocStr.split('/');
+            if (parts.length !== 3) return null;
+            const rocYear = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
+            const day = parseInt(parts[2]);
+            if (isNaN(rocYear) || isNaN(month) || isNaN(day)) return null;
+            const gregYear = rocYear + 1911;
+            return new Date(gregYear, month-1, day);
+        }
+        
+        // 建立拍照日期元件：僅原生日曆，無額外文字。getValue 回傳民國字串，setValue 接受民國字串。
+        function createPhotoDatePicker(initialRocStr = '') {
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.style.width = '100%';
+            dateInput.style.padding = '0.4rem';
+            dateInput.style.borderRadius = '8px';
+            dateInput.style.border = '1px solid #ddd';
+            
+            const setValue = (rocStr) => {
+                const gregDate = rocStringToGregorian(rocStr);
+                if (gregDate && !isNaN(gregDate.getTime())) {
+                    const year = gregDate.getFullYear();
+                    const month = (gregDate.getMonth()+1).toString().padStart(2,'0');
+                    const day = gregDate.getDate().toString().padStart(2,'0');
+                    dateInput.value = `${year}-${month}-${day}`;
+                } else {
+                    dateInput.value = '';
+                }
+            };
+            
+            const getValue = () => {
+                if (dateInput.value) {
+                    const gregDate = new Date(dateInput.value);
+                    if (!isNaN(gregDate.getTime())) {
+                        return gregorianToRocString(gregDate);
+                    }
+                }
+                return '';
+            };
+            
+            if (initialRocStr) setValue(initialRocStr);
+            return { element: dateInput, getValue, setValue };
+        }
+        
+        // 建立照片卡片
+        function createPhotoCard(groupId, photoIndex, initialData = {}) {
+            const photoDiv = document.createElement('div');
+            photoDiv.className = 'photo-card';
+            photoDiv.setAttribute('data-photo-idx', photoIndex);
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'photo-preview';
+            const placeholderIcon = document.createElement('i');
+            placeholderIcon.className = 'fas fa-image placeholder-icon';
+            previewDiv.appendChild(placeholderIcon);
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            let currentImageSrc = null;
+            previewDiv.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if(file && file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        previewDiv.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        previewDiv.appendChild(img);
+                        currentImageSrc = ev.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            if(initialData.photoPreview) {
+                const img = document.createElement('img');
+                img.src = initialData.photoPreview;
+                previewDiv.innerHTML = '';
+                previewDiv.appendChild(img);
+                currentImageSrc = initialData.photoPreview;
+            }
+            const detailsDiv = document.createElement('div');
+            detailsDiv.className = 'photo-details';
+            // 說明欄位
+            const descWrapper = createDetailField('說明', 'text', initialData.description || '');
+            // 拍照日期元件 (僅日曆)
+            const dateWrapper = document.createElement('div');
+            dateWrapper.className = 'photo-detail-field';
+            const dateLabel = document.createElement('label'); dateLabel.innerText = '拍照日期';
+            const { element: datePicker, getValue: getDateValue, setValue: setDateValue } = createPhotoDatePicker(initialData.photoDateRoc || '');
+            dateWrapper.appendChild(dateLabel);
+            dateWrapper.appendChild(datePicker);
+            // 拍照人員欄位
+            const staffWrapper = createDetailField('拍照人員', 'text', initialData.staffName || '');
+            detailsDiv.appendChild(descWrapper);
+            detailsDiv.appendChild(dateWrapper);
+            detailsDiv.appendChild(staffWrapper);
+            const removePhotoBtn = document.createElement('button');
+            removePhotoBtn.type = 'button';
+            removePhotoBtn.className = 'btn-icon';
+            removePhotoBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 刪除此照片';
+            removePhotoBtn.style.marginLeft = 'auto';
+            removePhotoBtn.addEventListener('click', () => {
+                photoDiv.remove();
+                reorderPhotoIndices(groupId);
+            });
+            photoDiv.appendChild(previewDiv);
+            photoDiv.appendChild(detailsDiv);
+            photoDiv.appendChild(removePhotoBtn);
+            photoDiv.appendChild(fileInput);
+            // 提供取值方法
+            const getPhotoData = () => ({
+                photoDataUrl: currentImageSrc,
+                description: descWrapper.querySelector('input').value,
+                photoDateRoc: getDateValue(),
+                staffName: staffWrapper.querySelector('input').value
+            });
+            photoDiv.getPhotoData = getPhotoData;
+            return { photoDiv, getPhotoData };
+        }
+        
+        function createDetailField(labelText, inputType, value) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'photo-detail-field';
+            const label = document.createElement('label'); label.innerText = labelText;
+            const input = document.createElement('input');
+            input.type = inputType;
+            input.value = value;
+            wrapper.appendChild(label);
+            wrapper.appendChild(input);
+            return wrapper;
+        }
+        
+        function reorderPhotoIndices(groupId) {
+            const groupDiv = document.querySelector(`.inspection-group[data-group-id="${groupId}"]`);
+            if(!groupDiv) return;
+            const photoCards = groupDiv.querySelectorAll('.photo-card');
+            photoCards.forEach((card, idx) => card.setAttribute('data-photo-idx', idx));
+            const addBtn = groupDiv.querySelector('.btn-add-photo');
+            if(addBtn && photoCards.length >= 6) addBtn.disabled = true;
+            else if(addBtn) addBtn.disabled = false;
+        }
+        
+        // 建立巡查組 (含獨立儲存按鈕)
+        function createInspectionGroup(groupId, initialXY = { x: '', y: '' }, initialYear = currentRocYear, initialPhotos = []) {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'inspection-group';
+            groupDiv.setAttribute('data-group-id', groupId);
+            const header = document.createElement('div');
+            header.className = 'group-header';
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'group-title';
+            titleSpan.innerText = `巡查記錄`;
+            const removeGroupBtn = document.createElement('button');
+            removeGroupBtn.type = 'button';
+            removeGroupBtn.className = 'btn-remove-group';
+            removeGroupBtn.innerHTML = '<i class="fas fa-trash-alt"></i> 刪除此組';
+            removeGroupBtn.addEventListener('click', () => groupDiv.remove());
+            header.appendChild(titleSpan);
+            header.appendChild(removeGroupBtn);
+            // 巡查年度
+            const yearRow = document.createElement('div');
+            yearRow.className = 'year-row';
+            const yearLabel = document.createElement('label'); yearLabel.innerText = '巡查年度 (民國)';
+            const yearSelect = document.createElement('select');
+            yearSelect.className = 'year-select';
+            rocYearOptions().forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = `${y}年`;
+                if (y === initialYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            });
+            yearRow.appendChild(yearLabel);
+            yearRow.appendChild(yearSelect);
+            // XY座標 (WGS84)
+            const xyContainer = document.createElement('div');
+            xyContainer.className = 'xy-row';
+            const xField = document.createElement('div');
+            xField.className = 'xy-field';
+            xField.innerHTML = '<label>經度 (WGS84)</label><input type="text" class="x-coord" placeholder="例如 121.5200">';
+            const yField = document.createElement('div');
+            yField.className = 'xy-field';
+            yField.innerHTML = '<label>緯度 (WGS84)</label><input type="text" class="y-coord" placeholder="例如 24.1234">';
+            if(initialXY.x) xField.querySelector('input').value = initialXY.x;
+            if(initialXY.y) yField.querySelector('input').value = initialXY.y;
+            xyContainer.appendChild(xField);
+            xyContainer.appendChild(yField);
+            const photoListDiv = document.createElement('div');
+            photoListDiv.className = 'photo-list';
+            const addPhotoBtn = document.createElement('button');
+            addPhotoBtn.type = 'button';
+            addPhotoBtn.className = 'btn-add-photo';
+            addPhotoBtn.innerHTML = '<i class="fas fa-camera"></i> 新增照片 (最多6張)';
+            addPhotoBtn.addEventListener('click', () => {
+                const currentPhotos = groupDiv.querySelectorAll('.photo-card').length;
+                if(currentPhotos >= 6) { alert('每組最多上傳6張照片'); return; }
+                const { photoDiv } = createPhotoCard(groupId, currentPhotos, {});
+                photoListDiv.appendChild(photoDiv);
+                addPhotoBtn.disabled = (currentPhotos+1 >= 6);
+                reorderPhotoIndices(groupId);
+            });
+            if(initialPhotos.length) {
+                initialPhotos.forEach(photoData => {
+                    const { photoDiv } = createPhotoCard(groupId, photoListDiv.children.length, photoData);
+                    photoListDiv.appendChild(photoDiv);
+                });
+                if(initialPhotos.length >= 6) addPhotoBtn.disabled = true;
+            }
+            // 獨立儲存按鈕
+            const saveGroupBtn = document.createElement('button');
+            saveGroupBtn.type = 'button';
+            saveGroupBtn.className = 'group-save-btn';
+            saveGroupBtn.innerHTML = '<i class="fas fa-save"></i> 儲存此組';
+            saveGroupBtn.addEventListener('click', () => {
+                const groupData = getGroupData();
+                console.log('儲存巡查組資料:', groupData);
+                alert(`巡查組 ${groupId} 資料已儲存 (請開啟主控台查看詳細JSON)`);
+            });
+            
+            groupDiv.appendChild(header);
+            groupDiv.appendChild(yearRow);
+            groupDiv.appendChild(xyContainer);
+            groupDiv.appendChild(photoListDiv);
+            groupDiv.appendChild(addPhotoBtn);
+            groupDiv.appendChild(saveGroupBtn);
+            
+            const getGroupData = () => {
+                const photos = [];
+                const photoCards = groupDiv.querySelectorAll('.photo-card');
+                photoCards.forEach(card => {
+                    if (card.getPhotoData) {
+                        const data = card.getPhotoData();
+                        photos.push({
+                            photoDataUrl: data.photoDataUrl || '',
+                            description: data.description || '',
+                            photoDateRoc: data.photoDateRoc || '',
+                            staffName: data.staffName || ''
+                        });
+                    }
+                });
+                return {
+                    groupId,
+                    year: yearSelect.value,
+                    xCoord: xField.querySelector('input').value,
+                    yCoord: yField.querySelector('input').value,
+                    photos
+                };
+            };
+            groupDiv.getGroupData = getGroupData;
+            return groupDiv;
+        }
+        
+        function addNewGroup(xy = {x:'', y:''}, photos = [], year = currentRocYear) {
+            groupCounter++;
+            const newGroup = createInspectionGroup(groupCounter, xy, year, photos);
+            groupsContainer.appendChild(newGroup);
+        }
+        
+        function resetAllGroups() {
+            groupsContainer.innerHTML = '';
+            groupCounter = 0;
+            addNewGroup({x:'121.5200', y:'24.1234'}, [], currentRocYear);
+            addNewGroup({x:'121.5300', y:'24.1300'}, [], currentRocYear);
+        }
+        
+        document.getElementById('addInspectionGroupBtn')?.addEventListener('click', () => addNewGroup({x:'', y:''}, [], currentRocYear));
+        resetAllGroups(); // 初始兩組示範
+    })();
+</script>
+</body>
+</html>
