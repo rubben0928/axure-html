@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>巡查現況查詢</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #eef2f8;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.8rem;
+            color: #1a2c3e;
+        }
+        .query-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .page-header {
+            background: #1f4e3c;
+            padding: 1.5rem 2rem;
+            border-bottom: 4px solid #ffc857;
+        }
+        .page-header h1 {
+            color: white;
+            font-weight: 600;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .page-header h1 i {
+            color: #ffc857;
+            font-size: 1.8rem;
+        }
+        .filter-section {
+            background: #fefdf8;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e6edf2;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 180px;
+        }
+        .filter-item label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #5b7f8c;
+            margin-bottom: 6px;
+        }
+        .filter-item select, .filter-item input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            border: 1.5px solid #e0eef4;
+            border-radius: 14px;
+            background: white;
+            transition: 0.2s;
+        }
+        .filter-item select:focus, .filter-item input:focus {
+            border-color: #1f4e3c;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(31,78,60,0.1);
+        }
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .btn-query, .btn-export {
+            padding: 0.7rem 1.6rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-query {
+            background: #1f4e3c;
+            color: white;
+        }
+        .btn-query:hover {
+            background: #123d2e;
+        }
+        .btn-export {
+            background: #2c6e5c;
+            color: white;
+        }
+        .btn-export:hover {
+            background: #1f5546;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            padding: 0 2rem 2rem 2rem;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .data-table th {
+            background: #f0f6fa;
+            color: #1f3b4c;
+            padding: 1rem 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 2px solid #cbdde6;
+        }
+        .data-table td {
+            padding: 0.9rem 0.8rem;
+            border-bottom: 1px solid #e9f0f5;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .data-table tr:hover {
+            background: #fafefd;
+        }
+        .badge-yes {
+            background: #d4edda;
+            color: #155724;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .badge-no {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        .empty-row td {
+            text-align: center;
+            padding: 2rem;
+            color: #8ba0aa;
+        }
+        @media (max-width: 760px) {
+            body {
+                padding: 1rem;
+            }
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-actions {
+                justify-content: flex-end;
+            }
+            .data-table th, .data-table td {
+                padding: 0.6rem 0.4rem;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="query-container">
+    <div class="page-header">
+        <h1><i class="fas fa-clipboard-list"></i> 巡查現況查詢</h1>
+    </div>
+
+    <!-- 篩選列 -->
+    <div class="filter-section">
+        <div class="filter-item">
+            <label><i class="fas fa-calendar-alt"></i> 巡查年度</label>
+            <select id="filterYear">
+                <option value="">全部</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label><i class="fas fa-building"></i> 工作站</label>
+            <select id="filterStation">
+                <option value="">全部</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label><i class="fas fa-search"></i> 關鍵字查詢</label>
+            <input type="text" id="filterKeyword" placeholder="輸入工程名稱關鍵字">
+        </div>
+        <div class="filter-actions">
+            <button class="btn-query" id="queryBtn"><i class="fas fa-search"></i> 查詢</button>
+            <button class="btn-export" id="exportBtn"><i class="fas fa-file-excel"></i> 匯出 Excel</button>
+        </div>
+    </div>
+
+    <!-- 查詢結果表格 -->
+    <div class="table-wrapper">
+        <table class="data-table" id="resultTable">
+            <thead>
+                <tr>
+                    <th>項次</th>
+                    <th>工程名稱</th>
+                    <th>工作站名稱</th>
+                    <th>本年度是否已巡查</th>
+                    <th>累計巡查次數</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr class="empty-row"><td colspan="5">載入資料中......</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- 原底部說明文字已移除 -->
+</div>
+
+<script>
+    // ---------- 模擬巡查記錄資料 (以工程為基礎) ----------
+    // 苗栗管理處工作站列表 (顯示名稱去除前綴)
+    const stationsFull = [
+        "苗栗管理處 苗栗工作站", "苗栗管理處 苑裡工作站", "苗栗管理處 通霄工作站", "苗栗管理處 竹南工作站",
+        "苗栗管理處 頭份工作站", "苗栗管理處 後龍工作站", "苗栗管理處 卓蘭工作站", "苗栗管理處 大湖工作站",
+        "苗栗管理處 公館工作站", "苗栗管理處 銅鑼工作站", "苗栗管理處 三義工作站", "苗栗管理處 西湖工作站",
+        "苗栗管理處 造橋工作站", "苗栗管理處 南庄工作站", "苗栗管理處 頭屋工作站", "苗栗管理處 三灣工作站",
+        "苗栗管理處 獅潭工作站", "苗栗管理處 泰安工作站"
+    ];
+    // 純工作站名稱(顯示用)
+    const stationDisplayNames = stationsFull.map(s => s.replace("苗栗管理處 ", ""));
+
+    // 模擬工程清單 (工程名稱, 所屬工作站完整名稱, 巡查記錄年份陣列)
+    const projects = [
+        { name: "大湖鄉雅悠圳路二期改善工程", stationFull: "苗栗管理處 大湖工作站", inspectYears: [113, 114, 115] },
+        { name: "後龍圳幹線更新工程", stationFull: "苗栗管理處 後龍工作站", inspectYears: [114, 115] },
+        { name: "苑裡圳支線護岸修復", stationFull: "苗栗管理處 苑裡工作站", inspectYears: [113, 115] },
+        { name: "銅鑼灌區明渠改善", stationFull: "苗栗管理處 銅鑼工作站", inspectYears: [115] },
+        { name: "公館排水系統整治", stationFull: "苗栗管理處 公館工作站", inspectYears: [113, 114] },
+        { name: "三義鄉農路排水工程", stationFull: "苗栗管理處 三義工作站", inspectYears: [114] },
+        { name: "頭份堤防加強工程", stationFull: "苗栗管理處 頭份工作站", inspectYears: [112, 113, 115] },
+        { name: "卓蘭圳更新工程", stationFull: "苗栗管理處 卓蘭工作站", inspectYears: [114, 115] },
+        { name: "南庄鄉灌溉系統改善", stationFull: "苗栗管理處 南庄工作站", inspectYears: [113] },
+        { name: "通霄沿海護岸工程", stationFull: "苗栗管理處 通霄工作站", inspectYears: [115] },
+        { name: "竹南圳路整建", stationFull: "苗栗管理處 竹南工作站", inspectYears: [112, 114] },
+        { name: "苗栗市區排水改善", stationFull: "苗栗管理處 苗栗工作站", inspectYears: [113, 115] }
+    ];
+
+    // 提取所有巡查年度範圍 (用於年度下拉選單)
+    function getAllYears() {
+        const yearSet = new Set();
+        projects.forEach(p => p.inspectYears.forEach(y => yearSet.add(y)));
+        // 確保包含最近幾年(若無資料則補近年)
+        const currentRoc = new Date().getFullYear() - 1911; // 2026 => 115
+        for (let y = currentRoc - 2; y <= currentRoc + 2; y++) yearSet.add(y);
+        return Array.from(yearSet).sort((a,b) => a-b);
+    }
+
+    // 填充分年度下拉
+    function populateYearSelect() {
+        const yearSelect = document.getElementById('filterYear');
+        const years = getAllYears();
+        yearSelect.innerHTML = '<option value="">全部</option>';
+        years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = `${y}年`;
+            yearSelect.appendChild(opt);
+        });
+    }
+
+    // 填充分工作站下拉 (顯示工作站名稱，無前綴)
+    function populateStationSelect() {
+        const stationSelect = document.getElementById('filterStation');
+        stationSelect.innerHTML = '<option value="">全部</option>';
+        stationDisplayNames.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;  // 用顯示名稱作為值 (實際篩選時對應)
+            opt.textContent = name;
+            stationSelect.appendChild(opt);
+        });
+    }
+
+    // 計算每個工程在指定年度是否有巡查 (本年度是否已巡查)
+    function isInspectedInYear(project, year) {
+        if (!year) return false;
+        return project.inspectYears.includes(year);
+    }
+
+    // 計算累計巡查次數 (所有年度總次數)
+    function getTotalInspections(project) {
+        return project.inspectYears.length;
+    }
+
+    // 篩選邏輯
+    function getFilteredProjects() {
+        const selectedYear = document.getElementById('filterYear').value;
+        const selectedStationDisplay = document.getElementById('filterStation').value;
+        const keyword = document.getElementById('filterKeyword').value.trim();
+
+        let filtered = [...projects];
+
+        // 工作站篩選 (比對顯示名稱)
+        if (selectedStationDisplay) {
+            filtered = filtered.filter(p => {
+                const displayName = p.stationFull.replace("苗栗管理處 ", "");
+                return displayName === selectedStationDisplay;
+            });
+        }
+        // 關鍵字篩選
+        if (keyword) {
+            filtered = filtered.filter(p => p.name.includes(keyword));
+        }
+        return filtered;
+    }
+
+    // 渲染表格
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const filtered = getFilteredProjects();
+        const selectedYear = document.getElementById('filterYear').value;
+        const yearNum = selectedYear ? parseInt(selectedYear) : null;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr class="empty-row"><td colspan="5">查無符合條件之工程資料</td></tr>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach((project, idx) => {
+            const inspected = (yearNum !== null) ? project.inspectYears.includes(yearNum) : false;
+            const inspectedText = inspected ? '已巡查' : '未巡查';
+            const inspectedClass = inspected ? 'badge-yes' : 'badge-no';
+            const totalCount = getTotalInspections(project);
+            const stationDisplay = project.stationFull.replace("苗栗管理處 ", "");
+            html += `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td style="text-align:left;">${escapeHtml(project.name)}</td>
+                    <td>${escapeHtml(stationDisplay)}</td>
+                    <td><span class="${inspectedClass}">${inspectedText}</span></td>
+                    <td>${totalCount}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // 匯出 Excel (依據目前篩選結果 + 年度判斷)
+    function exportToExcel() {
+        const filtered = getFilteredProjects();
+        const selectedYear = document.getElementById('filterYear').value;
+        const yearNum = selectedYear ? parseInt(selectedYear) : null;
+
+        if (filtered.length === 0) {
+            alert('沒有資料可匯出，請調整篩選條件。');
+            return;
+        }
+
+        const headers = ['項次', '工程名稱', '工作站名稱', '本年度是否已巡查', '累計巡查次數'];
+        const rows = filtered.map((project, idx) => {
+            const inspected = (yearNum !== null) ? project.inspectYears.includes(yearNum) : false;
+            const inspectedText = inspected ? '已巡查' : '未巡查';
+            const totalCount = getTotalInspections(project);
+            const stationDisplay = project.stationFull.replace("苗栗管理處 ", "");
+            return [
+                idx + 1,
+                project.name,
+                stationDisplay,
+                inspectedText,
+                totalCount
+            ];
+        });
+
+        const sheetData = [headers, ...rows];
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        ws['!cols'] = [{wch:6},{wch:32},{wch:15},{wch:16},{wch:12}];
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, '巡查現況清冊');
+        XLSX.writeFile(wb, `巡查現況查詢_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function queryData() {
+        renderTable();
+    }
+
+    // 初始化頁面
+    function init() {
+        populateYearSelect();
+        populateStationSelect();
+        renderTable();
+
+        const queryBtn = document.getElementById('queryBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const filterYear = document.getElementById('filterYear');
+        const filterStation = document.getElementById('filterStation');
+        const filterKeyword = document.getElementById('filterKeyword');
+
+        if (queryBtn) queryBtn.addEventListener('click', queryData);
+        if (exportBtn) exportBtn.addEventListener('click', exportToExcel);
+        if (filterYear) filterYear.addEventListener('change', queryData);
+        if (filterStation) filterStation.addEventListener('change', queryData);
+        if (filterKeyword) filterKeyword.addEventListener('input', queryData);
+    }
+
+    init();
+</script>
+</body>
+</html>
