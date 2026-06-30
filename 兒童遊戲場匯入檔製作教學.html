@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兒童遊戲場匯入檔製作教學</title>
+<style>
+  :root{
+    --ink:#1f2933; --muted:#5b6770; --line:#e1e5ea; --bg:#f7f8fa;
+    --accent:#2563a8; --accent-soft:#eaf2fb; --warn:#b4541a; --warn-soft:#fdf1e7;
+    --ok:#1f7a4d; --ok-soft:#e9f6ef; --req:#c0392b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Microsoft JhengHei","PingFang TC","Segoe UI",system-ui,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .wrap{max-width:960px; margin:0 auto; padding:48px 24px 96px;}
+  header.hero{
+    background:linear-gradient(135deg,#2563a8,#1d4e85); color:#fff;
+    border-radius:16px; padding:36px 40px; margin-bottom:36px;
+    box-shadow:0 8px 28px rgba(29,78,133,.18);
+  }
+  header.hero h1{margin:0 0 8px; font-size:28px; letter-spacing:.5px;}
+  header.hero p{margin:0; opacity:.92; font-size:15px;}
+  h2{
+    font-size:22px; margin:48px 0 16px; padding-bottom:8px;
+    border-bottom:3px solid var(--accent); display:inline-block;
+  }
+  h3{font-size:18px; margin:28px 0 10px; color:var(--accent);}
+  p{margin:10px 0;}
+  code{
+    background:#eef1f5; padding:2px 6px; border-radius:4px;
+    font-family:"Consolas","Courier New",monospace; font-size:.9em; color:#9b2c2c;
+  }
+  .lead{font-size:16px; color:var(--muted);}
+  ol,ul{padding-left:22px;}
+  li{margin:6px 0;}
+
+  .steps{counter-reset:step; list-style:none; padding:0; margin:18px 0;}
+  .steps li{
+    position:relative; padding:14px 16px 14px 56px; margin:10px 0;
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+  }
+  .steps li::before{
+    counter-increment:step; content:counter(step);
+    position:absolute; left:14px; top:13px; width:28px; height:28px;
+    background:var(--accent); color:#fff; border-radius:50%;
+    text-align:center; line-height:28px; font-weight:700; font-size:14px;
+  }
+
+  table{
+    width:100%; border-collapse:collapse; margin:16px 0 8px; background:#fff;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:14.5px;
+  }
+  th,td{padding:9px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top;}
+  thead th{background:var(--accent-soft); color:#1d4e85; font-weight:700; white-space:nowrap;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:#fafbfc;}
+  td.c,th.c{text-align:center; white-space:nowrap;}
+  .req{color:var(--req); font-weight:700;}
+  .cond{color:var(--warn); font-weight:700;}
+  .opt{color:var(--muted);}
+  .tablewrap{overflow-x:auto;}
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:20px 24px; margin:20px 0;
+  }
+  .note,.warn,.ok{
+    border-radius:10px; padding:14px 18px; margin:16px 0; font-size:14.5px;
+  }
+  .note{background:var(--accent-soft); border-left:4px solid var(--accent);}
+  .warn{background:var(--warn-soft); border-left:4px solid var(--warn);}
+  .ok{background:var(--ok-soft); border-left:4px solid var(--ok);}
+  .note b,.warn b,.ok b{display:block; margin-bottom:4px;}
+
+  .badge{
+    display:inline-block; font-size:12px; font-weight:700; padding:2px 8px;
+    border-radius:999px; background:var(--accent); color:#fff; margin-right:6px;
+  }
+  .flow{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px;
+    background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 18px;
+  }
+  .flow .pill{
+    background:var(--accent-soft); color:#1d4e85; font-weight:700;
+    padding:6px 14px; border-radius:8px; font-size:14px;
+  }
+  .flow .arrow{color:var(--accent); font-weight:700;}
+
+  .toc{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:18px 24px; margin-bottom:32px;
+  }
+  .toc h3{margin-top:0;}
+  .toc ol{margin:0;}
+  .toc a{color:var(--accent); text-decoration:none;}
+  .toc a:hover{text-decoration:underline;}
+
+  .example{
+    font-family:"Consolas","Courier New",monospace; font-size:13px;
+    background:#1f2933; color:#e6edf3; border-radius:8px; padding:14px 16px;
+    overflow-x:auto; margin:12px 0;
+  }
+  .example .k{color:#7fd1b9;}
+  .tree{
+    font-family:"Consolas","Courier New",monospace; font-size:13.5px;
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:16px 20px; overflow-x:auto; white-space:pre; line-height:1.6;
+  }
+  .download{
+    background:var(--ok-soft); border:1px solid #bfe3cf; border-left:4px solid var(--ok);
+    border-radius:12px; padding:18px 24px; margin:20px 0 8px;
+  }
+  .download h3{margin:0 0 6px; color:var(--ok);}
+  .download p{margin:6px 0;}
+  ul.dllist{list-style:none; padding:0; margin:14px 0 8px;}
+  ul.dllist li{
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 12px;
+    background:#fff; border:1px solid #cfe7da; border-radius:8px;
+    padding:10px 14px; margin:8px 0;
+  }
+  ul.dllist a{
+    color:var(--accent); font-weight:700; text-decoration:none;
+    font-family:"Consolas","Courier New",monospace; font-size:14px;
+  }
+  ul.dllist a:hover{text-decoration:underline;}
+  ul.dllist span{color:var(--muted); font-size:13px;}
+  .dlnote{font-size:13px; color:var(--muted);}
+  footer{margin-top:64px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px;}
+  .legend{font-size:13px; color:var(--muted); margin:4px 0 18px;}
+  .legend span{margin-right:16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>兒童遊戲場資料匯入檔製作教學</h1>
+  <p>本手冊說明如何製作四份匯入用的 Excel 檔案與附件資料夾：<strong>備查、維護管理、自主檢查、稽查管理</strong>。<br>適用對象為負責整理與填寫資料的承辦人員。</p>
+</header>
+
+<nav class="toc">
+  <h3>目錄</h3>
+  <ol>
+    <li><a href="#overview">總覽：你要準備什麼</a></li>
+    <li><a href="#common">通用規則（四份檔案共通）</a></li>
+    <li><a href="#filing">檔案一：備查</a></li>
+    <li><a href="#maint">檔案二：維護管理（定檢）</a></li>
+    <li><a href="#selfcheck">檔案三：自主檢查</a></li>
+    <li><a href="#audit">檔案四：稽查管理</a></li>
+    <li><a href="#checklist">完成前檢查清單 &amp; 常見錯誤</a></li>
+  </ol>
+</nav>
+
+<!-- ============ 總覽 ============ -->
+<section id="overview">
+<h2>一、總覽：你要準備什麼</h2>
+<p class="lead">四個模組各自獨立，請為每個模組準備「<strong>一份 Excel</strong>」＋「<strong>一個放實體附件的資料夾</strong>」。</p>
+
+<div class="download">
+  <h3>📥 先下載空白範本</h3>
+  <p>四份範本檔放在本教學同層的 <code>匯入範本</code> 資料夾，請下載後直接<strong>覆蓋第 2 列起的範例資料</strong>填寫（標題列請勿更動）：</p>
+  <ul class="dllist">
+    <li><a href="匯入範本/1_備查_匯入範本.xlsx">1_備查_匯入範本.xlsx</a><span>備查（含 A、B 兩區範例）</span></li>
+    <li><a href="匯入範本/2_維護管理_匯入範本.xlsx">2_維護管理_匯入範本.xlsx</a><span>維護管理（含合格／待改善／已完成改善範例）</span></li>
+    <li><a href="匯入範本/3_自主檢查_匯入範本.xlsx">3_自主檢查_匯入範本.xlsx</a><span>自主檢查（含需上傳／免上傳範例）</span></li>
+    <li><a href="匯入範本/4_稽查管理_匯入範本.xlsx">4_稽查管理_匯入範本.xlsx</a><span>稽查管理（含合格／改善中範例）</span></li>
+  </ul>
+  <p class="dlnote">範本中「公園編碼」與「日期」欄已設為文字格式，避免 Excel 自動移除前導 0 或誤判民國日期，請保持文字格式填寫。</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0;">每個模組各交付兩樣東西</h3>
+  <ul>
+    <li><span class="badge">Excel</span>主資料：每一列是一筆紀錄，欄位內容請依後面各章的對照表填寫。</li>
+    <li><span class="badge">附件資料夾</span>把該模組要用到的實體檔案（PDF、圖片等）<strong>全部集中放在同一個資料夾</strong>；Excel 內只要填「檔名」，系統會自動到資料夾裡找對應的檔。</li>
+  </ul>
+</div>
+
+<h3>匯入順序很重要</h3>
+<p>因為「維護管理」要接在「備查」的報告之後，請務必依下列順序準備與匯入：</p>
+<div class="flow">
+  <span class="pill">① 備查</span><span class="arrow">→</span>
+  <span class="pill">② 維護管理</span><span class="arrow">→</span>
+  <span class="pill">③ 自主檢查</span><span class="arrow">→</span>
+  <span class="pill">④ 稽查管理</span>
+</div>
+<div class="note">
+  <b>為什麼？</b>
+  維護（定檢）紀錄是「掛在備查的檢驗報告上」的。若備查還沒匯入，維護就找不到可以對應的報告。自主檢查與稽查彼此獨立，順序不拘，但建議一起放在備查、維護之後。
+</div>
+</section>
+
+<!-- ============ 通用規則 ============ -->
+<section id="common">
+<h2>二、通用規則（四份檔案共通）</h2>
+<div class="tablewrap">
+<table>
+  <thead><tr><th style="width:160px;">項目</th><th>填寫規則</th></tr></thead>
+  <tbody>
+    <tr><td>公園統一編碼</td><td>固定 <strong>7 碼數字</strong>，不足前面補 0（例：<code>0123456</code>）。此編碼必須是系統裡<strong>已存在</strong>的公園，否則該列會被判定為錯誤。</td></tr>
+    <tr><td>遊戲區代號</td><td>同一座公園內各遊戲區以 <strong>A、B、C…</strong> 表示（第 1 區 = A、第 2 區 = B，依此類推）。</td></tr>
+    <tr><td>日期欄</td><td>一律用<strong>民國年</strong>，格式 <code>民國年/月/日</code>（例：民國 113 年 3 月 15 日填 <code>113/03/15</code>）。例如備查日期、檢驗報告日期、稽查日期、各項改善日期。</td></tr>
+    <tr><td>年 / 月份欄</td><td>自主檢查、稽查以「年＋月」分開定位：<strong>民國年</strong>填整數（例：<code>113</code>），月份填 <code>1</code>～<code>12</code>。</td></tr>
+    <tr><td>是 / 否欄</td><td>直接填中文「<strong>是</strong>」或「<strong>否</strong>」。</td></tr>
+    <tr><td>附件欄（填檔名）</td><td>填實體檔案的<strong>完整檔名（含副檔名）</strong>，例：<code>0123456_基本資料.pdf</code>。該檔需確實放在對應模組的附件資料夾內，<strong>檔名要完全一致</strong>（含大小寫與副檔名）。</td></tr>
+    <tr><td>標題列 / 空列</td><td>第 1 列是欄位標題請勿刪除；資料從第 2 列開始。整列空白會被略過。</td></tr>
+    <tr><td>重複資料</td><td>若同一筆紀錄已存在於系統，匯入時會<strong>自動跳過並提示</strong>，不會重複建立。因此檔案可以安心重跑。</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="legend">
+  <span><span class="req">✓ 必填</span></span>
+  <span><span class="cond">△ 條件必填</span>（視情況，說明欄會註明）</span>
+  <span><span class="opt">空白 = 選填</span></span>
+</p>
+</section>
+
+<!-- ============ 備查 ============ -->
+<section id="filing">
+<h2>三、檔案一：備查</h2>
+<p><strong>一列 = 一個遊戲區。</strong> 同一座公園、同一份備查文號與備查日期的多列，會自動歸成「同一筆備查」。</p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>欄位</th><th class="c">必填</th><th>格式 / 說明</th><th>範例</th></tr></thead>
+  <tbody>
+    <tr><td>公園統一編碼</td><td class="c req">✓</td><td>7 碼</td><td><code>0123456</code></td></tr>
+    <tr><td>遊戲區代號</td><td class="c req">✓</td><td>A / B / C…</td><td><code>A</code></td></tr>
+    <tr><td>遊戲區名稱</td><td class="c opt">—</td><td>選填，無則留空</td><td><code>北側沙坑遊戲區</code></td></tr>
+    <tr><td>備查文號</td><td class="c req">✓</td><td>機關核備文號</td><td><code>北市建公字第1130001號</code></td></tr>
+    <tr><td>備查日期</td><td class="c req">✓</td><td><code>民國年/月/日</code></td><td><code>113/03/15</code></td></tr>
+    <tr><td>備查類型</td><td class="c req">✓</td><td>填 <strong>新設</strong> 或 <strong>變更</strong></td><td><code>新設</code></td></tr>
+    <tr><td>基本資料表檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_基本資料.pdf</code></td></tr>
+    <tr><td>廠商保證書檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_保證書.pdf</code></td></tr>
+    <tr><td>自主檢查表檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_自主檢查.pdf</code></td></tr>
+    <tr><td>平面圖檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_平面圖.pdf</code></td></tr>
+    <tr><td>管理人員證書檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_證書.pdf</code></td></tr>
+    <tr><td>檢驗報告日期</td><td class="c req">✓</td><td><code>民國年/月/日</code>，合格報告的日期</td><td><code>113/03/01</code></td></tr>
+    <tr><td>檢驗報告檔名</td><td class="c req">✓</td><td>附件</td><td><code>0123456A_檢驗報告.pdf</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="note">
+  <b>填寫示意</b>
+  一座公園有 2 個遊戲區、同一份備查 → 填成 2 列，公園編碼／備查文號／備查日期相同，遊戲區代號分別為 A、B：
+  <div class="example">
+公園編碼   遊戲區  備查文號          備查日期      備查類型 …
+<span class="k">0123456</span>    A      北市建公字第1130001號  113/03/15   新設    …
+<span class="k">0123456</span>    B      北市建公字第1130001號  113/03/15   新設    …
+  </div>
+</div>
+<div class="ok">
+  <b>匯入後系統會自動做的事</b>
+  每筆檢驗報告會自動建立一筆「維護（定檢）待辦」，下次定檢到期日 = 檢驗報告日期 + 3 年。所以你<strong>不需要</strong>在備查檔裡處理定檢到期。
+</div>
+</section>
+
+<!-- ============ 維護 ============ -->
+<section id="maint">
+<h2>四、檔案二：維護管理（定檢）</h2>
+<p><strong>一列 = 一次定檢的最終結果。</strong> 同一個遊戲區做過很多次定檢，就填很多列，並請<strong>依日期由舊到新</strong>由上往下排列。每一列要記錄「這次定檢最後的結果」（合格／待改善／已完成改善）。</p>
+
+<div class="warn">
+  <b>關鍵：用「備查日期」把定檢綁到正確的那一輪備查</b>
+  一個遊戲區可能備查過不只一次（例如後來改建又重新備查）。每一次備查都有自己的一條定檢歷史。<br>
+  因此維護的每一列，要用 <code>公園編碼 + 遊戲區代號 + 對應備查日期</code> 指出「這筆定檢是接在哪一次備查之後」。請填該輪備查在「備查檔」裡所使用的<strong>備查日期</strong>。
+</div>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>欄位</th><th class="c">必填</th><th>格式 / 說明</th><th>範例</th></tr></thead>
+  <tbody>
+    <tr><td>公園統一編碼</td><td class="c req">✓</td><td>7 碼（定位用）</td><td><code>0123456</code></td></tr>
+    <tr><td>遊戲區代號</td><td class="c req">✓</td><td>A / B / C…（定位用）</td><td><code>A</code></td></tr>
+    <tr><td>對應備查日期</td><td class="c req">✓</td><td><code>民國年/月/日</code>，<strong>填該輪備查的備查日期</strong></td><td><code>113/03/15</code></td></tr>
+    <tr><td>排檢狀態</td><td class="c opt">—</td><td>是 / 否</td><td><code>是</code></td></tr>
+    <tr><td>檢驗結果</td><td class="c req">✓</td><td>填 <strong>合格</strong> / <strong>待改善</strong> / <strong>已完成改善</strong></td><td><code>合格</code></td></tr>
+    <tr><td>改善期程分級</td><td class="c cond">△</td><td>「待改善」時必填：<strong>L1</strong>(10日) / <strong>L2</strong>(1個月) / <strong>L3</strong>(3個月)</td><td><code>L2</code></td></tr>
+    <tr><td>限期改善日期</td><td class="c cond">△</td><td>「待改善」時必填，<code>民國年/月/日</code></td><td><code>113/07/01</code></td></tr>
+    <tr><td>實際完成改善日期</td><td class="c cond">△</td><td>「已完成改善」時必填，<code>民國年/月/日</code></td><td><code>113/06/20</code></td></tr>
+    <tr><td>維護合格日期</td><td class="c cond">△</td><td>「合格 / 已完成改善」且要成為<strong>新定檢基準</strong>時填，<code>民國年/月/日</code></td><td><code>113/06/25</code></td></tr>
+    <tr><td>維護檢驗報告檔名</td><td class="c cond">△</td><td>附件；有填維護合格日期則必附</td><td><code>0123456A_維護報告_113.pdf</code></td></tr>
+    <tr><td>缺失項目檔名</td><td class="c opt">—</td><td>附件（如有缺失清單）</td><td><code>0123456A_缺失.pdf</code></td></tr>
+    <tr><td>備註</td><td class="c opt">—</td><td>選填</td><td></td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>每一列依「檢驗結果」要填的欄位</h3>
+<ul>
+  <li><strong>合格</strong>：本次定檢通過。若這次有開立新的合格報告（作為下一次定檢的起點），請填<strong>維護合格日期</strong>並附<strong>維護檢驗報告</strong>。</li>
+  <li><strong>待改善</strong>：發現缺失、尚未改善完成。<strong>必填</strong>改善期程分級、限期改善日期、缺失項目檔名。</li>
+  <li><strong>已完成改善</strong>：原本待改善、現已改善完成。<strong>必填</strong>實際完成改善日期；若改善後複檢合格並開立報告，再填維護合格日期＋維護檢驗報告。</li>
+</ul>
+
+<div class="warn">
+  <b>兩個最容易出錯的地方（會導致匯入失敗）</b>
+  <ul style="margin:6px 0 0;">
+    <li>「待改善」後來改善完成，請<strong>用「已完成改善」一列</strong>表示（同一列同時填限期改善日期與實際完成改善日期），<strong>不要拆成「待改善」＋「已完成改善」兩列</strong>——拆兩列時第二列會找不到可接續的定檢。</li>
+    <li>同一輪備查中，<strong>「待改善」只能放在最後一列</strong>（代表目前仍在改善中）。中間若要接續下一次定檢，該列必須是「合格」或「已完成改善」並填<strong>維護合格日期</strong>。</li>
+  </ul>
+</div>
+
+<h3>定檢的「版本鏈」是怎麼運作的</h3>
+<p>每當一筆定檢「<strong>合格</strong>（或已完成改善）且填了維護合格日期」，系統會把它當成新的定檢基準：自動產生一份新報告，並把下次定檢到期日往後算 3 年。你後面更晚的定檢列，就會自動接到這個新基準上。所以只要<strong>依日期由舊到新排好</strong>，系統會自動把整條歷史串起來。</p>
+
+<div class="note">
+  <b>同一遊戲區備查兩次的填法</b>
+  假設 A 區民國 109 年備查過一次、民國 113 年又重新備查。兩段定檢歷史用「對應備查日期」區分：
+  <div class="example">
+公園編碼  遊戲區  對應備查日期   檢驗結果   維護合格日期   …
+<span class="k">0123456</span>   A      109/05/01    合格       109/05/01    ← 屬 109 那輪
+<span class="k">0123456</span>   A      109/05/01    待改善      （空）       ← 仍屬 109 那輪
+<span class="k">0123456</span>   A      113/03/15    合格       113/03/15    ← 屬 113 新一輪
+  </div>
+  新一輪（113 年）匯入後，系統會自動把舊一輪尚未完成的定檢標記為「已被取代」，只保留最新一輪為進行中。你只要把日期與「對應備查日期」填正確即可，不需手動處理取代。
+</div>
+<div class="warn">
+  <b>前提</b>
+  維護檔要能匯入，前提是該遊戲區的「備查」已經先匯入（或系統本來就有）。請確實遵守匯入順序：先備查、再維護。
+</div>
+</section>
+
+<!-- ============ 自主檢查 ============ -->
+<section id="selfcheck">
+<h2>五、檔案三：自主檢查</h2>
+<p><strong>一列 = 某座公園、某年某月的一筆自主檢查。</strong></p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>欄位</th><th class="c">必填</th><th>格式 / 說明</th><th>範例</th></tr></thead>
+  <tbody>
+    <tr><td>公園統一編碼</td><td class="c req">✓</td><td>7 碼</td><td><code>0123456</code></td></tr>
+    <tr><td>民國年</td><td class="c req">✓</td><td>整數（民國）</td><td><code>113</code></td></tr>
+    <tr><td>月份</td><td class="c req">✓</td><td>1～12</td><td><code>3</code></td></tr>
+    <tr><td>無須上傳</td><td class="c opt">—</td><td>是 / 否。填「是」表示當月免附檔</td><td><code>否</code></td></tr>
+    <tr><td>檢查表檔名</td><td class="c cond">△</td><td>附件；當「無須上傳 = 否」時必填</td><td><code>0123456_113_03_自主檢查.pdf</code></td></tr>
+    <tr><td>備註</td><td class="c opt">—</td><td>選填</td><td></td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note"><b>提醒</b> 自主檢查只對應到「公園」，不需要填遊戲區代號。</div>
+</section>
+
+<!-- ============ 稽查 ============ -->
+<section id="audit">
+<h2>六、檔案四：稽查管理</h2>
+<p><strong>一列 = 某座公園、某年某月的一筆稽查。</strong></p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>欄位</th><th class="c">必填</th><th>格式 / 說明</th><th>範例</th></tr></thead>
+  <tbody>
+    <tr><td>公園統一編碼</td><td class="c req">✓</td><td>7 碼</td><td><code>0123456</code></td></tr>
+    <tr><td>行政區</td><td class="c opt">—</td><td>可留空，系統會自動帶入</td><td><code>中正區</code></td></tr>
+    <tr><td>民國年</td><td class="c req">✓</td><td>整數（民國）</td><td><code>113</code></td></tr>
+    <tr><td>月份</td><td class="c req">✓</td><td>1～12</td><td><code>4</code></td></tr>
+    <tr><td>預定稽查日期</td><td class="c opt">—</td><td><code>民國年/月/日</code></td><td><code>113/04/10</code></td></tr>
+    <tr><td>實際稽查日期</td><td class="c req">✓</td><td><code>民國年/月/日</code></td><td><code>113/04/12</code></td></tr>
+    <tr><td>稽查結果</td><td class="c req">✓</td><td>填 <strong>合格</strong> 或 <strong>改善中</strong></td><td><code>合格</code></td></tr>
+    <tr><td>逾期改善日期</td><td class="c cond">△</td><td>「改善中」時必填，<code>民國年/月/日</code></td><td><code>113/05/12</code></td></tr>
+    <tr><td>備註</td><td class="c opt">—</td><td>選填</td><td></td></tr>
+    <tr><td>基本資料表檔名</td><td class="c cond">△</td><td>附件；<strong>稽查結果為「合格」時必填</strong>（改善中可免）</td><td><code>0123456_113_04_基本資料.pdf</code></td></tr>
+    <tr><td>廠商保證書檔名</td><td class="c cond">△</td><td>附件；合格時必填</td><td><code>0123456_113_04_保證書.pdf</code></td></tr>
+    <tr><td>管理人員識別證檔名</td><td class="c cond">△</td><td>附件；合格時必填</td><td><code>0123456_113_04_識別證.pdf</code></td></tr>
+    <tr><td>稽核紀錄檔名</td><td class="c cond">△</td><td>附件；合格時必填</td><td><code>0123456_113_04_稽核紀錄.pdf</code></td></tr>
+  </tbody>
+</table>
+</div>
+<div class="note"><b>提醒</b>
+  <ul style="margin:6px 0 0;">
+    <li>稽查只對應到「公園」，不需要填遊戲區代號。</li>
+    <li><strong>同一座公園、同一年度只會有一筆稽查紀錄</strong>（月份代表該年實際稽查的月份）。請勿為同一公園同年度填多列。</li>
+    <li>稽查結果為「合格」時，4 類文件皆需附上；「改善中」時文件可留空，但<strong>逾期改善日期必填</strong>。</li>
+    <li>若某公園當年「改善中」後來已改善完成，仍記為同一列：稽查結果填「合格」並保留逾期改善日期。</li>
+  </ul>
+</div>
+</section>
+
+<!-- ============ 檢查清單 ============ -->
+<section id="checklist">
+<h2>七、完成前檢查清單 &amp; 常見錯誤</h2>
+
+<h3>交付前請逐項確認</h3>
+<ol class="steps">
+  <li>四份 Excel 的<strong>第一列標題</strong>都沒有被更動或刪除。</li>
+  <li>所有公園編碼都是 <strong>7 碼</strong>、不足補 0，且確實是系統現有的公園。</li>
+  <li>所有日期都是<strong>民國年</strong>格式（例：<code>113/03/15</code>）；年、月分開的欄位也用民國年。</li>
+  <li>每個附件欄填的<strong>檔名</strong>，都能在對應模組的附件資料夾裡找到、且檔名完全一致。</li>
+  <li>必填欄（標示 ✓）都有填；條件必填欄（△）依說明補齊。</li>
+  <li>維護檔的每一列都填了正確的「<strong>對應備查日期</strong>」，且同一遊戲區的定檢已<strong>依日期由舊到新</strong>排序。</li>
+  <li>維護檔中「待改善」的列已補齊改善期程分級、限期改善日期、缺失項目檔名，且「待改善」只出現在該輪的<strong>最後一列</strong>；改善完成的情況用「已完成改善」單列表示。</li>
+  <li>稽查檔中<strong>同一公園同年度只有一列</strong>；「合格」列已附 4 類文件，「改善中」列已填逾期改善日期。</li>
+  <li>已依「備查 → 維護 → 自主檢查 → 稽查」的順序整理。</li>
+</ol>
+
+<h3>常見錯誤</h3>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>錯誤情形</th><th>結果</th><th>如何修正</th></tr></thead>
+  <tbody>
+    <tr><td>公園編碼不存在或位數不對</td><td>該列匯入失敗</td><td>確認編碼為 7 碼、補 0，且為系統現有公園</td></tr>
+    <tr><td>附件欄檔名與資料夾內檔名對不上</td><td>找不到附件，該列失敗</td><td>檢查錯字、副檔名、是否漏放檔案</td></tr>
+    <tr><td>日期寫成西元年（如 2024）或用「-」分隔</td><td>日期無法判讀</td><td>一律改成民國年 <code>113/03/15</code> 形式</td></tr>
+    <tr><td>必填欄留空</td><td>該列失敗並提示缺哪一欄</td><td>補齊後重跑該列</td></tr>
+    <tr><td>維護「對應備查日期」填錯輪次</td><td>定檢綁到錯誤的備查</td><td>對照備查檔，填正確那一輪的備查日期</td></tr>
+    <tr><td>維護「待改善」漏填改善分級／限期改善日期／缺失項目檔名</td><td>該列失敗</td><td>三欄皆為待改善必填，請補齊</td></tr>
+    <tr><td>把「待改善→已完成改善」拆成兩列</td><td>第二列找不到可接續的定檢而失敗</td><td>合併為「已完成改善」一列，同列填限期＋實際完成改善日期</td></tr>
+    <tr><td>稽查同一公園同年度填多列</td><td>重複、第二列被拒</td><td>一公園一年度只填一列</td></tr>
+    <tr><td>先匯入維護、還沒匯入備查</td><td>維護找不到報告基準</td><td>務必先完成備查匯入</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="ok">
+  <b>放心重跑</b>
+  系統會依邏輯鍵（備查：編碼＋文號；自主檢查／稽查：編碼＋年＋月）判斷重複，已存在的會自動跳過。修正錯誤列後再次匯入，不會造成重複資料。
+</div>
+</section>
+
+<footer>
+  兒童遊戲場資料匯入檔製作教學 · 本文件僅說明資料填寫方式，實際匯入由系統管理人員執行。
+</footer>
+
+</div>
+</body>
+</html>
