@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重要防砂構造物處置情形登錄系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3EC;
+    --paper-raised:#FFFFFF;
+    --ink:#2A2B24;
+    --ink-soft:#5B5B4F;
+    --forest:#2F4B3C;
+    --forest-deep:#1D3226;
+    --clay:#B5652D;
+    --clay-soft:#E8C9A8;
+    --sage:#7C9885;
+    --line:#DCD5C4;
+    --grade-a:#4C7A5A;
+    --grade-b:#3E6C8C;
+    --grade-c:#C4862F;
+    --grade-d:#A63D40;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(124,152,133,0.10), transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    line-height:1.6;
+    padding:36px 20px 80px;
+  }
+
+  .sheet{
+    max-width:980px;
+    margin:0 auto;
+  }
+
+  /* ---------- Header ---------- */
+  .masthead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    border-bottom:3px solid var(--forest);
+    padding-bottom:18px;
+    margin-bottom:28px;
+    gap:20px;
+    flex-wrap:wrap;
+  }
+  .masthead-left{display:flex; align-items:center; gap:16px;}
+  .mark{
+    width:52px;height:52px;border-radius:10px;
+    background:linear-gradient(160deg, var(--forest) 0%, var(--forest-deep) 100%);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    box-shadow:0 3px 10px rgba(29,50,38,0.35);
+  }
+  .mark svg{width:28px;height:28px;}
+  .masthead h1{
+    font-family:"Noto Serif TC",serif;
+    font-weight:900;
+    font-size:26px;
+    margin:0 0 2px;
+    color:var(--forest-deep);
+    letter-spacing:0.5px;
+  }
+  .masthead .sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    letter-spacing:1px;
+  }
+  .masthead-right{
+    text-align:right;
+    font-size:13px;
+    color:var(--ink-soft);
+    display:flex;
+    gap:22px;
+  }
+  .meta-field label{
+    display:block;
+    font-size:11px;
+    letter-spacing:1px;
+    color:var(--sage);
+    margin-bottom:4px;
+    text-transform:uppercase;
+  }
+  .meta-field input[type=text]{
+    border:none;
+    border-bottom:1.5px solid var(--line);
+    background:transparent;
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:14px;
+    padding:2px 2px 4px;
+    color:var(--ink);
+    width:140px;
+  }
+  .meta-field input[type=text]:focus{outline:none; border-bottom-color:var(--forest);}
+
+  /* meta 區塊的民國日期元件（無外框，貼齊底線樣式）*/
+  .meta-field .roc-date-field{position:relative; width:120px;}
+  .meta-field .roc-date-visual{
+    border:none;
+    border-bottom:1.5px solid var(--line);
+    border-radius:0;
+    background:transparent;
+    padding:2px 2px 4px;
+    font-size:14px;
+    justify-content:flex-start;
+    gap:6px;
+  }
+  .meta-field .roc-date-field:focus-within .roc-date-visual{border-bottom-color:var(--forest); box-shadow:none;}
+
+  /* ---------- Section card ---------- */
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 28px;
+    margin-bottom:22px;
+    box-shadow:0 1px 3px rgba(42,43,36,0.04);
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:20px;
+  }
+  .card-num{
+    font-family:"JetBrains Mono",monospace;
+    font-size:12px;
+    font-weight:600;
+    color:var(--paper-raised);
+    background:var(--forest);
+    width:24px;height:24px;
+    border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card-head h2{
+    font-family:"Noto Serif TC",serif;
+    font-size:17px;
+    font-weight:700;
+    margin:0;
+    color:var(--forest-deep);
+  }
+  .card-head .hint{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-left:auto;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px 18px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px; min-width:0;}
+  .field.span-2{grid-column:span 2;}
+  .field.span-4{grid-column:span 4;}
+  .field label{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .field label .req{color:var(--clay); font-weight:700;}
+
+  input[type=text], input[type=number], input[type=date], select, textarea{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 11px;
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:14px;
+    color:var(--ink);
+    background:#FCFBF8;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--forest);
+    box-shadow:0 0 0 3px rgba(47,75,60,0.12);
+    background:#fff;
+  }
+  textarea{resize:vertical; min-height:70px; font-family:inherit;}
+
+  /* ---------- 唯讀 / 僅供檢視 欄位 ---------- */
+  input.locked-input{
+    background:#F1EFE7;
+    color:var(--ink-soft);
+    cursor:not-allowed;
+  }
+  input.locked-input:focus{box-shadow:none; border-color:var(--line); background:#F1EFE7;}
+  .locked-note{
+    font-size:11.5px;
+    color:var(--sage);
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+
+  /* ---------- Grade badge selector（處置結果用，可點選）---------- */
+  .grade-select{
+    display:flex;
+    gap:10px;
+  }
+  .grade-opt{
+    flex:1;
+    position:relative;
+  }
+  .grade-opt input{position:absolute; opacity:0; inset:0; cursor:pointer;}
+  .grade-opt .chip{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:10px 12px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s;
+    background:#FCFBF8;
+  }
+  .grade-opt .chip .letter{
+    font-family:"Noto Serif TC",serif;
+    font-weight:900;
+    font-size:18px;
+    line-height:1;
+    flex-shrink:0;
+  }
+  .grade-opt[data-grade="A"] input:checked ~ .chip{border-color:var(--grade-a); background:rgba(76,122,90,0.10); color:var(--grade-a);}
+  .grade-opt[data-grade="B"] input:checked ~ .chip{border-color:var(--grade-b); background:rgba(62,108,140,0.10); color:var(--grade-b);}
+  .grade-opt[data-grade="C"] input:checked ~ .chip{border-color:var(--grade-c); background:rgba(196,134,47,0.12); color:var(--grade-c);}
+  .grade-opt[data-grade="D"] input:checked ~ .chip{border-color:var(--grade-d); background:rgba(166,61,64,0.12); color:var(--grade-d);}
+  .grade-opt .chip .letter{color:inherit;}
+  .grade-opt input:focus-visible ~ .chip{box-shadow:0 0 0 3px rgba(47,75,60,0.25);}
+
+  /* ---------- 巡查評級 唯讀顯示（僅供檢視）---------- */
+  .grade-readout{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 13px;
+    background:#F1EFE7;
+    min-width:0;
+  }
+  .grade-readout-letter{
+    font-family:"Noto Serif TC",serif;
+    font-weight:900;
+    font-size:19px;
+    min-width:32px;height:32px;
+    padding:0 6px;
+    border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    background:#DCD5C4;
+    color:var(--ink-soft);
+    flex-shrink:0;
+    transition:all .15s;
+  }
+  .grade-readout-text{
+    font-size:13px;
+    color:var(--ink-soft);
+    min-width:0;
+    overflow-wrap:break-word;
+    word-break:break-word;
+  }
+  .grade-readout.grade-a .grade-readout-letter{background:rgba(76,122,90,0.16); color:var(--grade-a);}
+  .grade-readout.grade-b .grade-readout-letter{background:rgba(62,108,140,0.16); color:var(--grade-b);}
+  .grade-readout.grade-c .grade-readout-letter{background:rgba(196,134,47,0.18); color:var(--grade-c);}
+  .grade-readout.grade-d .grade-readout-letter{background:rgba(166,61,64,0.18); color:var(--grade-d);}
+
+  /* ---------- 坐標唯讀顯示 ---------- */
+  .coord-readout{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 13px;
+    background:#F1EFE7;
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .coord-readout .axis-item{display:flex; align-items:baseline; gap:6px;}
+  .coord-readout .axis{
+    font-family:"JetBrains Mono",monospace;
+    font-size:12px;
+    font-weight:700;
+    color:var(--sage);
+  }
+  .coord-readout .val{
+    font-family:"JetBrains Mono",monospace;
+    font-size:14px;
+    color:var(--ink);
+    font-weight:600;
+  }
+
+  /* ---------- Photo upload ---------- */
+  .photo-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  .photo-box{
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    background:#FCFBF8;
+    aspect-ratio:4/3;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:border-color .15s, background .15s;
+  }
+  .photo-box:hover{border-color:var(--sage); background:#F8F7F1;}
+  .photo-box.has-image{border-style:solid;}
+  .photo-box img{width:100%; height:100%; object-fit:cover;}
+  .photo-box .placeholder{
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    color:var(--ink-soft);
+    pointer-events:none;
+  }
+  .photo-box .placeholder svg{width:30px;height:30px; stroke:var(--sage);}
+  .photo-box .placeholder span{font-size:12.5px;}
+  .photo-box input[type=file]{position:absolute; inset:0; opacity:0; cursor:pointer;}
+  .photo-label{font-size:12.5px; color:var(--ink-soft); margin-top:8px; text-align:center;}
+
+  /* ---------- 民國日期元件（可重複使用）---------- */
+  .roc-date-field{position:relative;}
+  .roc-date-visual{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:9px 11px;
+    background:#FCFBF8;
+    font-size:14px;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .roc-date-visual .cal-icon{width:15px;height:15px; stroke:var(--sage); flex-shrink:0;}
+  .roc-date-visual .roc-date-text.placeholder-text{color:#9C978A;}
+  .roc-date-input{
+    position:absolute; inset:0;
+    opacity:0;
+    width:100%; height:100%;
+    cursor:pointer;
+    border:none;
+    padding:0;
+  }
+  .roc-date-field:focus-within .roc-date-visual{
+    border-color:var(--forest);
+    box-shadow:0 0 0 3px rgba(47,75,60,0.12);
+  }
+  .roc-date-field.compact .roc-date-visual{padding:6px 8px 8px; font-size:12.5px;}
+  .roc-date-field.compact{width:150px;}
+
+  /* ---------- Disposal outcome section ---------- */
+  .grade-gate{
+    border-radius:10px;
+    padding:16px 18px;
+    background:#FBF9F4;
+    border:1px solid var(--line);
+    margin-bottom:16px;
+  }
+  .grade-gate .gate-empty{
+    font-size:13px;
+    color:var(--ink-soft);
+    display:flex; align-items:center; gap:8px;
+  }
+  .gate-empty svg{width:16px;height:16px; stroke:var(--sage); flex-shrink:0;}
+
+  .option-list{display:flex; flex-direction:column; gap:10px;}
+  .option-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:11px 13px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#fff;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .option-row:hover{border-color:var(--sage);}
+  .option-row.checked{border-color:var(--forest); background:rgba(47,75,60,0.05);}
+  .option-row input{margin-top:2px; accent-color:var(--forest); width:16px; height:16px; flex-shrink:0;}
+  .option-row .opt-text{font-size:14px;}
+  .option-row .opt-code{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;
+    color:var(--clay);
+    font-weight:700;
+    margin-left:6px;
+  }
+
+  .r4-panel{
+    margin-top:14px;
+    padding:18px;
+    border-radius:10px;
+    background:var(--clay-soft);
+    border:1px solid #D9B183;
+    display:none;
+    flex-direction:column;
+    gap:12px;
+  }
+  .r4-panel.visible{display:flex;}
+  .r4-panel .r4-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:#7A4519;
+    display:flex; align-items:center; gap:6px;
+  }
+  .r4-panel .field label{color:#7A4519;}
+  .r4-panel input, .r4-panel textarea, .r4-panel .roc-date-visual{background:#FFFDF9;}
+
+  .note-hint{
+    font-size:12px;
+    color:var(--sage);
+    margin-top:6px;
+    display:flex;
+    gap:6px;
+    align-items:flex-start;
+  }
+
+  /* ---------- 修復工程編號查詢 ---------- */
+  .repair-lookup{
+    border-top:1px dashed #D9B183;
+    padding-top:14px;
+    margin-top:2px;
+  }
+  .lookup-row{display:flex; gap:10px;}
+  .lookup-row input{flex:1;}
+  .btn-lookup{
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:13px;
+    font-weight:700;
+    padding:0 18px;
+    border-radius:8px;
+    border:1.5px solid var(--forest);
+    background:var(--forest);
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s;
+  }
+  .btn-lookup:hover{background:var(--forest-deep);}
+  .note-hint.warn{color:var(--grade-d);}
+  .note-hint.ok{color:var(--grade-a);}
+
+  .repair-result{
+    display:none;
+    border-top:1px dashed #D9B183;
+    padding-top:14px;
+    margin-top:2px;
+  }
+  .repair-result.visible{display:block;}
+  .repair-result textarea{background:#FFFDF9;}
+
+  /* 進度列：沿用 option-row，加入內嵌小輸入框 */
+  .progress-row{align-items:center;}
+  .progress-main{display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:14px;}
+  .progress-sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .mini-input{
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:4px 7px;
+    font-size:12.5px;
+    font-family:"Noto Sans TC",sans-serif;
+    background:#fff;
+    width:64px;
+  }
+  select.mini-input{width:72px; padding:4px 4px;}
+  .mini-input.tiny{width:48px;}
+  .mini-input:focus{outline:none; border-color:var(--forest);}
+  .progress-row:not(.checked) .mini-input,
+  .progress-row:not(.checked) .roc-date-visual{
+    background:#F3F1EA;
+    color:var(--ink-soft);
+  }
+
+  /* ---------- 照片相簿（多張上傳，最多3張）---------- */
+  .gallery-upload{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .gallery-add{
+    width:104px;height:104px;
+    border:1.5px dashed var(--line);
+    border-radius:10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    cursor:pointer;
+    position:relative;
+    background:#FCFBF8;
+    color:var(--ink-soft);
+    font-size:12px;
+    flex-shrink:0;
+    transition:border-color .15s, background .15s;
+  }
+  .gallery-add:hover{border-color:var(--sage); background:#F8F7F1;}
+  .gallery-add input{position:absolute; inset:0; opacity:0; cursor:pointer;}
+  .gallery-thumb{
+    width:104px;height:104px;
+    border-radius:10px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .gallery-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .gallery-thumb .remove-btn{
+    position:absolute;
+    top:5px; right:5px;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:rgba(30,30,26,0.6);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    line-height:1;
+    cursor:pointer;
+    border:none;
+  }
+  .gallery-thumb .remove-btn:hover{background:rgba(166,61,64,0.85);}
+  .gallery-hint{font-size:11.5px; color:var(--sage); margin-top:2px;}
+
+  /* ---------- Footer actions ---------- */
+  .actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:8px;
+  }
+  .btn{
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:14px;
+    font-weight:700;
+    padding:12px 26px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .btn:hover{border-color:var(--sage); color:var(--forest);}
+  .btn.primary{
+    background:var(--forest);
+    border-color:var(--forest);
+    color:#fff;
+    box-shadow:0 3px 10px rgba(47,75,60,0.28);
+  }
+  .btn.primary:hover{background:var(--forest-deep); border-color:var(--forest-deep); color:#fff;}
+
+  .status-toast{
+    position:fixed;
+    bottom:26px; left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--forest-deep);
+    color:#fff;
+    padding:12px 22px;
+    border-radius:30px;
+    font-size:13.5px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    opacity:0;
+    pointer-events:none;
+    transition:all .25s ease;
+    display:flex; align-items:center; gap:8px;
+  }
+  .status-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:760px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .field.span-2{grid-column:span 2;}
+    .field.span-4{grid-column:span 2;}
+    .photo-grid{grid-template-columns:1fr;}
+    .masthead{flex-direction:column; align-items:flex-start;}
+    .masthead-right{gap:14px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="masthead">
+    <div class="masthead-left">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F6F3EC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 20 L9 8 L13 14 L16 9 L21 20 Z"/>
+          <path d="M3 20 H21"/>
+        </svg>
+      </div>
+      <div>
+        <h1>重要防砂構造物處置情形登錄系統</h1>
+        <div class="sub">評估處置結果表 &nbsp;·&nbsp; DISPOSAL ASSESSMENT RECORD</div>
+      </div>
+    </div>
+    <div class="masthead-right">
+      <div class="meta-field">
+        <label>填表人</label>
+        <input type="text" id="fillerName" placeholder="請輸入姓名">
+      </div>
+      <div class="meta-field">
+        <label>填表日期</label>
+        <div class="roc-date-field compact">
+          <div class="roc-date-visual">
+            <span class="roc-date-text" id="fillerDateText">115/07/02</span>
+            <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+          </div>
+          <input type="date" id="fillerDate" class="roc-date-input" onchange="syncRocDate('fillerDate','fillerDateText')">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: 基本資料 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">1</div>
+      <h2>基本資料</h2>
+      <div class="hint">由系統資料庫帶入，僅供檢視</div>
+    </div>
+    <div class="grid">
+      <div class="field">
+        <label>所屬分署</label>
+        <input type="text" class="locked-input" value="臺北分署" readonly>
+      </div>
+      <div class="field">
+        <label>構造物編號</label>
+        <input type="text" class="locked-input" value="柑腳溪-06-A51-110" readonly>
+      </div>
+      <div class="field">
+        <label>FID</label>
+        <input type="text" class="locked-input" value="18" readonly>
+      </div>
+      <div class="field">
+        <label>集水區</label>
+        <input type="text" class="locked-input" value="柑腳溪" readonly>
+      </div>
+
+      <div class="field span-4">
+        <label>巡查評級</label>
+        <div class="grade-readout grade-c" id="gradeReadout">
+          <span class="grade-readout-letter" id="gradeReadoutLetter">C1</span>
+          <span class="grade-readout-text" id="gradeReadoutText">級：部分受損，影響功能性，且工程重要性屬一般者</span>
+        </div>
+      </div>
+
+      <div class="field span-2">
+        <label>工程編號</label>
+        <input type="text" class="locked-input" value="110-ADE-77-1-007" readonly>
+      </div>
+      <div class="field span-2">
+        <label>工程名稱</label>
+        <input type="text" class="locked-input" value="雙溪區上林里平林溪(大瀨橋至上林橋間)護岸設施改善工程" readonly>
+      </div>
+
+      <div class="field span-4">
+        <label>坐標 (X, Y) &nbsp;TWD97</label>
+        <div class="coord-readout">
+          <span class="axis-item"><span class="axis">X</span><span class="val">333632</span></span>
+          <span class="axis-item"><span class="axis">Y</span><span class="val">2768795</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: 巡查照片 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">2</div>
+      <h2>巡查照片</h2>
+      <div class="hint">點擊方框上傳，建議 4:3 比例</div>
+    </div>
+    <div class="photo-grid">
+      <div>
+        <label class="photo-box" id="photoBox1">
+          <div class="placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16 L15 10 L5 19"/></svg>
+            <span>上傳巡查照片(1)</span>
+          </div>
+          <input type="file" accept="image/*" onchange="handlePhoto(event,'photoBox1')">
+        </label>
+        <div class="photo-label">巡查照片(1)</div>
+      </div>
+      <div>
+        <label class="photo-box" id="photoBox2">
+          <div class="placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16 L15 10 L5 19"/></svg>
+            <span>上傳巡查照片(2)</span>
+          </div>
+          <input type="file" accept="image/*" onchange="handlePhoto(event,'photoBox2')">
+        </label>
+        <div class="photo-label">巡查照片(2)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: 處置結果 -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-num">3</div>
+      <h2>處置結果</h2>
+      <div class="hint">請點選評級以顯示對應選項</div>
+    </div>
+
+    <div class="field span-4" style="margin-bottom:18px;">
+      <label>評級判定 <span class="req">*</span></label>
+      <div class="grade-select" id="disposalGradeSelect" style="max-width:420px;">
+        <label class="grade-opt" data-grade="C">
+          <input type="radio" name="disposalGrade" value="C">
+          <div class="chip"><span class="letter">C</span><span>級部分損毀，可能影響功能性</span></div>
+        </label>
+        <label class="grade-opt" data-grade="D">
+          <input type="radio" name="disposalGrade" value="D">
+          <div class="chip"><span class="letter">D</span><span>級全部損毀或功能喪失</span></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="grade-gate" id="gateEmpty">
+      <div class="gate-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16" r="0.6" fill="var(--sage)"/></svg>
+        請先點選上方「C 級」或「D 級」，系統將顯示對應的處置選項。
+      </div>
+    </div>
+
+    <div class="option-list" id="optionListC" style="display:none;">
+      <label class="option-row" data-code="R1">
+        <input type="radio" name="disposalOption" value="R1">
+        <div class="opt-text">重新評級為 B 級<span class="opt-code">R1</span></div>
+      </label>
+      <label class="option-row" data-code="R2">
+        <input type="radio" name="disposalOption" value="R2">
+        <div class="opt-text">持續觀察，納入隔年度巡查清單<span class="opt-code">R2</span></div>
+      </label>
+      <label class="option-row" data-code="R3">
+        <input type="radio" name="disposalOption" value="R3">
+        <div class="opt-text">納入資料庫保存，不再進行例行巡查<span class="opt-code">R3</span></div>
+      </label>
+      <label class="option-row" data-code="R4">
+        <input type="radio" name="disposalOption" value="R4">
+        <div class="opt-text">各分署規劃立即辦理修復或替代工程<span class="opt-code">R4</span></div>
+      </label>
+    </div>
+
+    <div class="option-list" id="optionListD" style="display:none;">
+      <label class="option-row" data-code="R3">
+        <input type="radio" name="disposalOption" value="R3">
+        <div class="opt-text">納入資料庫保存，不再進行例行巡查<span class="opt-code">R3</span></div>
+      </label>
+      <label class="option-row" data-code="R4">
+        <input type="radio" name="disposalOption" value="R4">
+        <div class="opt-text">各分署規劃立即辦理修復或替代工程<span class="opt-code">R4</span></div>
+      </label>
+    </div>
+
+
+    <div class="grid" style="margin-top:18px;">
+      <div class="field span-4">
+        <label>處置結果說明</label>
+        <textarea id="disposalNote" placeholder="請詳述為何選擇該處置結果。若屬R3且有替代工程請說明其工程編號與名稱。"></textarea>
+      </div>
+    </div>
+
+    <div class="r4-panel" id="r4Panel">
+      <div class="r4-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A4519" stroke-width="2"><path d="M12 2 L2 22 H22 Z"/><path d="M12 9v5M12 17h.01"/></svg>
+        擬辦工程說明（選擇 R4 者請填寫）
+      </div>
+      <div class="grid">
+        <div class="field span-2">
+          <label>(概估) 經費</label>
+          <input type="text" placeholder="請輸入概估經費，例：新臺幣 500 萬元">
+        </div>
+        <div class="field span-2">
+          <label>(預計) 辦理日期</label>
+          <div class="roc-date-field">
+            <div class="roc-date-visual">
+              <span class="roc-date-text placeholder-text" id="plannedDateText">請選擇日期</span>
+              <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+            </div>
+            <input type="date" id="plannedDate" class="roc-date-input" onchange="syncRocDate('plannedDate','plannedDateText')">
+          </div>
+        </div>
+        <div class="field span-4">
+          <label>(擬辦) 工程內容</label>
+          <textarea placeholder="請說明擬辦工程之具體內容"></textarea>
+        </div>
+      </div>
+
+      <div class="repair-lookup">
+        <div class="field span-4">
+          <label>修復工程編號</label>
+          <div class="lookup-row">
+            <input type="text" id="repairCodeInput" placeholder="請輸入修復工程編號，例：REP-2024-015" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupRepairProject();}">
+            <button type="button" class="btn-lookup" onclick="lookupRepairProject()">查詢帶入</button>
+          </div>
+          <div class="note-hint" id="lookupHint" style="display:none;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            <span id="lookupHintText"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="repair-result" id="repairResult">
+        <div class="grid">
+          <div class="field span-4">
+            <label>修復工程內容</label>
+            <textarea id="repairContent" placeholder="查詢工程編號後自動帶出，亦可手動修改"></textarea>
+          </div>
+
+          <div class="field span-4">
+            <label>修復工程進度</label>
+            <div class="option-list" id="progressList">
+              <label class="option-row progress-row" data-status="pending">
+                <input type="radio" name="repairProgress" value="pending" onchange="onProgressChange(this)">
+                <div class="opt-text progress-main">
+                  <span>尚未辦理</span>
+                  <span class="progress-sub">（預期辦理日期：
+                    <select class="mini-input" id="pendingYear">
+                      <option value="">年</option>
+                      <option value="108">108</option>
+                      <option value="109">109</option>
+                      <option value="110">110</option>
+                      <option value="111">111</option>
+                      <option value="112">112</option>
+                      <option value="113">113</option>
+                      <option value="114">114</option>
+                      <option value="115">115</option>
+                      <option value="116">116</option>
+                      <option value="117">117</option>
+                      <option value="118">118</option>
+                      <option value="119">119</option>
+                      <option value="120">120</option>
+                    </select> 年
+                    <select class="mini-input tiny" id="pendingMonth">
+                      <option value="">月</option>
+                      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                      <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                      <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                    </select> 月）
+                  </span>
+                </div>
+              </label>
+              <label class="option-row progress-row" data-status="contracted">
+                <input type="radio" name="repairProgress" value="contracted" onchange="onProgressChange(this)">
+                <div class="opt-text progress-main">
+                  <span>工程發包</span>
+                  <span class="progress-sub">（發包日期：
+                    <div class="roc-date-field compact">
+                      <div class="roc-date-visual">
+                        <span class="roc-date-text placeholder-text" id="contractedDateText">請選擇日期</span>
+                        <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+                      </div>
+                      <input type="date" id="contractedDate" class="roc-date-input" onchange="syncRocDate('contractedDate','contractedDateText')">
+                    </div>
+                    ）
+                  </span>
+                </div>
+              </label>
+              <label class="option-row progress-row" data-status="inprogress">
+                <input type="radio" name="repairProgress" value="inprogress" onchange="onProgressChange(this)">
+                <div class="opt-text progress-main">
+                  <span>施工進行中</span>
+                  <span class="progress-sub">（已完成 <input type="number" class="mini-input tiny" id="progressPercent" min="0" max="100"> %）</span>
+                </div>
+              </label>
+              <label class="option-row progress-row" data-status="completed">
+                <input type="radio" name="repairProgress" value="completed" onchange="onProgressChange(this)">
+                <div class="opt-text progress-main">
+                  <span>工程完工並驗收</span>
+                  <span class="progress-sub">（驗收日期：
+                    <div class="roc-date-field compact">
+                      <div class="roc-date-visual">
+                        <span class="roc-date-text placeholder-text" id="completedDateText">請選擇日期</span>
+                        <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+                      </div>
+                      <input type="date" id="completedDate" class="roc-date-input" onchange="syncRocDate('completedDate','completedDateText')">
+                    </div>
+                    ）
+                  </span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="field span-4">
+            <label>現況說明</label>
+            <textarea id="repairStatusNote" placeholder="請說明目前工程現況"></textarea>
+          </div>
+
+          <div class="field span-4">
+            <label>工程進行照片或完工照片</label>
+            <div class="gallery-upload" id="repairGallery">
+              <label class="gallery-add">
+                <input type="file" accept="image/*" multiple onchange="handleGalleryUpload(event)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M12 5v14M5 12h14"/></svg>
+                <span>新增照片</span>
+              </label>
+            </div>
+            <div class="gallery-hint">最多可上傳 3 張照片</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" type="button" onclick="resetForm()">清除重填</button>
+    <button class="btn primary" type="button" onclick="saveRecord()">儲存紀錄</button>
+  </div>
+
+</div>
+
+<div class="status-toast" id="toast">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toastText">已儲存</span>
+</div>
+
+<script>
+  const MAX_PHOTOS = 3;
+
+  // ---------- 民國日期轉換 ----------
+  function toRocDateString(iso){
+    if(!iso) return '';
+    const parts = iso.split('-');
+    const y = parseInt(parts[0],10) - 1911;
+    return y + '/' + parts[1] + '/' + parts[2];
+  }
+  function syncRocDate(inputId, textId){
+    const input = document.getElementById(inputId);
+    const text = document.getElementById(textId);
+    if(input.value){
+      text.textContent = toRocDateString(input.value);
+      text.classList.remove('placeholder-text');
+    } else {
+      text.textContent = '請選擇日期';
+      text.classList.add('placeholder-text');
+    }
+  }
+
+  // 填表日期預設今天
+  (function(){
+    const today = new Date();
+    const iso = today.toISOString().slice(0,10);
+    document.getElementById('fillerDate').value = iso;
+    syncRocDate('fillerDate','fillerDateText');
+  })();
+
+  // 照片上傳預覽
+  function handlePhoto(evt, boxId){
+    const file = evt.target.files[0];
+    if(!file) return;
+    const box = document.getElementById(boxId);
+    const reader = new FileReader();
+    reader.onload = function(e){
+      box.classList.add('has-image');
+      box.innerHTML = '<img src="'+e.target.result+'" alt="巡查照片">' +
+        '<input type="file" accept="image/*" onchange="handlePhoto(event,\''+boxId+'\')">';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ---------- 處置結果：點選 C / D 顯示對應勾選清單 ----------
+  const gradeInputs = document.querySelectorAll('input[name="disposalGrade"]');
+  const gateEmpty = document.getElementById('gateEmpty');
+  const optionListC = document.getElementById('optionListC');
+  const optionListD = document.getElementById('optionListD');
+  const r4Panel = document.getElementById('r4Panel');
+
+  function clearDisposalChecks(){
+    document.querySelectorAll('input[name="disposalOption"]').forEach(cb=>{
+      cb.checked = false;
+      cb.closest('.option-row').classList.remove('checked');
+    });
+    r4Panel.classList.remove('visible');
+  }
+
+  gradeInputs.forEach(input=>{
+    input.addEventListener('change', ()=>{
+      const g = input.value;
+      clearDisposalChecks();
+      if(g === 'C'){
+        gateEmpty.style.display='none';
+        optionListC.style.display='flex';
+        optionListD.style.display='none';
+      } else if(g === 'D'){
+        gateEmpty.style.display='none';
+        optionListC.style.display='none';
+        optionListD.style.display='flex';
+      } else {
+        gateEmpty.style.display='block';
+        optionListC.style.display='none';
+        optionListD.style.display='none';
+      }
+    });
+  });
+
+  // 點選處置選項（單選）-> R4 顯示擬辦工程欄位
+  document.addEventListener('change', (e)=>{
+    if(e.target.name === 'disposalOption'){
+      document.querySelectorAll('input[name="disposalOption"]').forEach(cb=>{
+        cb.closest('.option-row').classList.toggle('checked', cb.checked);
+      });
+
+      r4Panel.classList.toggle('visible', e.target.value === 'R4' && e.target.checked);
+    }
+  });
+
+  // ---------- 修復工程編號查詢 -> 自動帶出工程內容／進度／照片 ----------
+  // 示範用模擬資料庫，實際串接時請改為呼叫後端 API 依工程編號查詢。
+  const repairProjectDB = {
+    'REP-2024-015': {
+      content: '辦理○○溪防砂壩壩體修復工程，含壩體裂縫填補、下游消能池整平及護岸加強。',
+      status: 'inprogress',
+      percent: 65,
+      statusNote: '壩體修復已完成，目前進行下游護岸加強作業，預計如期完工。'
+    },
+    'REP-2024-022': {
+      content: '辦理○○溪防砂壩替代工程規劃設計，尚未進入發包程序。',
+      status: 'pending',
+      pendingYear: 115,
+      pendingMonth: 12,
+      statusNote: '規劃設計中，俟細部設計完成後辦理發包。'
+    },
+    'REP-2023-118': {
+      content: '辦理○○野溪防砂構造物拆除重建工程。',
+      status: 'completed',
+      completedDate: '2025-11-20',
+      statusNote: '工程已完工並完成驗收，功能恢復正常。'
+    },
+    'REP-2025-003': {
+      content: '辦理平林溪護岸設施改善工程，含護岸加高及基礎保護工。',
+      status: 'contracted',
+      contractedDate: '2026-03-10',
+      statusNote: '已完成發包，預計近期進場施工。'
+    }
+  };
+
+  const repairResult = document.getElementById('repairResult');
+  const lookupHint = document.getElementById('lookupHint');
+  const lookupHintText = document.getElementById('lookupHintText');
+
+  function lookupRepairProject(){
+    const code = document.getElementById('repairCodeInput').value.trim();
+    repairResult.classList.add('visible');
+    lookupHint.style.display = 'flex';
+
+    if(!code){
+      lookupHint.className = 'note-hint warn';
+      lookupHintText.textContent = '請先輸入修復工程編號，再點選查詢帶入，即可自動帶入相關資訊。';
+      return;
+    }
+
+    const data = repairProjectDB[code.toUpperCase()];
+
+    // 清空目前資料
+    document.getElementById('repairContent').value = '';
+    document.getElementById('repairStatusNote').value = '';
+    document.querySelectorAll('input[name="repairProgress"]').forEach(r=>{
+      r.checked = false;
+      r.closest('.progress-row').classList.remove('checked');
+    });
+    document.getElementById('pendingYear').value = '';
+    document.getElementById('pendingMonth').value = '';
+    document.getElementById('progressPercent').value = '';
+    document.getElementById('contractedDate').value = '';
+    syncRocDate('contractedDate','contractedDateText');
+    document.getElementById('completedDate').value = '';
+    syncRocDate('completedDate','completedDateText');
+
+    if(data){
+      lookupHint.className = 'note-hint ok';
+      lookupHintText.textContent = '已依工程編號「' + code.toUpperCase() + '」自動帶出資料，可視需要修改。';
+
+      document.getElementById('repairContent').value = data.content || '';
+      document.getElementById('repairStatusNote').value = data.statusNote || '';
+
+      if(data.status){
+        const radio = document.querySelector('input[name="repairProgress"][value="'+data.status+'"]');
+        if(radio){
+          radio.checked = true;
+          onProgressChange(radio);
+        }
+        if(data.status === 'pending'){
+          document.getElementById('pendingYear').value = data.pendingYear || '';
+          document.getElementById('pendingMonth').value = data.pendingMonth || '';
+        } else if(data.status === 'contracted'){
+          document.getElementById('contractedDate').value = data.contractedDate || '';
+          syncRocDate('contractedDate','contractedDateText');
+        } else if(data.status === 'inprogress'){
+          document.getElementById('progressPercent').value = data.percent || '';
+        } else if(data.status === 'completed'){
+          document.getElementById('completedDate').value = data.completedDate || '';
+          syncRocDate('completedDate','completedDateText');
+        }
+      }
+    } else {
+      lookupHint.className = 'note-hint warn';
+      lookupHintText.textContent = '查無此修復工程編號的資料，請確認編號或手動填寫下方欄位。';
+    }
+  }
+
+  function onProgressChange(radio){
+    document.querySelectorAll('.progress-row').forEach(row=> row.classList.remove('checked'));
+    radio.closest('.progress-row').classList.add('checked');
+  }
+
+  // ---------- 工程照片相簿：可多張上傳 / 移除，最多 3 張 ----------
+  function updateGalleryAddVisibility(){
+    const gallery = document.getElementById('repairGallery');
+    const addBtn = gallery.querySelector('.gallery-add');
+    const count = gallery.querySelectorAll('.gallery-thumb').length;
+    addBtn.style.display = count >= MAX_PHOTOS ? 'none' : 'flex';
+  }
+
+  function handleGalleryUpload(evt){
+    const gallery = document.getElementById('repairGallery');
+    const addBtn = gallery.querySelector('.gallery-add');
+    const currentCount = gallery.querySelectorAll('.gallery-thumb').length;
+    const files = Array.from(evt.target.files);
+    const remaining = MAX_PHOTOS - currentCount;
+
+    if(remaining <= 0){
+      showToast('最多僅能上傳 ' + MAX_PHOTOS + ' 張照片');
+      evt.target.value = '';
+      return;
+    }
+    if(files.length > remaining){
+      showToast('最多僅能上傳 ' + MAX_PHOTOS + ' 張照片，已加入前 ' + remaining + ' 張');
+    }
+
+    files.slice(0, remaining).forEach(file=>{
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const thumb = document.createElement('div');
+        thumb.className = 'gallery-thumb';
+        thumb.innerHTML = '<img src="'+e.target.result+'" alt="工程照片">' +
+          '<button type="button" class="remove-btn" onclick="this.parentElement.remove(); updateGalleryAddVisibility();">×</button>';
+        gallery.insertBefore(thumb, addBtn);
+        updateGalleryAddVisibility();
+      };
+      reader.readAsDataURL(file);
+    });
+    evt.target.value = '';
+  }
+
+  function showToast(text){
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = text;
+    toast.classList.add('show');
+    setTimeout(()=> toast.classList.remove('show'), 2200);
+  }
+
+  function saveRecord(){
+    showToast('已儲存紀錄');
+  }
+
+  function resetForm(){
+    document.querySelectorAll('input[type=text]:not(.locked-input), input[type=number], textarea').forEach(el=> el.value='');
+    document.querySelectorAll('input[type=date]').forEach(el=> el.value='');
+    document.querySelectorAll('select').forEach(el=> el.selectedIndex=0);
+    document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(el=> el.checked=false);
+    document.querySelectorAll('.option-row').forEach(el=> el.classList.remove('checked'));
+    gateEmpty.style.display='block';
+    optionListC.style.display='none';
+    optionListD.style.display='none';
+    r4Panel.classList.remove('visible');
+    repairResult.classList.remove('visible');
+    lookupHint.style.display='none';
+    document.querySelectorAll('.gallery-thumb').forEach(el=> el.remove());
+    updateGalleryAddVisibility();
+    ['photoBox1','photoBox2'].forEach((id,i)=>{
+      const box = document.getElementById(id);
+      box.classList.remove('has-image');
+      box.innerHTML = '<div class="placeholder"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16 L15 10 L5 19"/></svg><span>上傳巡查照片('+(i+1)+')</span></div><input type="file" accept="image/*" onchange="handlePhoto(event,\''+id+'\')">';
+    });
+    const today = new Date();
+    document.getElementById('fillerDate').value = today.toISOString().slice(0,10);
+    syncRocDate('fillerDate','fillerDateText');
+    syncRocDate('plannedDate','plannedDateText');
+    syncRocDate('contractedDate','contractedDateText');
+    syncRocDate('completedDate','completedDateText');
+    showToast('已清除表單');
+  }
+</script>
+
+</body>
+</html>
