@@ -599,6 +599,291 @@
   }
   .status-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
+  /* ---------- 頁籤導覽 ---------- */
+  .tab-nav{
+    display:flex;
+    gap:8px;
+    margin-bottom:20px;
+    border-bottom:1px solid var(--line);
+  }
+  .tab-btn{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:14px;
+    font-weight:700;
+    padding:11px 18px;
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    margin-bottom:-1px;
+    transition:color .15s, border-color .15s;
+  }
+  .tab-btn svg{width:16px;height:16px; flex-shrink:0;}
+  .tab-btn:hover{color:var(--forest);}
+  .tab-btn.active{color:var(--forest-deep); border-bottom-color:var(--forest);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+
+  .grade-tag{
+    display:inline-flex;
+    align-items:center;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+  }
+  .grade-tag.grade-a{background:rgba(76,122,90,0.14); color:var(--grade-a);}
+  .grade-tag.grade-b{background:rgba(62,108,140,0.14); color:var(--grade-b);}
+  .grade-tag.grade-c{background:rgba(196,134,47,0.16); color:var(--grade-c);}
+  .grade-tag.grade-d{background:rgba(166,61,64,0.16); color:var(--grade-d);}
+
+  /* ---------- 歷次巡查紀錄（簡易列表，可檢視／編輯）---------- */
+  .history-head-row{
+    display:grid;
+    grid-template-columns:110px 130px 1fr 90px;
+    gap:12px;
+    padding:0 14px 10px;
+    font-size:11.5px;
+    color:var(--sage);
+    letter-spacing:0.5px;
+  }
+  .history-table{display:flex; flex-direction:column; gap:10px;}
+  .history-row{
+    display:grid;
+    grid-template-columns:110px 130px 1fr 90px;
+    align-items:center;
+    gap:12px;
+    padding:13px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    transition:border-color .15s;
+  }
+  .history-row:hover{border-color:var(--sage);}
+  .history-row.editing{
+    background:#FBF9F4;
+    border-color:var(--forest);
+    grid-template-columns:1fr;
+    gap:14px;
+  }
+  .hr-date{
+    font-family:"JetBrains Mono",monospace;
+    font-size:13.5px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .hr-disposal{font-size:13px; color:var(--ink-soft);}
+  .hr-disposal .opt-code{
+    font-family:"JetBrains Mono",monospace;
+    font-size:11px;
+    color:var(--clay);
+    font-weight:700;
+    margin-right:6px;
+  }
+  .hr-actions{display:flex; justify-content:flex-end;}
+  .hr-btn{
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    padding:6px 14px;
+    border-radius:7px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .hr-btn:hover{border-color:var(--sage); color:var(--forest);}
+  .hr-btn.save{background:var(--forest); border-color:var(--forest); color:#fff;}
+  .hr-btn.save:hover{background:var(--forest-deep); border-color:var(--forest-deep);}
+
+  .history-edit-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr) auto;
+    gap:14px;
+    align-items:end;
+  }
+  .history-edit-field{display:flex; flex-direction:column; gap:6px;}
+  .history-edit-field label{font-size:11.5px; color:var(--ink-soft); font-weight:500;}
+  .history-edit-actions{display:flex; gap:8px;}
+
+  .demo-note{
+    font-size:12px;
+    color:var(--sage);
+    display:flex;
+    gap:6px;
+    align-items:flex-start;
+    margin-top:4px;
+    padding:0 4px;
+  }
+
+  .btn-add-record{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-family:"Noto Sans TC",sans-serif;
+    font-size:12.5px;
+    font-weight:700;
+    padding:8px 14px;
+    border-radius:8px;
+    border:1.5px solid var(--forest);
+    background:var(--forest);
+    color:#fff;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s;
+  }
+  .btn-add-record:hover{background:var(--forest-deep); border-color:var(--forest-deep);}
+
+  /* ---------- CD級列管追蹤：查詢條件 chip 多選 ---------- */
+  .chip-multi{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip-multi label{position:relative; display:inline-flex;}
+  .chip-multi input{position:absolute; opacity:0; inset:0; cursor:pointer; margin:0;}
+  .chip-multi .chip-small{
+    padding:7px 15px;
+    border-radius:20px;
+    border:1.5px solid var(--line);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+    background:#FCFBF8;
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .chip-multi input:checked ~ .chip-small{
+    border-color:var(--forest);
+    background:rgba(47,75,60,0.09);
+    color:var(--forest-deep);
+    font-weight:700;
+  }
+  .chip-multi input:focus-visible ~ .chip-small{box-shadow:0 0 0 3px rgba(47,75,60,0.2);}
+
+  /* ---------- CD級列管追蹤：查詢結果表格 ---------- */
+  .tracking-head-row{
+    display:grid;
+    grid-template-columns:64px 90px 130px 100px 1fr 96px;
+    gap:12px;
+    padding:0 14px 10px;
+    font-size:11.5px;
+    color:var(--sage);
+    letter-spacing:0.5px;
+  }
+  .tracking-row{
+    display:grid;
+    grid-template-columns:64px 90px 130px 100px 1fr 96px;
+    align-items:center;
+    gap:12px;
+    padding:13px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    transition:border-color .15s;
+    font-size:13.5px;
+    margin-bottom:10px;
+  }
+  .tracking-row:hover{border-color:var(--sage);}
+  .tracking-row:last-child{margin-bottom:0;}
+  .tracking-seq{
+    font-family:"JetBrains Mono",monospace;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .tracking-fid{
+    font-family:"JetBrains Mono",monospace;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .disposal-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+    background:rgba(181,101,45,0.13);
+    color:var(--clay);
+    white-space:nowrap;
+  }
+  .tracking-result-count{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-left:auto;
+  }
+  .tracking-empty{
+    text-align:center;
+    padding:34px 14px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  @media (max-width:760px){
+    .tracking-head-row{display:none;}
+    .tracking-row{grid-template-columns:1fr; gap:6px;}
+  }
+
+  /* ---------- 詳細資料區：返回列管清單 按鈕列 ---------- */
+  .detail-back-row{
+    display:flex;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .detail-back-row .btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .detail-back-row .btn svg{width:15px;height:15px;}
+
+  /* ---------- 巡查登錄表單：填表人／填表日期（置於基本資料卡片上方）---------- */
+  .filler-info-row{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    gap:20px;
+    margin-bottom:20px;
+    padding:0 4px;
+  }
+  .filler-info-row .field{flex:0 0 200px;}
+  .filler-info-row .roc-date-field.compact{width:160px;}
+
+  /* ---------- 表單頁籤：編輯模式提示橫幅 ---------- */
+  .edit-banner{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    background:rgba(196,134,47,0.12);
+    border:1px solid #E0B370;
+    border-radius:10px;
+    padding:12px 18px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .edit-banner-text{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13.5px;
+    color:#7A4519;
+  }
+  .edit-banner-text svg{width:16px;height:16px; flex-shrink:0;}
+  .edit-banner-text strong{font-family:"JetBrains Mono",monospace;}
+
+  @media (max-width:760px){
+    .history-head-row{display:none;}
+    .history-row{grid-template-columns:1fr; gap:8px;}
+    .hr-actions{justify-content:flex-start;}
+    .history-edit-grid{grid-template-columns:1fr 1fr;}
+  }
   @media (max-width:760px){
     .grid{grid-template-columns:repeat(2,1fr);}
     .field.span-2{grid-column:span 2;}
@@ -626,20 +911,128 @@
         <div class="sub">評估處置結果表 &nbsp;·&nbsp; DISPOSAL ASSESSMENT RECORD</div>
       </div>
     </div>
-    <div class="masthead-right">
-      <div class="meta-field">
-        <label>填表人</label>
-        <input type="text" id="fillerName" placeholder="請輸入姓名">
+  </div>
+
+  <!-- ===== CD級列管追蹤（獨立頂層頁籤，與既有系統之「已巡查清單」「預定巡查清單」同層） ===== -->
+  <div id="trackingView" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-num">Q</div>
+        <h2>查詢條件</h2>
       </div>
-      <div class="meta-field">
-        <label>填表日期</label>
-        <div class="roc-date-field compact">
-          <div class="roc-date-visual">
-            <span class="roc-date-text" id="fillerDateText">115/07/02</span>
-            <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
-          </div>
-          <input type="date" id="fillerDate" class="roc-date-input" onchange="syncRocDate('fillerDate','fillerDateText')">
+      <div class="grid">
+        <div class="field">
+          <label>所屬分署</label>
+          <select id="trackDivision">
+            <option value="">全部</option>
+            <option value="臺北分署">臺北分署</option>
+            <option value="南投分署">南投分署</option>
+            <option value="臺南分署">臺南分署</option>
+            <option value="臺東分署">臺東分署</option>
+            <option value="花蓮分署">花蓮分署</option>
+          </select>
         </div>
+        <div class="field span-3">
+          <label>FID</label>
+          <input type="text" id="trackFidInput" placeholder="請輸入FID">
+        </div>
+
+        <div class="field span-2">
+          <label>巡查評級 <span style="font-weight:400;color:var(--sage);">（可複選）</span></label>
+          <div class="chip-multi">
+            <label><input type="checkbox" class="track-grade-check" value="C1"><span class="chip-small">C1</span></label>
+            <label><input type="checkbox" class="track-grade-check" value="C2"><span class="chip-small">C2</span></label>
+            <label><input type="checkbox" class="track-grade-check" value="D1"><span class="chip-small">D1</span></label>
+            <label><input type="checkbox" class="track-grade-check" value="D2"><span class="chip-small">D2</span></label>
+          </div>
+        </div>
+        <div class="field span-2">
+          <label>處置結果 <span style="font-weight:400;color:var(--sage);">（可複選）</span></label>
+          <div class="chip-multi">
+            <label><input type="checkbox" class="track-disposal-check" value="R1"><span class="chip-small">R1 重新評級為B級</span></label>
+            <label><input type="checkbox" class="track-disposal-check" value="R2"><span class="chip-small">R2 持續觀察</span></label>
+            <label><input type="checkbox" class="track-disposal-check" value="R3"><span class="chip-small">R3 納入資料庫保存</span></label>
+            <label><input type="checkbox" class="track-disposal-check" value="R4"><span class="chip-small">R4 規劃修復工程</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:16px;">
+        <button class="btn" type="button" onclick="resetTrackingQuery()">清除條件</button>
+        <button class="btn primary" type="button" onclick="runTrackingQuery()">查詢</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-num">R</div>
+        <h2>查詢結果</h2>
+        <div class="tracking-result-count" id="trackingResultCount">共 0 筆</div>
+      </div>
+
+      <div class="tracking-head-row">
+        <span>項次</span>
+        <span>FID</span>
+        <span>所屬分署</span>
+        <span>巡查評級</span>
+        <span>處置結果</span>
+        <span>登錄</span>
+      </div>
+      <div id="trackingResultTable"></div>
+    </div>
+
+    <div class="demo-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      以上為示範資料，實際串接時建議依查詢條件向後端資料庫查詢符合 C 級／D 級列管中之構造物清單；點選「登錄」可導向該構造物之巡查登錄表單。
+    </div>
+
+  </div><!-- /#trackingView -->
+
+  <!-- ===== 詳細資料區：巡查登錄表單／歷次紀錄（由 CD級列管追蹤 點選「登錄」後進入） ===== -->
+  <div id="detailSection" style="display:none;">
+
+    <div class="detail-back-row">
+      <button type="button" class="btn" onclick="showTrackingList()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        返回 CD級列管追蹤
+      </button>
+    </div>
+
+    <div class="tab-nav">
+      <button type="button" class="tab-btn active" id="tabBtnForm" onclick="switchDetailTab('formView')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>
+        巡查登錄表單
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnHistory" onclick="switchDetailTab('historyView')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        歷次紀錄
+      </button>
+    </div>
+
+  <div id="formView" class="tab-panel active">
+
+  <div class="edit-banner" id="editBanner" style="display:none;">
+    <div class="edit-banner-text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      正在編輯 <strong id="editBannerDate">—</strong> 的巡查紀錄
+    </div>
+    <button type="button" class="btn" onclick="cancelEditRecord()">返回歷次紀錄</button>
+  </div>
+
+  <div class="filler-info-row">
+    <div class="field">
+      <label>填表人</label>
+      <input type="text" id="fillerName" placeholder="請輸入姓名">
+    </div>
+    <div class="field">
+      <label>填表日期</label>
+      <div class="roc-date-field compact">
+        <div class="roc-date-visual">
+          <span class="roc-date-text" id="fillerDateText">115/07/02</span>
+          <svg class="cal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 9h18"/></svg>
+        </div>
+        <input type="date" id="fillerDate" class="roc-date-input" onchange="syncRocDate('fillerDate','fillerDateText')">
       </div>
     </div>
   </div>
@@ -654,7 +1047,7 @@
     <div class="grid">
       <div class="field">
         <label>所屬分署</label>
-        <input type="text" class="locked-input" value="臺北分署" readonly>
+        <input type="text" class="locked-input" id="baseDivisionInput" value="臺北分署" readonly>
       </div>
       <div class="field">
         <label>構造物編號</label>
@@ -662,7 +1055,7 @@
       </div>
       <div class="field">
         <label>FID</label>
-        <input type="text" class="locked-input" value="18" readonly>
+        <input type="text" class="locked-input" id="baseFidInput" value="18" readonly>
       </div>
       <div class="field">
         <label>集水區</label>
@@ -802,7 +1195,7 @@
       <div class="grid">
         <div class="field span-2">
           <label>(概估) 經費</label>
-          <input type="text" placeholder="請輸入概估經費，例：新臺幣 500 萬元">
+          <input type="text" id="fundingInput" placeholder="請輸入概估經費，例：新臺幣 500 萬元">
         </div>
         <div class="field span-2">
           <label>(預計) 辦理日期</label>
@@ -816,7 +1209,7 @@
         </div>
         <div class="field span-4">
           <label>(擬辦) 工程內容</label>
-          <textarea placeholder="請說明擬辦工程之具體內容"></textarea>
+          <textarea id="plannedContent" placeholder="請說明擬辦工程之具體內容"></textarea>
         </div>
       </div>
 
@@ -939,9 +1332,43 @@
   </div>
 
   <div class="actions">
-    <button class="btn" type="button" onclick="resetForm()">清除重填</button>
-    <button class="btn primary" type="button" onclick="saveRecord()">儲存紀錄</button>
+    <button class="btn" type="button" id="btnSecondary" onclick="resetForm()">清除重填</button>
+    <button class="btn primary" type="button" id="btnPrimary" onclick="saveRecord()">新增紀錄</button>
   </div>
+
+  </div><!-- /#formView -->
+
+  <div id="historyView" class="tab-panel">
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-num">H</div>
+        <h2>歷次巡查紀錄</h2>
+        <div class="hint">構造物編號：柑腳溪-06-A51-110</div>
+        <button type="button" class="btn-add-record" onclick="startNewRecord()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+          新增巡查紀錄
+        </button>
+      </div>
+
+      <div class="history-head-row">
+        <span>巡查日期</span>
+        <span>巡查評級</span>
+        <span>處置結果</span>
+        <span class="hr-actions-head">操作</span>
+      </div>
+
+      <div class="history-table" id="historyTable"></div>
+    </div>
+
+    <div class="demo-note">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      以上為示範資料，實際串接時建議由後端資料庫依構造物編號查詢歷次登錄紀錄，「儲存」修改後寫回資料庫。
+    </div>
+
+  </div><!-- /#historyView -->
+
+  </div><!-- /#detailSection -->
 
 </div>
 
@@ -1185,11 +1612,367 @@
     setTimeout(()=> toast.classList.remove('show'), 2200);
   }
 
+  // ---------- 新增 / 編輯 模式狀態 ----------
+  let editingIndex = null; // null = 新增模式；否則為 historyRecords 的索引
+
   function saveRecord(){
-    showToast('已儲存紀錄');
+    if(editingIndex === null){
+      addNewRecord();
+    } else {
+      saveEditedRecord();
+    }
   }
 
-  function resetForm(){
+  // ---------- 頁籤切換 ----------
+  // CD級列管追蹤 為獨立頂層頁面；巡查登錄表單／歷次紀錄 則是點選「登錄」後進入的詳細資料區，兩者互相獨立。
+  function switchDetailTab(tabId){
+    document.querySelectorAll('#detailSection .tab-panel').forEach(p=> p.classList.toggle('active', p.id === tabId));
+    document.getElementById('tabBtnForm').classList.toggle('active', tabId === 'formView');
+    document.getElementById('tabBtnHistory').classList.toggle('active', tabId === 'historyView');
+  }
+
+  function showTrackingList(){
+    document.getElementById('trackingView').classList.add('active');
+    document.getElementById('detailSection').style.display = 'none';
+  }
+
+  function showDetailSection(tabId){
+    document.getElementById('trackingView').classList.remove('active');
+    document.getElementById('detailSection').style.display = 'block';
+    switchDetailTab(tabId || 'formView');
+  }
+
+  // ---------- 歷次巡查紀錄（示範資料）----------
+  // 實際串接時，請改為依構造物編號向後端查詢歷次登錄紀錄；
+  // 新增／儲存時應呼叫後端 API 寫入資料庫。
+  const gradeColorClass = {A:'grade-a', B:'grade-b', C1:'grade-c', C2:'grade-c', D1:'grade-d', D2:'grade-d'};
+  const gradeFullLabels = {
+    A:'正常',
+    B:'輕微',
+    C1:'部分受損，影響功能性，且工程重要性屬一般者',
+    C2:'部分受損，影響功能性，且工程重要性屬重大者',
+    D1:'全部損毀或功能喪失，且工程重要性屬一般者',
+    D2:'全部損毀或功能喪失，且工程重要性屬重大者'
+  };
+  const disposalLabels = {
+    R1:'重新評級為 B 級',
+    R2:'持續觀察，納入隔年度巡查清單',
+    R3:'納入資料庫保存，不再進行例行巡查',
+    R4:'各分署規劃立即辦理修復或替代工程'
+  };
+
+  // ---------- CD級列管追蹤：示範資料 ----------
+  // 實際串接時，請改為依查詢條件呼叫後端 API 查詢資料庫。
+  const trackingRecords = [
+    {fid:18,  division:'臺北分署', grade:'C1', disposal:'R4'},
+    {fid:23,  division:'臺北分署', grade:'C2', disposal:'R2'},
+    {fid:47,  division:'南投分署', grade:'D1', disposal:'R4'},
+    {fid:52,  division:'南投分署', grade:'C1', disposal:'R1'},
+    {fid:69,  division:'南投分署', grade:'D2', disposal:'R3'},
+    {fid:81,  division:'臺南分署', grade:'C2', disposal:'R4'},
+    {fid:95,  division:'臺南分署', grade:'C1', disposal:'R2'},
+    {fid:104, division:'臺南分署', grade:'D1', disposal:'R4'},
+    {fid:118, division:'臺東分署', grade:'C2', disposal:'R2'},
+    {fid:126, division:'臺東分署', grade:'D2', disposal:'R4'},
+    {fid:133, division:'花蓮分署', grade:'C1', disposal:'R3'},
+    {fid:141, division:'花蓮分署', grade:'D1', disposal:'R2'}
+  ];
+
+  function trackingRowHtml(r, idx){
+    return '<div class="tracking-row">'
+      + '<span class="tracking-seq">'+(idx+1)+'</span>'
+      + '<span class="tracking-fid">'+r.fid+'</span>'
+      + '<span>'+r.division+'</span>'
+      + '<span class="grade-tag '+gradeColorClass[r.grade]+'">'+r.grade+'</span>'
+      + '<span class="disposal-tag">'+r.disposal+'　'+disposalLabels[r.disposal]+'</span>'
+      + '<div class="hr-actions"><button type="button" class="hr-btn" onclick="viewTrackingRecord('+idx+')">登錄</button></div>'
+      + '</div>';
+  }
+
+  function renderTrackingResults(list){
+    const table = document.getElementById('trackingResultTable');
+    document.getElementById('trackingResultCount').textContent = '共 ' + list.length + ' 筆';
+    if(list.length === 0){
+      table.innerHTML = '<div class="tracking-empty">查無符合條件之資料</div>';
+      return;
+    }
+    table.innerHTML = list.map((r, idx)=> trackingRowHtml(r, idx)).join('');
+  }
+
+  function runTrackingQuery(){
+    const division = document.getElementById('trackDivision').value;
+    const fidKeyword = document.getElementById('trackFidInput').value.trim();
+    const grades = Array.from(document.querySelectorAll('.track-grade-check:checked')).map(cb=> cb.value);
+    const disposals = Array.from(document.querySelectorAll('.track-disposal-check:checked')).map(cb=> cb.value);
+
+    const filtered = trackingRecords.filter(r=>{
+      if(division && r.division !== division) return false;
+      if(fidKeyword && String(r.fid) !== fidKeyword) return false;
+      if(grades.length && !grades.includes(r.grade)) return false;
+      if(disposals.length && !disposals.includes(r.disposal)) return false;
+      return true;
+    });
+    renderTrackingResults(filtered);
+  }
+
+  function resetTrackingQuery(){
+    document.getElementById('trackDivision').selectedIndex = 0;
+    document.getElementById('trackFidInput').value = '';
+    document.querySelectorAll('.track-grade-check, .track-disposal-check').forEach(cb=> cb.checked = false);
+    renderTrackingResults(trackingRecords);
+  }
+
+  function viewTrackingRecord(idx){
+    const r = trackingRecords[idx];
+    document.getElementById('baseDivisionInput').value = r.division;
+    document.getElementById('baseFidInput').value = r.fid;
+    applyGradeReadout(r.grade);
+    showDetailSection('formView');
+    showToast('已導向 FID ' + r.fid + ' 的巡查登錄表單（示範資料）');
+  }
+
+  let historyRecords = [
+    {
+      date:'2026-07-02', grade:'C1', disposalGrade:'C', disposalOption:'R4',
+      disposalNote:'壩體下游側發現新裂縫，建議立即辦理修復工程以避免情況惡化。',
+      funding:'新臺幣 500 萬元', plannedContent:'辦理壩體裂縫填補、下游消能池整平及護岸加強。', plannedDate:'2026-09-01',
+      repairCode:'REP-2024-015', repairContent:'辦理平林溪防砂壩壩體修復工程，含壩體裂縫填補、下游消能池整平及護岸加強。',
+      repairStatus:'inprogress', pendingYear:null, pendingMonth:null, contractedDate:null, percent:65, completedDate:null,
+      repairStatusNote:'壩體修復已完成，目前進行下游護岸加強作業，預計如期完工。'
+    },
+    {
+      date:'2025-07-15', grade:'C2', disposalGrade:'C', disposalOption:'R2',
+      disposalNote:'壩體局部有輕微損傷，尚未影響整體功能性，先納入隔年度巡查清單持續列管觀察。',
+      funding:'', plannedContent:'', plannedDate:null,
+      repairCode:'', repairContent:'', repairStatus:null, pendingYear:null, pendingMonth:null, contractedDate:null, percent:null, completedDate:null,
+      repairStatusNote:''
+    },
+    {
+      date:'2024-06-20', grade:'B', disposalGrade:null, disposalOption:null,
+      disposalNote:'構造物整體狀況良好，僅局部輕微風化，功能未受影響，無需特別處置。',
+      funding:'', plannedContent:'', plannedDate:null,
+      repairCode:'', repairContent:'', repairStatus:null, pendingYear:null, pendingMonth:null, contractedDate:null, percent:null, completedDate:null,
+      repairStatusNote:''
+    },
+    {
+      date:'2023-05-10', grade:'A', disposalGrade:null, disposalOption:null,
+      disposalNote:'構造物功能正常，無異常情形，維持例行巡查頻率即可。',
+      funding:'', plannedContent:'', plannedDate:null,
+      repairCode:'', repairContent:'', repairStatus:null, pendingYear:null, pendingMonth:null, contractedDate:null, percent:null, completedDate:null,
+      repairStatusNote:''
+    }
+  ];
+
+  function renderHistoryRowView(r, idx){
+    const disposalHtml = r.disposalOption
+      ? '<span class="opt-code">'+r.disposalOption+'</span>'+disposalLabels[r.disposalOption]
+      : '<span style="color:var(--sage);">無需特別處置</span>';
+    return '<div class="history-row" id="hrow-'+idx+'">'
+      + '<span class="hr-date">'+toRocDateString(r.date)+'</span>'
+      + '<span class="grade-tag '+gradeColorClass[r.grade]+'">'+r.grade+'</span>'
+      + '<span class="hr-disposal">'+disposalHtml+'</span>'
+      + '<div class="hr-actions"><button type="button" class="hr-btn" onclick="openHistoryRecordInForm('+idx+')">編輯</button></div>'
+      + '</div>';
+  }
+
+  function renderHistoryTable(){
+    document.getElementById('historyTable').innerHTML =
+      historyRecords.map((r, idx)=> renderHistoryRowView(r, idx)).join('');
+  }
+
+  // ---------- 表單模式切換（新增 / 編輯）----------
+  function updateFormModeUI(){
+    const banner = document.getElementById('editBanner');
+    const btnPrimary = document.getElementById('btnPrimary');
+    const btnSecondary = document.getElementById('btnSecondary');
+    if(editingIndex === null){
+      banner.style.display = 'none';
+      btnPrimary.textContent = '新增紀錄';
+      btnSecondary.textContent = '清除重填';
+    } else {
+      banner.style.display = 'flex';
+      document.getElementById('editBannerDate').textContent = toRocDateString(historyRecords[editingIndex].date);
+      btnPrimary.textContent = '儲存修改';
+      btnSecondary.textContent = '取消編輯';
+    }
+  }
+
+  function applyGradeReadout(gradeCode){
+    const readoutEl = document.getElementById('gradeReadout');
+    const letterEl = document.getElementById('gradeReadoutLetter');
+    const textEl = document.getElementById('gradeReadoutText');
+    readoutEl.classList.remove('grade-a','grade-b','grade-c','grade-d');
+    readoutEl.classList.add(gradeColorClass[gradeCode] || 'grade-c');
+    letterEl.textContent = gradeCode;
+    textEl.textContent = '級：' + (gradeFullLabels[gradeCode] || '');
+  }
+
+  function resetR4Fields(){
+    document.getElementById('fundingInput').value = '';
+    document.getElementById('plannedContent').value = '';
+    document.getElementById('plannedDate').value = '';
+    syncRocDate('plannedDate','plannedDateText');
+    document.getElementById('repairCodeInput').value = '';
+    document.getElementById('repairContent').value = '';
+    document.getElementById('repairStatusNote').value = '';
+    document.querySelectorAll('input[name="repairProgress"]').forEach(rd=>{
+      rd.checked = false;
+      rd.closest('.progress-row').classList.remove('checked');
+    });
+    document.getElementById('pendingYear').value = '';
+    document.getElementById('pendingMonth').value = '';
+    document.getElementById('contractedDate').value = '';
+    syncRocDate('contractedDate','contractedDateText');
+    document.getElementById('progressPercent').value = '';
+    document.getElementById('completedDate').value = '';
+    syncRocDate('completedDate','completedDateText');
+    repairResult.classList.remove('visible');
+    lookupHint.style.display = 'none';
+    document.querySelectorAll('.gallery-thumb').forEach(el=> el.remove());
+    updateGalleryAddVisibility();
+  }
+
+  // 依歷次紀錄資料，將完整巡查登錄表單填滿（供「編輯」使用）
+  function populateFormFromRecord(r){
+    applyGradeReadout(r.grade);
+
+    document.getElementById('fillerDate').value = r.date;
+    syncRocDate('fillerDate','fillerDateText');
+
+    // 評級判定（C / D）
+    document.querySelectorAll('input[name="disposalGrade"]').forEach(rd=> rd.checked = false);
+    clearDisposalChecks();
+    if(r.disposalGrade){
+      const gradeRadio = document.querySelector('input[name="disposalGrade"][value="'+r.disposalGrade+'"]');
+      if(gradeRadio){
+        gradeRadio.checked = true;
+        if(r.disposalGrade === 'C'){
+          gateEmpty.style.display='none'; optionListC.style.display='flex'; optionListD.style.display='none';
+        } else {
+          gateEmpty.style.display='none'; optionListC.style.display='none'; optionListD.style.display='flex';
+        }
+      }
+    } else {
+      gateEmpty.style.display='block'; optionListC.style.display='none'; optionListD.style.display='none';
+    }
+
+    // 處置結果選項（R1～R4）
+    if(r.disposalOption){
+      const optRadio = document.querySelector('input[name="disposalOption"][value="'+r.disposalOption+'"]');
+      if(optRadio){
+        optRadio.checked = true;
+        document.querySelectorAll('input[name="disposalOption"]').forEach(cb=>{
+          cb.closest('.option-row').classList.toggle('checked', cb.checked);
+        });
+      }
+    }
+
+    document.getElementById('disposalNote').value = r.disposalNote || '';
+
+    // 擬辦工程說明（R4）
+    resetR4Fields();
+    if(r.disposalOption === 'R4'){
+      r4Panel.classList.add('visible');
+      document.getElementById('fundingInput').value = r.funding || '';
+      document.getElementById('plannedContent').value = r.plannedContent || '';
+      if(r.plannedDate){ document.getElementById('plannedDate').value = r.plannedDate; syncRocDate('plannedDate','plannedDateText'); }
+
+      document.getElementById('repairCodeInput').value = r.repairCode || '';
+      document.getElementById('repairContent').value = r.repairContent || '';
+      document.getElementById('repairStatusNote').value = r.repairStatusNote || '';
+      if(r.repairCode){
+        repairResult.classList.add('visible');
+      }
+      if(r.repairStatus){
+        const statusRadio = document.querySelector('input[name="repairProgress"][value="'+r.repairStatus+'"]');
+        if(statusRadio){ statusRadio.checked = true; onProgressChange(statusRadio); }
+      }
+      if(r.pendingYear) document.getElementById('pendingYear').value = r.pendingYear;
+      if(r.pendingMonth) document.getElementById('pendingMonth').value = r.pendingMonth;
+      if(r.contractedDate){ document.getElementById('contractedDate').value = r.contractedDate; syncRocDate('contractedDate','contractedDateText'); }
+      if(r.percent) document.getElementById('progressPercent').value = r.percent;
+      if(r.completedDate){ document.getElementById('completedDate').value = r.completedDate; syncRocDate('completedDate','completedDateText'); }
+    } else {
+      r4Panel.classList.remove('visible');
+    }
+  }
+
+  // 從目前表單畫面收集資料，組成一筆歷次紀錄
+  function collectFormAsRecord(existingGrade){
+    const gradeRadio = document.querySelector('input[name="disposalGrade"]:checked');
+    const optionRadio = document.querySelector('input[name="disposalOption"]:checked');
+    const statusRadio = document.querySelector('input[name="repairProgress"]:checked');
+    return {
+      date: document.getElementById('fillerDate').value || new Date().toISOString().slice(0,10),
+      grade: existingGrade || 'C1',
+      disposalGrade: gradeRadio ? gradeRadio.value : null,
+      disposalOption: optionRadio ? optionRadio.value : null,
+      disposalNote: document.getElementById('disposalNote').value,
+      funding: document.getElementById('fundingInput').value,
+      plannedContent: document.getElementById('plannedContent').value,
+      plannedDate: document.getElementById('plannedDate').value || null,
+      repairCode: document.getElementById('repairCodeInput').value,
+      repairContent: document.getElementById('repairContent').value,
+      repairStatus: statusRadio ? statusRadio.value : null,
+      pendingYear: document.getElementById('pendingYear').value || null,
+      pendingMonth: document.getElementById('pendingMonth').value || null,
+      contractedDate: document.getElementById('contractedDate').value || null,
+      percent: document.getElementById('progressPercent').value || null,
+      completedDate: document.getElementById('completedDate').value || null,
+      repairStatusNote: document.getElementById('repairStatusNote').value
+    };
+  }
+
+  // 「歷次紀錄」點選編輯 -> 切換到表單頁籤並帶入完整資料
+  function openHistoryRecordInForm(idx){
+    editingIndex = idx;
+    populateFormFromRecord(historyRecords[idx]);
+    updateFormModeUI();
+    switchDetailTab('formView');
+  }
+
+  // 「歷次紀錄」新增紀錄按鈕 / 表單頁籤預設狀態
+  function startNewRecord(){
+    editingIndex = null;
+    resetForm(true);
+    updateFormModeUI();
+    switchDetailTab('formView');
+  }
+
+  function addNewRecord(){
+    const record = collectFormAsRecord('C1');
+    historyRecords.unshift(record);
+    renderHistoryTable();
+    resetForm(true);
+    updateFormModeUI();
+    showToast('已新增巡查紀錄');
+    switchDetailTab('historyView');
+  }
+
+  function saveEditedRecord(){
+    const original = historyRecords[editingIndex];
+    historyRecords[editingIndex] = collectFormAsRecord(original.grade);
+    renderHistoryTable();
+    editingIndex = null;
+    resetForm(true);
+    updateFormModeUI();
+    showToast('已儲存修改');
+    switchDetailTab('historyView');
+  }
+
+  function cancelEditRecord(){
+    editingIndex = null;
+    resetForm(true);
+    updateFormModeUI();
+    switchDetailTab('historyView');
+  }
+
+  renderHistoryTable();
+  updateFormModeUI();
+  renderTrackingResults(trackingRecords);
+
+
+  function resetForm(silent){
     document.querySelectorAll('input[type=text]:not(.locked-input), input[type=number], textarea').forEach(el=> el.value='');
     document.querySelectorAll('input[type=date]').forEach(el=> el.value='');
     document.querySelectorAll('select').forEach(el=> el.selectedIndex=0);
@@ -1214,7 +1997,8 @@
     syncRocDate('plannedDate','plannedDateText');
     syncRocDate('contractedDate','contractedDateText');
     syncRocDate('completedDate','completedDateText');
-    showToast('已清除表單');
+    applyGradeReadout('C1');
+    if(!silent) showToast('已清除表單');
   }
 </script>
 
