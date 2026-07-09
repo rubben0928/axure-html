@@ -132,8 +132,16 @@
         border-radius: 6px;
         margin: 20px 0;
     }
+
+    .alert-box {
+        background-color: #fdf2f2;
+        border: 1px solid #f8b4b4;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+    }
     
-    .highlight-box ul {
+    .highlight-box ul, .alert-box ul {
         margin-bottom: 0;
     }
     
@@ -176,7 +184,7 @@
         <li><strong>詳細資料區 (選取清單資料後進入)</strong>：包含兩個子分頁 (Tab)：
             <ul>
                 <li><strong>巡查登錄表單</strong>：提供表單填寫、基本資料區、處置結果動態連動控制、R4 維修工程編號彈性調整，以及嚴格驗證的照片上傳功能。</li>
-                <li><strong>歷次紀錄</strong>：以清單形式展現該構造物過去所有的巡查處置歷史，並支援於列表上直接進行即時編輯 (Inline Editing)。</li>
+                <li><strong>歷次紀錄</strong>：以唯讀清單形式展現該構造物過去所有的巡查處置歷史。</li>
             </ul>
         </li>
     </ul>
@@ -267,7 +275,7 @@
     <h3>A. 填表基礎資訊</h3>
     <ul>
         <li><strong>填表人</strong>：<span class="code-span">#fillerName</span> (Text Input，必填)</li>
-        <li><strong>填表日期</strong>：<span class="code-span">#fillerDate</span> (中華民民國日期組件，必填)</li>
+        <li><strong>填表日期</strong>：<span class="code-span">#fillerDate</span> (中華民國民國日期組件，必填)</li>
     </ul>
 
     <h3>B. 基本資料區卡片</h3>
@@ -367,8 +375,23 @@
         </ul>
     </div>
 
+    <h3>F. 儲存送出控制與阻斷警示機制</h3>
+    <div class="alert-box">
+        <strong>⚠️ 新增儲存確認（前台 Submit 按鈕觸發事件）：</strong>
+        <p>當使用者點選「儲存」按鈕時，前端 JavaScript 必須強制攔截表單提交，並彈出二次確認對話視窗（如 <code>window.confirm</code> 或系統客製化 Modal），提示精確訊息：</p>
+        <ul>
+            <li><span class="text-red">「一旦儲存後，資料就無法修改，且會列入歷次紀錄，確定要新增儲存？」</span></li>
+            <li>使用者點擊<strong>「取消」</strong>：中斷儲存行為，維持於當前編輯填報狀態。</li>
+            <li>使用者點擊<strong>「確定」</strong>：始正式執行表單欄位檢驗並發送後端 API 進行資料儲存。</li>
+        </ul>
+    </div>
+
     <h2>5. 歷次紀錄子頁籤 (History View)</h2>
     <p>當使用者切換至歷次紀錄子分頁時，前端以 Table 形式動態加載此構造物歷史資料。</p>
+    <div class="alert-box">
+        <strong>🔒 權限與編輯限制業務宣告：</strong>
+        <p>本子頁籤所顯示之歷史資料為<span class="text-red">「純讀取（Read-only）歸檔狀態」</span>。<strong>歷次紀錄僅能檢視，在任何情況下皆不允許修改</strong>，本列表不提供編輯按鈕或即時編輯（Inline Editing）控制元件。</p>
+    </div>
     <ul>
         <li><strong>列表呈現欄位：</strong> 列表必須嚴格遵循且僅包含以下 3 個欄位：
             <ol>
@@ -377,7 +400,6 @@
                 <li><strong>處置結果</strong> (顯示細項代碼與文字標籤，如 R1/R2/R3/R4)</li>
             </ol>
         </li>
-        <li><strong>即時編輯功能 (Inline Editing)：</strong> 點選某列之「編輯」時，該橫列改為編輯輸入控制狀態。**除了基本資料區定義之唯讀欄位外，其餘所有欄位內容皆開放使用者進行編輯修改**。點選「儲存」時呼叫更新 API 並回復唯讀。</li>
     </ul>
 </div>
 
