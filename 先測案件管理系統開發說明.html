@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>「先測案件管理」功能 － 系統需求規格書</title>
+<style>
+  :root{
+    --navy:#1f3864;
+    --navy-light:#2f5597;
+    --accent:#c0504d;
+    --green:#4e8f5c;
+    --bg:#f5f6f8;
+    --line:#d8dde3;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Microsoft JhengHei","PMingLiU",-apple-system,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:#222;
+    line-height:1.6;
+    font-size:14px;
+  }
+  .doc{
+    max-width:940px;
+    margin:0 auto;
+    background:#fff;
+    padding:0 0 40px 0;
+    box-shadow:0 0 0 1px var(--line);
+  }
+  .cover{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);
+    color:#fff;
+    padding:26px 40px;
+  }
+  .cover .tag{ font-size:12px; letter-spacing:2px; opacity:0.85; }
+  .cover h1{ margin:8px 0 4px 0; font-size:22px; }
+  .cover .sub{ font-size:12.5px; opacity:0.9; }
+  .content{ padding:26px 40px 10px 40px; }
+
+  section{ margin-bottom:30px; }
+  h2.sec-title{
+    color:#fff;
+    background:var(--navy);
+    padding:6px 14px;
+    border-radius:3px;
+    font-size:15px;
+    margin:0 0 12px 0;
+  }
+  p{ margin:6px 0; font-size:13.5px; }
+  ul, ol{ margin:6px 0; padding-left:20px; }
+  li{ margin:3px 0; font-size:13.5px; }
+
+  table.spec-table{
+    width:100%;
+    border-collapse:collapse;
+    margin:8px 0 14px 0;
+    font-size:12.8px;
+  }
+  table.spec-table th{
+    background:#e4ebf5;
+    border:1px solid var(--line);
+    color:var(--navy);
+    padding:6px 8px;
+    text-align:left;
+  }
+  table.spec-table td{
+    border:1px solid var(--line);
+    padding:6px 8px;
+    vertical-align:top;
+  }
+  table.spec-table tr:nth-child(even) td{ background:#fafbfc; }
+
+  code.field{
+    background:#eef1f5;
+    border:1px solid #dde2e8;
+    border-radius:3px;
+    padding:0px 5px;
+    font-family:Consolas,monospace;
+    font-size:12px;
+    color:#25507f;
+  }
+
+  .diagram-wrap{
+    background:#fbfcfe;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 10px;
+    margin:10px 0 16px 0;
+    overflow-x:auto;
+    text-align:center;
+  }
+  .diagram-caption{
+    font-size:12px;
+    color:#888;
+    text-align:center;
+    margin-top:6px;
+  }
+  .legend{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+    font-size:12px;
+    color:#555;
+    margin:8px 0 0 0;
+  }
+  .legend .item{ display:flex; align-items:center; gap:6px; }
+  .legend .swatch{ width:14px; height:14px; border-radius:3px; display:inline-block; }
+
+  .footer-note{ text-align:center; color:#999; font-size:11px; padding:20px 0 0 0; }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="cover">
+    <h1>「先測案件管理」功能 － 系統需求規格書</h1>
+  </div>
+
+  <div class="content">
+
+    <!-- 1 角色權限 -->
+    <section>
+      <h2 class="sec-title">1. 角色與權限</h2>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 260" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;">
+          <defs>
+            <marker id="arrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#8a97a8"/>
+            </marker>
+          </defs>
+          <!-- role boxes -->
+          <rect x="10" y="20" width="190" height="46" rx="6" fill="#dfeee2" stroke="#4e8f5c"/>
+          <text x="105" y="40" text-anchor="middle" font-size="12.5" fill="#2f4a10" font-weight="bold">分署系統管理人員</text>
+          <text x="105" y="56" text-anchor="middle" font-size="10.5" fill="#2f4a10">產生工程序號・傳送</text>
+
+          <rect x="10" y="100" width="190" height="70" rx="6" fill="#dfeee2" stroke="#4e8f5c"/>
+          <text x="105" y="122" text-anchor="middle" font-size="12.5" fill="#2f4a10" font-weight="bold">分署 / 地方單位</text>
+          <text x="105" y="137" text-anchor="middle" font-size="12.5" fill="#2f4a10" font-weight="bold">承辦人員</text>
+          <text x="105" y="155" text-anchor="middle" font-size="10.5" fill="#2f4a10">登錄・碳排量上限・移除</text>
+
+          <rect x="10" y="196" width="190" height="60" rx="6" fill="#fbe8e6" stroke="#c0504d"/>
+          <text x="105" y="212" text-anchor="middle" font-size="12.5" fill="#5a1508" font-weight="bold">署本部系統管理人員</text>
+          <text x="105" y="228" text-anchor="middle" font-size="9" fill="#5a1508">僅開放填寫本署核定先測日期、</text>
+          <text x="105" y="242" text-anchor="middle" font-size="9.8" fill="#5a1508">預計完成預算書(定稿本)日期</text>
+
+          <!-- center: 登錄視窗 -->
+          <rect x="330" y="90" width="200" height="90" rx="6" fill="#fff" stroke="#1f3864" stroke-width="1.5"/>
+          <text x="430" y="112" text-anchor="middle" font-size="13" fill="#1f3864" font-weight="bold">登錄視窗欄位</text>
+          <text x="430" y="132" text-anchor="middle" font-size="10.5" fill="#333">統編・提報日期・工程來源</text>
+          <text x="430" y="148" text-anchor="middle" font-size="10.5" fill="#333">核定日期・預算書定稿日期</text>
+          <text x="430" y="164" text-anchor="middle" font-size="10" fill="#888">（非權限欄位＝禁用顯示）</text>
+
+          <!-- arrows -->
+          <line x1="200" y1="43" x2="325" y2="100" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow1)"/>
+          <text x="255" y="70" font-size="10" fill="#888">產生序號（外部流程）</text>
+
+          <line x1="200" y1="135" x2="325" y2="135" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow1)"/>
+          <text x="235" y="127" font-size="10" fill="#888">可編輯 3 欄</text>
+
+          <line x1="200" y1="226" x2="325" y2="155" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow1)"/>
+          <text x="255" y="200" font-size="10" fill="#888">僅可編輯 2 欄</text>
+
+          <!-- vendor -->
+          <rect x="620" y="100" width="220" height="70" rx="6" fill="#f2ecf7" stroke="#7a4fa0"/>
+          <text x="730" y="122" text-anchor="middle" font-size="12.5" fill="#4a2a5a" font-weight="bold">規劃設計單位（廠商）</text>
+          <text x="730" y="140" text-anchor="middle" font-size="9.8" fill="#4a2a5a">此時，廠商用工程序號 + (d)</text>
+          <text x="730" y="155" text-anchor="middle" font-size="9.8" fill="#4a2a5a">即可登入外部生態檢核系統</text>
+
+          <line x1="530" y1="135" x2="615" y2="135" stroke="#8a97a8" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arrow1)"/>
+          <text x="545" y="127" font-size="10" fill="#888">序號建立後</text>
+        </svg>
+      </div>
+      <div class="diagram-caption">圖 1：角色 → 可執行動作／可編輯欄位對照。虛線表示非本系統內操作，僅為下游串接關係。</div>
+      <p style="font-size:12.5px;color:#666;">補充：工程序號末尾「(d)」為固定字尾，對應規劃設計單位登入外部生態檢核系統之用。</p>
+    </section>
+
+    <!-- 2 篩選條件 -->
+    <section>
+      <h2 class="sec-title">2. 篩選條件與頁籤關聯</h2>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 860 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;">
+          <defs>
+            <marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#8a97a8"/>
+            </marker>
+          </defs>
+          <rect x="300" y="15" width="260" height="50" rx="6" fill="#e4ebf5" stroke="#1f3864"/>
+          <text x="430" y="36" text-anchor="middle" font-size="12.5" fill="#1f3864" font-weight="bold">年度 ／ 計畫 ／ 提送批次</text>
+          <text x="430" y="52" text-anchor="middle" font-size="10.5" fill="#555">全域篩選條件</text>
+
+          <line x1="380" y1="65" x2="120" y2="110" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow2)"/>
+          <line x1="430" y1="65" x2="430" y2="110" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow2)"/>
+          <line x1="480" y1="65" x2="740" y2="110" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow2)"/>
+
+          <rect x="10" y="112" width="220" height="50" rx="6" fill="#fff" stroke="#9aa"/>
+          <text x="120" y="133" text-anchor="middle" font-size="12">2. 非先測案件管理</text>
+          <text x="120" y="150" text-anchor="middle" font-size="10" fill="#888">梯次設定未勾選為先測案件</text>
+
+          <rect x="320" y="112" width="220" height="50" rx="6" fill="#fff" stroke="#1f3864" stroke-width="1.6"/>
+          <text x="430" y="133" text-anchor="middle" font-size="12" font-weight="bold" fill="#1f3864">3. 先測案件管理</text>
+          <text x="430" y="150" text-anchor="middle" font-size="10" fill="#888">梯次設定有勾選為先測案件</text>
+
+          <rect x="630" y="112" width="220" height="50" rx="6" fill="#fff" stroke="#9aa"/>
+          <text x="740" y="133" text-anchor="middle" font-size="12">4. 核定情形查詢</text>
+          <text x="740" y="150" text-anchor="middle" font-size="10.5" fill="#888">傳送後結果查詢</text>
+        </svg>
+      </div>
+      <div class="diagram-caption">圖 2：三個篩選欄位任一變更 → 三個頁籤清單皆需重新查詢；頁籤 3 僅呈現已轉入之先測案件，不重複判斷。</div>
+    </section>
+
+    <!-- 3 案件狀態流程 -->
+    <section>
+      <h2 class="sec-title">3. 案件狀態流程</h2>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;">
+          <defs>
+            <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#8a97a8"/>
+            </marker>
+          </defs>
+
+          <rect x="10" y="90" width="150" height="55" rx="6" fill="#fff" stroke="#1f3864"/>
+          <text x="85" y="112" text-anchor="middle" font-size="12">案件傳送前</text>
+          <text x="85" y="128" text-anchor="middle" font-size="10.5" fill="#888">（尚無工程序號）</text>
+
+          <line x1="160" y1="117" x2="200" y2="117" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow3)"/>
+
+          <!-- new: confirm dialog for 產生工程序號 -->
+          <polygon points="255,90 320,117 255,145 190,117" fill="#fdf3e7" stroke="#c07a1e" stroke-width="1.4"/>
+          <text x="255" y="112" text-anchor="middle" font-size="9.5" fill="#5a3a10" font-weight="bold">確認產生</text>
+          <text x="255" y="124" text-anchor="middle" font-size="9.5" fill="#5a3a10" font-weight="bold">工程序號？</text>
+
+          <line x1="320" y1="117" x2="360" y2="117" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow3)"/>
+          <text x="332" y="108" font-size="9" fill="#4e8f5c">確定</text>
+
+          <rect x="200" y="150" width="140" height="52" rx="4" fill="#fdecec" stroke="#c0504d"/>
+          <text x="270" y="164" text-anchor="middle" font-size="8.8" fill="#5a1508">提示文字：「工程序號</text>
+          <text x="270" y="176" text-anchor="middle" font-size="8.8" fill="#5a1508">已產生，若點選確定後，</text>
+          <text x="270" y="188" text-anchor="middle" font-size="8.8" fill="#5a1508">將無法再修改，且視為</text>
+          <text x="270" y="200" text-anchor="middle" font-size="8.8" fill="#5a1508">正式工程序號」</text>
+          <line x1="255" y1="145" x2="255" y2="150" stroke="#8a97a8" stroke-width="1.1"/>
+
+          <rect x="365" y="90" width="165" height="55" rx="6" fill="#fff" stroke="#1f3864"/>
+          <text x="447" y="108" text-anchor="middle" font-size="12">已產生工程序號</text>
+          <text x="447" y="124" text-anchor="middle" font-size="10" fill="#888">（唯讀・不可再修改）</text>
+          <text x="447" y="138" text-anchor="middle" font-size="10" fill="#888">傳送前必要條件</text>
+
+          <line x1="530" y1="117" x2="585" y2="117" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow3)"/>
+
+          <rect x="590" y="20" width="150" height="50" rx="6" fill="#fff" stroke="#9aa" stroke-dasharray="4,3"/>
+          <text x="665" y="40" text-anchor="middle" font-size="12">登錄（選填）</text>
+          <text x="665" y="56" text-anchor="middle" font-size="10" fill="#888">傳送前可反覆編輯</text>
+
+          <line x1="590" y1="117" x2="590" y2="45" stroke="#8a97a8" stroke-width="1.1" stroke-dasharray="3,3"/>
+          <line x1="590" y1="45" x2="585" y2="45" stroke="#8a97a8" stroke-width="1.1" marker-end="url(#arrow3)"/>
+
+          <rect x="590" y="185" width="150" height="66" rx="6" fill="#fff" stroke="#c0504d" stroke-dasharray="4,3"/>
+          <text x="665" y="203" text-anchor="middle" font-size="12">移除</text>
+          <text x="665" y="219" text-anchor="middle" font-size="10" fill="#888">可發生於傳送前任一階段</text>
+          <text x="665" y="234" text-anchor="middle" font-size="9.5" fill="#c0504d" font-weight="bold">工程序號遇缺不補，</text>
+          <text x="665" y="247" text-anchor="middle" font-size="9.5" fill="#c0504d" font-weight="bold">不釋出重新使用</text>
+
+          <line x1="590" y1="117" x2="590" y2="218" stroke="#8a97a8" stroke-width="1.1" stroke-dasharray="3,3"/>
+          <line x1="590" y1="218" x2="585" y2="218" stroke="#8a97a8" stroke-width="1.1" marker-end="url(#arrow3)"/>
+
+          <!-- decision diamond -->
+          <polygon points="805,90 880,117 805,145 730,117" fill="#fdf3e7" stroke="#c07a1e" stroke-width="1.4"/>
+          <text x="805" y="112" text-anchor="middle" font-size="11" fill="#5a3a10" font-weight="bold">傳送檢核</text>
+          <text x="805" y="126" text-anchor="middle" font-size="9.5" fill="#5a3a10">序號＋三項齊備?</text>
+
+          <line x1="805" y1="145" x2="805" y2="270" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow3)"/>
+          <text x="818" y="210" font-size="10" fill="#c07a1e">否</text>
+          <rect x="695" y="272" width="220" height="56" rx="4" fill="#fdecec" stroke="#c0504d"/>
+          <text x="805" y="287" text-anchor="middle" font-size="9.5" fill="#5a1508">阻擋，提示文字：</text>
+          <text x="805" y="301" text-anchor="middle" font-size="9.5" fill="#5a1508">「部分案件碳排量上限、</text>
+          <text x="805" y="315" text-anchor="middle" font-size="9.5" fill="#5a1508">核章版、生態成果表有缺漏!」</text>
+
+          <text x="855" y="108" font-size="10" fill="#4e8f5c">是</text>
+          <rect x="855" y="92" width="30" height="1" fill="none" stroke="none"/>
+        </svg>
+      </div>
+      <div class="diagram-caption">圖 3：產生工程序號需經一次性確認視窗，確定後序號鎖定不可再修改；登錄與移除為虛線分支（選擇性 / 可隨時發生），移除後之工程序號遇缺不補；「已傳送」為單向終態，不可逆。</div>
+      <p style="font-size:12.5px;color:#666;">補充：工程序號之流水號範圍為<b>同年度全部案件共用一組</b>；序號產生後須即時同步寫入勘查紀錄表(提供規劃設計單位可以開始填寫生態檢核系統的相關表單)。案件移除後，其本功能內的登錄資料與工程序號採<b>直接刪除</b>（非軟刪除），不保留還原機制；原工程序號遇缺不補，不釋出重新使用。移除後，若該案件<b>沿用同一筆來源資料</b>再次被勾選為先測案件，即視為重新提報：需重新走一次「產生工程序號」流程（取得新序號）並重新填寫登錄欄位，其餘轉入欄位（工程名稱、執行單位、縣市等）仍沿用原資料，不需重新匯入。</p>
+    </section>
+
+    <!-- 4 傳送檢核決策樹 -->
+    <section>
+      <h2 class="sec-title">4. 傳送至農村水保署 － 檢核決策流程</h2>
+      <div class="diagram-wrap">
+        <svg viewBox="0 0 720 620" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:560px;">
+          <defs>
+            <marker id="arrow4" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#8a97a8"/>
+            </marker>
+          </defs>
+
+          <rect x="260" y="10" width="200" height="44" rx="6" fill="#1f3864"/>
+          <text x="360" y="37" text-anchor="middle" font-size="12.5" fill="#fff">點擊「傳送至農村水保署」</text>
+
+          <line x1="360" y1="54" x2="360" y2="90" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+
+          <polygon points="360,90 460,140 360,190 260,140" fill="#fdf3e7" stroke="#c07a1e" stroke-width="1.4"/>
+          <text x="360" y="140" text-anchor="middle" font-size="11.5" fill="#5a3a10" font-weight="bold">已勾選 ≥ 1 筆？</text>
+
+          <line x1="460" y1="140" x2="540" y2="140" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+          <text x="470" y="132" font-size="10.5" fill="#c07a1e">否</text>
+          <rect x="545" y="115" width="150" height="50" rx="5" fill="#fdecec" stroke="#c0504d"/>
+          <text x="620" y="135" text-anchor="middle" font-size="10" fill="#5a1508">提示「請至少勾選</text>
+          <text x="620" y="150" text-anchor="middle" font-size="10" fill="#5a1508">一筆案件後再傳送」</text>
+
+          <line x1="360" y1="190" x2="360" y2="225" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+          <text x="374" y="212" font-size="10.5" fill="#4e8f5c">是</text>
+
+          <rect x="220" y="228" width="280" height="30" rx="5" fill="#eef1f5" stroke="#9aa"/>
+          <text x="360" y="248" text-anchor="middle" font-size="10.5" fill="#333">說明：未產生工程序號之案件，勾選框已預先禁用</text>
+
+          <line x1="360" y1="258" x2="360" y2="290" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+
+          <polygon points="360,290 470,345 360,400 250,345" fill="#fdf3e7" stroke="#c07a1e" stroke-width="1.4"/>
+          <text x="360" y="335" text-anchor="middle" font-size="11" fill="#5a3a10" font-weight="bold">逐筆檢查勾選案件：</text>
+          <text x="360" y="349" text-anchor="middle" font-size="10" fill="#5a3a10">碳排量／核章版／</text>
+          <text x="360" y="362" text-anchor="middle" font-size="10" fill="#5a3a10">生態成果表 皆齊備？</text>
+          <text x="360" y="376" text-anchor="middle" font-size="9" fill="#5a3a10">（登錄資料不列入本項檢核）</text>
+
+          <line x1="470" y1="345" x2="550" y2="345" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+          <text x="480" y="337" font-size="10.5" fill="#c07a1e">任一項缺</text>
+          <rect x="555" y="310" width="150" height="105" rx="5" fill="#fdecec" stroke="#c0504d"/>
+          <text x="630" y="330" text-anchor="middle" font-size="10" fill="#5a1508">全部勾選案件</text>
+          <text x="630" y="344" text-anchor="middle" font-size="10" fill="#5a1508">皆不傳送</text>
+          <text x="630" y="362" text-anchor="middle" font-size="9" fill="#5a1508">提示文字：</text>
+          <text x="630" y="376" text-anchor="middle" font-size="9" fill="#5a1508">「部分案件碳排量上限、</text>
+          <text x="630" y="390" text-anchor="middle" font-size="9" fill="#5a1508">核章版、生態成果表</text>
+          <text x="630" y="404" text-anchor="middle" font-size="9" fill="#5a1508">有缺漏!」</text>
+
+          <line x1="360" y1="400" x2="360" y2="435" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+          <text x="374" y="422" font-size="10.5" fill="#4e8f5c">全部齊備</text>
+
+          <rect x="240" y="438" width="240" height="50" rx="6" fill="#eaf2fc" stroke="#4472c4"/>
+          <text x="360" y="458" text-anchor="middle" font-size="11" fill="#25507f">確認視窗：「已選取 N 筆</text>
+          <text x="360" y="474" text-anchor="middle" font-size="11" fill="#25507f">案件」+ 傳送後僅能檢視提示</text>
+
+          <line x1="360" y1="488" x2="360" y2="520" stroke="#8a97a8" stroke-width="1.3" marker-end="url(#arrow4)"/>
+          <text x="374" y="508" font-size="10.5" fill="#333">確認傳送</text>
+
+          <rect x="220" y="523" width="280" height="60" rx="6" fill="#f0f0f0" stroke="#888"/>
+          <text x="360" y="543" text-anchor="middle" font-size="11" fill="#444">案件鎖定：整列唯讀、勾選框禁用、</text>
+          <text x="360" y="558" text-anchor="middle" font-size="11" fill="#444">登錄→檢視、移除禁用</text>
+          <text x="360" y="573" text-anchor="middle" font-size="9.5" fill="#888">提示「已將 N 筆案件傳送至農村水保署」</text>
+        </svg>
+      </div>
+      <div class="diagram-caption">圖 4：「傳送至農村水保署」操作僅開放<b>分署系統管理人員</b>執行；傳送前檢核為「全有或全無」，任一項缺漏即全數擋下，不做個別案件放行。</div>
+    </section>
+
+    <!-- 5 資料欄位重點（保留表格，屬參考型資料非流程） -->
+    <section>
+      <h2 class="sec-title">5. 資料欄位重點（參考表）</h2>
+      <table class="spec-table">
+        <tr><th>欄位</th><th>可編輯角色</th><th>傳送後</th></tr>
+        <tr><td>工程序號</td><td>系統產生（分署系統管理人員觸發，需經確認視窗，確定後不可修改）</td><td>唯讀</td></tr>
+        <tr><td>碳排量</td><td>系統自動計算（沿用既有系統計算規則，本功能不重新設計公式）</td><td>唯讀，傳送必檢欄位</td></tr>
+        <tr><td>碳排量上限</td><td>分署 / 地方單位</td><td>唯讀</td></tr>
+        <tr><td>核章版 / 生態成果表（狀態）</td><td>分署 / 地方單位（於其他頁籤/功能上傳實際檔案）</td><td>唯讀，本頁籤僅顯示狀態文字（已上傳/未上傳、已附/未附），不提供下載；傳送必檢欄位</td></tr>
+        <tr><td>規劃設計單位統編 / 分署提報先測日期 / 工程來源</td><td>分署 / 地方單位</td><td>唯讀</td></tr>
+        <tr><td>本署核定先測日期 / 預算書定稿本日期</td><td><b>僅開放署本部填寫</b></td><td>唯讀</td></tr>
+        <tr><td>其餘轉入欄位（工程名稱、工作項目、執行單位、縣市…）</td><td>不可編輯</td><td>唯讀</td></tr>
+      </table>
+
+      <h3 style="font-size:13.5px;color:var(--navy);margin:18px 0 6px 0;">5.1 登錄資料表 Schema</h3>
+      <p style="font-size:12.5px;color:#666;margin:0 0 8px 0;">說明：以下僅為本功能<b>新增登錄欄位</b>之建議 schema。日期欄位格式統一採<b>民國年/月/日</b>（例：115/07/16）。</p>
+      <table class="spec-table">
+        <tr><th>欄位中文名稱</th><th>英文欄位名</th><th>型別</th><th>長度/格式</th><th>可否為空</th><th>備註</th></tr>
+        <tr><td>規劃設計單位統編</td><td><code class="field">vendor_tax_id</code></td><td>VARCHAR</td><td>8（須剛好 8 碼，純數字）</td><td>可（選填）</td><td>分署 / 地方單位填寫；不足或超過 8 碼皆提示「限8碼」，不可送出</td></tr>
+        <tr><td>分署提報先測日期</td><td><code class="field">report_date</code></td><td>VARCHAR</td><td>民國年(3碼)/月(2碼)/日(2碼)（例：115/07/16）</td><td>可（選填）</td><td>分署 / 地方單位填寫，可選未來日期</td></tr>
+        <tr><td>工程來源</td><td><code class="field">project_source</code></td><td>VARCHAR</td><td>30</td><td>可（選填）</td><td>分署 / 地方單位填寫，限 30 字元</td></tr>
+        <tr><td>本署核定先測日期</td><td><code class="field">approved_date</code></td><td>VARCHAR</td><td>民國年(3碼)/月(2碼)/日(2碼)（例：115/07/16）</td><td>可（選填）</td><td>僅開放署本部填寫，可選未來日期</td></tr>
+        <tr><td>預計完成預算書（定稿本）日期</td><td><code class="field">budget_final_date</code></td><td>VARCHAR</td><td>民國年(3碼)/月(2碼)/日(2碼)（例：115/07/16）</td><td>可（選填）</td><td>僅開放署本部填寫，可選未來日期</td></tr>
+      </table>
+      <p style="font-size:12px;color:#888;margin:6px 0 0 0;">備註：三個日期欄位皆採民國年/月/日格式儲存與顯示（年份 3 碼、月/日各 2 碼，例：115/07/16）；若後端以西元 DATE 型別儲存，前端顯示與輸入仍需轉換為民國年格式。案件移除時，本表對應資料列直接刪除（實體刪除），不保留還原機制；重新提報時沿用原案件，本表重新新增一筆資料。</p>
+    </section>
+
+    <!-- 6 欄位驗證規則 -->
+    <section>
+      <h2 class="sec-title">6. 欄位驗證規則</h2>
+      <table class="spec-table">
+        <tr><th style="width:220px;">欄位</th><th>驗證規則</th></tr>
+        <tr><td>工程序號</td><td>產生時須先跳出確認視窗，提示文字：「工程序號已產生，若點選確定後，將無法再修改，且視為正式工程序號」；使用者點選「確定」後序號即鎖定為唯讀，不可再修改。若該案件於傳送前被移除，本功能內對應之登錄資料與工程序號<b>直接刪除</b>（非軟刪除），該工程序號<b>遇缺不補</b>，不釋出重新使用。日後若同一筆案件再次被勾選為先測案件（重新提報），沿用原案件資料，惟需重新產生新的工程序號並重新登錄。</td></tr>
+        <tr><td>規劃設計單位統編</td><td><b>須為 8 碼、純數字</b>；不足 8 碼或超過 8 碼皆視為不合法，需顯示提示文字「限8碼」，不可送出。</td></tr>
+        <tr><td>分署提報先測日期 / 本署核定先測日期 / 預計完成預算書（定稿本）日期</td><td>日期格式，<b>可選未來日期</b>，無其他日期範圍限制。</td></tr>
+        <tr><td>工程來源（及其餘一般文字輸入欄位）</td><td><b>限 30 字元</b>，超過則不可再輸入或提示已達字數上限。</td></tr>
+        <tr><td>核章版 / 生態成果表</td><td>本頁籤僅呈現<b>狀態文字</b>（核章版：已上傳/未上傳；生態成果表：已附/未附），<b>不提供下載連結</b>；實際檔案上傳與檢視在其他頁籤/功能中操作，本頁籤不重複實作。兩欄位用詞刻意維持不一致（已上傳/未上傳 vs 已附/未附），非需修正之錯誤。</td></tr>
+        <tr><td>碳排量</td><td>計算公式沿用<b>既有系統規則</b>，本功能不重新設計，僅檢查傳送前是否已有值。</td></tr>
+      </table>
+    </section>
+
+  </div>
+</div>
+</body>
+</html>
