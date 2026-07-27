@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>核定後案件明細頁籤　開發需求文件</title>
+<style>
+  :root{
+    --ink:#1c2b2d; --sub:#5b6b6d; --paper:#fbfaf7; --panel:#ffffff; --line:#dfe3e0;
+    --teal:#0f5e59; --teal-deep:#0a3f3c; --teal-soft:#e4f0ee;
+    --amber:#8a5a12; --amber-soft:#fbf1de; --red:#8f2d2d; --red-soft:#faeaea;
+    --blue:#1f4e79; --blue-soft:#eaf1f8;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.65; font-size:15px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 28px 80px;}
+
+  header{background:linear-gradient(160deg,var(--teal-deep),var(--teal) 70%); color:#f2f6f5; padding:44px 0 30px; margin-bottom:34px;}
+  header .wrap{padding-top:0;padding-bottom:0;}
+  h1.doc-title{font-size:26px; margin:0 0 8px; font-weight:700;}
+  .doc-sub{color:#cfe6e1; font-size:14px; max-width:680px;}
+  .meta-row{display:flex; gap:24px; flex-wrap:wrap; margin-top:18px; padding-top:16px;
+    border-top:1px solid rgba(255,255,255,.18); font-size:12.5px; color:#bfded8;}
+  .meta-row div span{display:block; color:#f2f6f5; font-size:14px; margin-top:2px; font-weight:600;}
+
+  .purpose{background:var(--panel); border:1px solid var(--line); border-left:4px solid var(--teal);
+    border-radius:6px; padding:14px 20px; margin-bottom:34px; font-size:14px; color:var(--sub);}
+
+  nav.toc{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:16px 24px; margin-bottom:40px;}
+  nav.toc h2{margin:0 0 10px; font-size:12.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--teal);}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:32px;}
+  nav.toc li{margin-bottom:5px; font-size:13.5px;}
+  nav.toc a{color:var(--ink); text-decoration:none;}
+  nav.toc a:hover{color:var(--teal);}
+
+  section.tab{margin-bottom:44px;}
+  .tab-head{display:flex; align-items:baseline; gap:14px; border-bottom:2px solid var(--teal); padding-bottom:10px; margin-bottom:16px;}
+  .tab-num{font-family:var(--mono); font-size:12px; color:#fff; background:var(--teal); padding:2px 9px; border-radius:4px;}
+  .tab-head h2{margin:0; font-size:19px;}
+  .tab-head .url{margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--sub); background:var(--teal-soft); padding:3px 8px; border-radius:4px;}
+
+  h3.block-title{font-size:14.5px; margin:22px 0 8px; color:var(--teal-deep); display:flex; align-items:center; gap:8px;}
+  h3.block-title::before{content:""; width:5px; height:5px; background:var(--teal); border-radius:50%; flex:none;}
+
+  p{margin:0 0 10px;}
+  code, .field{font-family:var(--mono); font-size:.9em; background:#eef3f1; color:var(--teal-deep); padding:1px 5px; border-radius:4px; border:1px solid #dbe8e4;}
+
+  table.spec-table{width:100%; border-collapse:collapse; margin:8px 0 18px; font-size:13.5px;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; overflow:hidden;}
+  table.spec-table th{background:var(--teal-soft); color:var(--teal-deep); text-align:left; padding:8px 12px; font-weight:600; border-bottom:1px solid var(--line); font-size:12px;}
+  table.spec-table td{padding:8px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  table.spec-table tr:last-child td{border-bottom:none;}
+
+  .tag{display:inline-block; font-size:11px; font-family:var(--mono); padding:1px 7px; border-radius:20px; font-weight:600; white-space:nowrap;}
+  .tag.new{background:#e4f3e7; color:#286a3c;}
+  .tag.rename{background:var(--blue-soft); color:var(--blue);}
+  .tag.remove{background:var(--red-soft); color:var(--red);}
+  .tag.move{background:#f1e9fb; color:#5b3a8c;}
+  .tag.keep{background:#eee; color:#666;}
+  .tag.group{background:#fde7d9; color:#9a4a10;}
+
+  .callout{border-radius:6px; padding:10px 16px; margin:10px 0; font-size:13.5px; border:1px solid transparent;}
+  .callout .lbl{font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; display:block; margin-bottom:3px;}
+  .callout.warn{background:var(--amber-soft); border-color:#eddcb5; color:#6b4a10;}
+  .callout.warn .lbl{color:var(--amber);}
+  .callout.rule{background:var(--teal-soft); border-color:#c7e1db; color:#0d4440;}
+  .callout.rule .lbl{color:var(--teal);}
+
+  .global-box{background:var(--teal-deep); color:#eef6f4; border-radius:8px; padding:20px 26px; margin-bottom:44px; font-size:14px;}
+  .global-box h2{margin-top:0; font-size:17px; color:#fff;}
+
+  footer{margin-top:50px; padding-top:18px; border-top:1px solid var(--line); color:var(--sub); font-size:12px;}
+
+  @media (max-width:700px){ nav.toc ol{columns:1;} .tab-head{flex-wrap:wrap;} .tab-head .url{margin-left:0;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1 class="doc-title">核定後案件明細頁籤　開發需求文件</h1>
+    <div class="doc-sub">彙整「基本資料」「預定期程」「執行狀況」「預算額度」「施工進度」五個頁籤之欄位調整、業務邏輯規則與驗證規則，供系統開發人員開發參閱。</div>
+    <div class="meta-row">
+      <div>文件版本 <span>v2.8</span></div>
+      <div>建立日期 <span>2026-07-23</span></div>
+      <div>涉及頁籤數 <span>5 個</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="purpose">
+    每個頁籤先以表格呈現欄位規格（異動類型、必填、規則），複雜的跨欄位邏輯（警示、展開條件、搬移來源）才另立簡短說明框。第 7 節彙整所有欄位之資料庫命名、型態與驗證規則。
+  </div>
+
+  <nav class="toc">
+    <h2>目錄</h2>
+    <ol>
+      <li><a href="#tab1">1. 基本資料頁籤</a></li>
+      <li><a href="#tab2">2. 預定期程頁籤</a></li>
+      <li><a href="#tab3">3. 執行狀況頁籤</a></li>
+      <li><a href="#tab4">4. 預算額度頁籤</a></li>
+      <li><a href="#tab5">5. 施工進度頁籤</a></li>
+      <li><a href="#global">6. 跨頁籤共用規則</a></li>
+      <li><a href="#schema">7. 欄位資料結構、異動類型與驗證規則</a></li>
+    </ol>
+  </nav>
+
+  <!-- ============ TAB 1 基本資料 ============ -->
+  <section class="tab" id="tab1">
+    <div class="tab-head">
+      <span class="tab-num">01</span><h2>基本資料頁籤</h2><span class="url">/basic-info</span>
+    </div>
+
+    <h3 class="block-title">1.1　主要欄位（一）</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">計畫年度</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">計畫編號</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">計畫名稱</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">工程核定日期</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">核定文號</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">核定經費（千元）</td><td>是</td><td>匯入必要欄位；右側／下方即為「查看明細」按鈕，見 1.2 節</td></tr>
+    </table>
+
+    <h3 class="block-title">1.2　查看明細（金額）</h3>
+    <p style="color:var(--sub); font-size:13px;">點擊「核定經費（千元）」旁的「查看明細」按鈕開啟，畫面順序緊接於核定經費之後。</p>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">資金來源選項 <span class="tag rename">改名</span></td><td>—</td><td>「國庫撥充作業基金」改為「自籌款」</td></tr>
+      <tr><td class="field">本案為跨年度</td><td>否</td><td>勾選才可新增多筆核定年度列</td></tr>
+      <tr><td class="field">核定年度</td><td>是</td><td>預設一列，帶入核定日期年度；可修改但僅限當年度或核定年度之下一年度，不可早於核定年度</td></tr>
+      <tr><td class="field">核定金額</td><td>是</td><td>可依分年輸入</td></tr>
+      <tr><td class="field">累計實際支付金額</td><td>唯讀</td><td>由預算額度頁籤實付紀錄依年度、月份自動加總</td></tr>
+      <tr><td class="field">有無其他費用</td><td>否</td><td>勾選「有」才顯示下列輸入框</td></tr>
+      <tr><td class="field">其他費用累計實際支付金額</td><td>否</td><td>勾選「有」時必填</td></tr>
+    </table>
+    <div class="callout rule">
+      <span class="lbl">查看明細按鈕規則</span>
+      點擊按鈕後，<b>預設即顯示一列</b>可輸入核定金額，年度預設帶入核定日期年度（累計實際支付金額為唯讀欄位，由系統依年度、月份自動加總帶入，不可手動輸入）；若勾選「本案為跨年度」，<b>才可新增多筆</b>核定年度列。
+    </div>
+
+    <h3 class="block-title">1.3　主要欄位（二）</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">核定碳排量 <span class="tag new">新增</span></td><td>是</td><td>可置於核定經費右側或另起下一列；可匯入後補登，補登後不可留空；允許至小數點第 3 位</td></tr>
+      <tr><td class="field">取消文號</td><td>否</td><td>需與取消原因同時填寫才視為整案結案（取代原放在<b>執行狀況頁籤</b>的「現況結案日期／文號」，已刪除）</td></tr>
+      <tr><td class="field">取消原因</td><td>否</td><td>同上</td></tr>
+      <tr><td class="field">工程編號</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">工程名稱</td><td>是</td><td>匯入必要欄位</td></tr>
+      <tr><td class="field">是否有分項工程 <span class="tag new">新增</span></td><td>否</td><td>勾選後之連動效果見下方規則框</td></tr>
+      <tr><td class="field">工程位置（縣市／鄉鎮） <span class="tag new">新增</span> <span class="tag group">分組Ａ</span></td><td><b>是</b></td><td>非地址文字輸入，改為與「縣市／鄉鎮」下拉選單相同之定位方式；可多筆新增；勾選「是否有分項工程」時隱藏，不需填寫。屬本案最初始之定位欄位組；「縣市」依管理處自動帶入（對照表見 1.6 節），可修改；「鄉鎮」則由使用者自行選擇，不自動帶入。<b>注意：本欄位（分組Ａ）與下方「縣市／鄉鎮／座標」（分組Ｂ）為不同欄位</b>，見本節末段落說明。</td></tr>
+      <tr><td class="field">座標（TWD97）X／Y（工程位置用） <span class="tag new">新增</span> <span class="tag group">分組Ａ</span></td><td><b>是</b></td><td>僅限整數；可多筆，隨「工程位置（縣市／鄉鎮）」逐筆對應；勾選「是否有分項工程」時隱藏，不需填寫；與下方「座標（TWD97）X／Y」（分組Ｂ）為不同欄位，各自獨立儲存與驗證。</td></tr>
+      <tr><td class="field">工程內容 <span class="tag new">新增</span></td><td>否</td><td>字數上限 1000 字；勾選「是否有分項工程」時隱藏，不需填寫</td></tr>
+      <tr><td class="field">分項工程編號</td><td>是＊</td><td>需勾選「是否有分項工程」才顯示；顯示後<b>必填</b>，見下方規則框＊</td></tr>
+      <tr><td class="field">分項工程名稱</td><td>是＊</td><td>需勾選才顯示；顯示後<b>必填</b>；影響預算書編製分區，見下方規則框</td></tr>
+      <tr><td class="field">分項工程內容</td><td>否</td><td>需勾選才顯示</td></tr>
+      <tr><td class="field">縣市（定位用） <span class="tag group">分組Ｂ</span></td><td>是＊</td><td>依管理處自動帶入，可修改；對照表見 1.6 節；勾選「是否有分項工程」時<b>必填</b>，見下方規則框＊；僅於有分項工程時使用</td></tr>
+      <tr><td class="field">鄉鎮（定位用） <span class="tag group">分組Ｂ</span></td><td>是＊</td><td>勾選「是否有分項工程」時<b>必填</b></td></tr>
+      <tr><td class="field">座標（TWD97）X／Y <span class="tag group">分組Ｂ</span></td><td>是＊</td><td>僅限整數；勾選「是否有分項工程」時<b>必填</b></td></tr>
+      <tr><td class="field">生態檢核自評表（分級）</td><td>是</td><td>攸關第三期生態檢核管理功能，先此註記提醒</td></tr>
+    </table>
+    <div class="callout warn">
+      <span class="lbl">釐清：本節有三組容易混淆的定位欄位</span>
+      <b>分組Ａ</b>「工程位置＋座標（工程位置用）」：最初始、必填、可多筆，勾選「是否有分項工程」時隱藏；縣市依管理處自動帶入、鄉鎮由使用者自行選擇。<br>
+      <b>分組Ｂ</b>「分項工程定位（縣市／鄉鎮／座標）」：依管理處自動帶入，僅於勾選「是否有分項工程」時啟用並必填（詳見下方規則框）。<br>
+      <b>分組Ｃ</b>（1.4 節「用地取得情形」）：縣市依「是否有分項工程」連動帶入分組Ａ或分組Ｂ之值（詳見 1.4 節）。三組欄位各自獨立儲存，勿混用。
+    </div>
+    <div class="callout rule">
+      <span class="lbl">是否有分項工程：勾選連動效果</span>
+      <b>勾選</b>：隱藏「工程位置／座標（分組Ａ）／工程內容」，改用分組Ｂ填寫分項工程定位（必填）。<br>
+      <b>未勾選</b>：正常顯示並填寫「工程位置／座標（分組Ａ）／工程內容」，不顯示分項工程欄位。
+    </div>
+    <div class="callout rule">
+      <span class="lbl">＊分項工程填報清單（1.4 節）之必填邏輯</span>
+      <b>未勾選</b>：預設 1 筆，工程編號／名稱唯讀帶入；生態檢核自評表、用地取得情形為<b>必填</b>；定位以分組Ａ為準，不使用分組Ｂ。<br>
+      <b>勾選</b>：依新增之分項工程展開多筆，每筆之分項工程編號／名稱、縣市／鄉鎮／座標（分組Ｂ）皆為<b>必填</b>。
+    </div>
+    <div class="callout rule">
+      <span class="lbl">分項工程名稱 × 預算書編製作業</span>
+      有新增分項工程名稱 → 預算書分區依此新增預算項目；未新增 → 分區直接沿用「工程名稱」。
+    </div>
+    <div class="callout warn">
+      <span class="lbl">警示</span>
+      刪除或修改分項工程名稱時，須跳出警告：此操作將影響預算書編製作業已設定之分區。
+    </div>
+
+    <h3 class="block-title">1.4　用地取得情形（分項工程填報清單）</h3>
+    <p style="color:var(--sub); font-size:13px;">本畫面之用地取得情形<b>可由使用者手動新增多筆</b>（例如同一分項工程橫跨多筆地號時）；必填邏輯詳見 1.3 節「＊分項工程填報清單之必填邏輯」規則框。</p>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">縣市（用地取得用） <span class="tag group">分組Ｃ</span></td><td>否</td><td>依「是否有分項工程」連動帶入分組Ａ或分組Ｂ之縣市值，可手動修改；與分組Ａ／Ｂ為不同欄位，各自獨立儲存</td></tr>
+      <tr><td class="field">鄉鎮（用地取得用） <span class="tag group">分組Ｃ</span></td><td>否</td><td>由使用者自行手動輸入，不自動帶入</td></tr>
+      <tr><td class="field">地段</td><td>否</td><td>可考慮串接地政司地籍資料查詢帶入</td></tr>
+      <tr><td class="field">地號－母號／子號 <span class="tag rename">原「母號」拆分</span></td><td>否</td><td>拆為兩輸入框</td></tr>
+      <tr><td class="field">公私有 <span class="tag rename">改單選</span></td><td>否</td><td>僅限「公有」「私有」</td></tr>
+      <tr><td class="field">土地同意書檔案 <span class="tag new">新增</span></td><td>否</td><td>限自籌款案件；上傳區塊置於本畫面最底部；限單一檔案，僅接受 PDF、容量上限 10MB</td></tr>
+    </table>
+    <div class="callout rule">
+      <span class="lbl">下載行為</span>
+      補助款案件：直接顯示下載鈕。自籌款案件：比照補助款案件，於「用地取得情形」按鈕右側顯示下載鈕，可下載已上傳之土地同意書；本畫面表單內容本身亦可下載。
+    </div>
+
+    <h3 class="block-title">1.5　聯絡人</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">管理機關</td><td>—</td><td>固定顯示「農田水利署」，不可編輯</td></tr>
+      <tr><td class="field">執行單位</td><td>否</td><td>依管理處自動帶入</td></tr>
+      <tr><td class="field">承辦人</td><td>是</td><td>即 1.1 節匯入必要欄位「承辦人」，實際顯示位置在本區塊、執行單位下方</td></tr>
+      <tr><td class="field">電話</td><td>否</td><td>—</td></tr>
+      <tr><td class="field">電子郵件</td><td>是</td><td>即匯入必要欄位「電子郵件」，需 Email 格式，實際顯示位置在本區塊最下方</td></tr>
+    </table>
+
+    <h3 class="block-title">1.6　縣市自動帶入對照（依農水署 17 個管理處轄屬縣市，原始資料表）</h3>
+    <table class="spec-table">
+      <tr><th>縣市</th><th>所屬管理處</th></tr>
+      <tr><td class="field">基隆市</td><td>北基、七星</td></tr>
+      <tr><td class="field">臺北市</td><td>七星、瑠公</td></tr>
+      <tr><td class="field">新北市</td><td>北基、七星、瑠公、石門（部分）</td></tr>
+      <tr><td class="field">桃園市</td><td>桃園、石門</td></tr>
+      <tr><td class="field">新竹市</td><td>新竹、苗栗（部分）</td></tr>
+      <tr><td class="field">新竹縣</td><td>新竹、苗栗（部分）</td></tr>
+      <tr><td class="field">苗栗縣</td><td>苗栗</td></tr>
+      <tr><td class="field">臺中市</td><td>臺中</td></tr>
+      <tr><td class="field">南投縣</td><td>南投</td></tr>
+      <tr><td class="field">彰化縣</td><td>彰化</td></tr>
+      <tr><td class="field">雲林縣</td><td>雲林</td></tr>
+      <tr><td class="field">嘉義市</td><td>嘉南</td></tr>
+      <tr><td class="field">嘉義縣</td><td>嘉南</td></tr>
+      <tr><td class="field">臺南市</td><td>嘉南</td></tr>
+      <tr><td class="field">高雄市</td><td>高雄</td></tr>
+      <tr><td class="field">屏東縣</td><td>屏東</td></tr>
+      <tr><td class="field">宜蘭縣</td><td>宜蘭</td></tr>
+      <tr><td class="field">花蓮縣</td><td>花蓮</td></tr>
+      <tr><td class="field">臺東縣</td><td>臺東</td></tr>
+    </table>
+    <div class="callout rule">
+      <span class="lbl">自動帶入邏輯（反查）</span>
+      依使用者所屬管理處反查本表取得預設縣市（比對到多筆時，以下拉選單列出全部候選供選擇，不強制單一值）。本邏輯適用於分組Ａ（工程位置）與分組Ｂ（分項工程定位）之「縣市」自動帶入，兩者各自獨立、互不影響。<br>
+      1.4 節分組Ｃ（用地取得情形）之「縣市」不套用本表，改依「是否有分項工程」連動帶入分組Ａ或分組Ｂ之值；「鄉鎮」則由使用者自行手動輸入，不自動帶入。
+    </div>
+  </section>
+
+  <!-- ============ TAB 2 預定期程 ============ -->
+  <section class="tab" id="tab2">
+    <div class="tab-head">
+      <span class="tab-num">02</span><h2>預定期程頁籤</h2><span class="url">/schedule</span>
+    </div>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th></tr>
+      <tr><td class="field">測設預定完成日期／預定決標日期／預定開工日期／預定竣工日期</td><td><b>是</b></td></tr>
+    </table>
+  </section>
+
+  <!-- ============ TAB 3 執行狀況 ============ -->
+  <section class="tab" id="tab3">
+    <div class="tab-head">
+      <span class="tab-num">03</span><h2>執行狀況頁籤</h2><span class="url">/execution-status</span>
+    </div>
+
+    <table class="spec-table">
+      <tr><th>欄位（依畫面由上至下順序）</th><th>異動</th><th>規則／備註</th></tr>
+      <tr><td class="field">用地取得日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">辦理說明會日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">工程特殊狀態</td><td class="tag rename">改名＋改下拉</td><td><b>必填</b>；原「工程辦理方式」；選項：自行設計監造／委託測設自行監造／委託測設監造／自行設計委託監造</td></tr>
+      <tr><td class="field">規劃設計單位</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">測設完成日期</td><td class="tag rename">合併</td><td><b>必填</b>；由「量測完成日期＋細部設計完成日期」合併而成</td></tr>
+      <tr><td class="field">上網日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">決標日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">標案編號</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">契約編號</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">競標家數</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">發包方式</td><td class="tag keep">維持</td><td><b>必填</b>；下拉：公開招標、限制性招標、其他</td></tr>
+      <tr><td class="field">監造單位</td><td class="tag keep">維持</td><td><b>必填</b>；「廠商名稱」與「統一編號」兩部分，皆為必填</td></tr>
+      <tr><td class="field">承包廠商</td><td class="tag keep">維持</td><td><b>必填</b>；「廠商名稱」與「統一編號」兩部分，皆為必填</td></tr>
+      <tr><td class="field">生態團隊</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">訂約日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">開工日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">施工期限</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">停／復工設定</td><td class="tag move">改資料帶入</td><td>資料來源改為施工日誌之工期設定紀錄（唯讀）：停工／復工日期、文號、原因</td></tr>
+      <tr><td class="field">竣工日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">驗收清單（工程驗收列表）</td><td class="tag move">搬移</td><td>原「驗收付款階段」更名為「驗收決算階段」涵蓋此區塊；內容見下方說明框</td></tr>
+      <tr><td class="field">結算清單（工程結算列表）</td><td class="tag move">搬移＋正名</td><td>內容見下方說明框</td></tr>
+      <tr><td class="field">決算日期</td><td class="tag rename">改名</td><td><b>必填</b>；原「結算完成日期」，<b>非「結算清單」內之欄位</b>，為本頁籤獨立末項</td></tr>
+    </table>
+
+    <div class="callout rule">
+      <span class="lbl">驗收清單／結算清單：搬移細節</span>
+      <b>驗收清單</b>（辦理日期／驗收階段／驗收人員／限期改善時間／初驗結果）自「工程驗收結算保固作業→工程驗收」整份搬移至此；動作僅留「檢視」，刪除鈕移除。<br>
+      <b>結算清單</b>（原誤稱初驗/複驗紀錄列表，正名為工程結算列表；辦理日期／驗收階段／驗收人員／狀態）自「工程驗收結算保固作業→工程結算」搬移至此；動作僅留「檢視」，刪除鈕移除。
+    </div>
+    <div class="callout rule">
+      <span class="lbl">已移除欄位（不再顯示於本頁籤）</span>
+      技術服務團隊、預算書完成日期／預算書核定日期、現況結案日期／文號：三者皆自本頁籤移除。現況結案日期／文號改由基本資料頁籤「取消文號＋取消原因」同時填寫判斷結案。
+    </div>
+  </section>
+
+  <!-- ============ TAB 4 預算額度 ============ -->
+  <section class="tab" id="tab4">
+    <div class="tab-head">
+      <span class="tab-num">04</span><h2>預算額度頁籤</h2><span class="url">/budget</span>
+    </div>
+
+    <div class="callout rule">
+      <span class="lbl">子畫面順序（本頁籤共 4 個子畫面，非平面欄位清單）</span>
+      工程發包 → 變更內容 → <b>實付紀錄</b> → 工程結算（<b>「實付紀錄」為子畫面名稱，已從原本排序最後一項，調整至變更內容與工程結算之間；子畫面內實際欄位為「是否已付款」，見 4.4 節</b>）。以下欄位依所屬子畫面分組列出；4.1 之共用費用欄位跨四個子畫面共用。
+    </div>
+
+    <h3 class="block-title">4.1　共用費用欄位（發包／變更／實付／結算皆適用）</h3>
+    <table class="spec-table">
+      <tr><th>原欄位</th><th>異動</th><th>新欄位／規則</th></tr>
+      <tr><td class="field">工程款（元）</td><td class="tag rename">改名</td><td>工程費；<b>必填</b>；預設值 0</td></tr>
+      <tr><td class="field">（既有）工管費</td><td class="tag keep">維持</td><td>名稱邏輯不變，僅調整顯示順序；<b>必填</b>；預設值 0</td></tr>
+      <tr><td class="field">供給材料費（元）</td><td class="tag rename">改名</td><td>空污費；<b>必填</b>；預設值 0</td></tr>
+      <tr><td class="field">委託設計費（元）</td><td class="tag rename">改名</td><td>技術服務費；<b>必填</b>；預設值 0</td></tr>
+      <tr><td class="field">自辦工程費（元）</td><td class="tag rename">改名</td><td>其他；<b>必填</b>；預設值 0</td></tr>
+      <tr><td class="field">委託監造費（元）／生態檢核費（元）</td><td class="tag remove">刪除</td><td>—</td></tr>
+    </table>
+    <div class="callout rule">
+      <span class="lbl">顯示順序與預設值</span>
+      由左至右、由上而下：工程費 → 工管費 → 空污費 → 技術服務費 → 其他。以上 5 欄位皆為<b>必填</b>，且畫面初始載入時<b>預設值皆為 0</b>，由使用者依實際金額覆寫。
+    </div>
+
+    <h3 class="block-title">4.2　工程發包（子畫面）</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>異動</th><th>規則／備註</th></tr>
+      <tr><td class="field">核定底價</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">發包賸餘款</td><td class="tag remove">刪除</td><td>本欄位移除，不再顯示於本子畫面</td></tr>
+    </table>
+
+    <h3 class="block-title">4.3　變更內容（子畫面）</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>異動</th><th>規則／備註</th></tr>
+      <tr><td class="field">是否需變更經費</td><td class="tag keep">維持</td><td>選項：有需變更／無需變更</td></tr>
+    </table>
+
+    <h3 class="block-title">4.4　實付紀錄（子畫面）</h3>
+    <p style="color:var(--sub); font-size:13px;">「實付紀錄」為子畫面名稱，本子畫面內僅有下列 1 個獨立欄位（另加 4.1 節共用費用欄位）。</p>
+    <table class="spec-table">
+      <tr><th>原欄位</th><th>異動</th><th>新規格</th></tr>
+      <tr><td class="field">是否已結案並付款？</td><td class="tag rename">改名＋改控制項</td><td>→「是否已付款？」，改為 <b>checkbox</b>，勾選才展開付款輸入欄位</td></tr>
+      <tr><td class="field">未結案付款（選項）</td><td class="tag remove">刪除</td><td>—</td></tr>
+    </table>
+
+    <h3 class="block-title">4.5　工程結算（子畫面）</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>異動</th><th>規則／備註</th></tr>
+      <tr><td class="field">是否已結算</td><td class="tag keep">維持</td><td>選項：已結算／未結算（與 4.4 節「是否已付款」為不同欄位，分屬付款與結算兩個獨立狀態）</td></tr>
+    </table>
+  </section>
+
+  <!-- ============ TAB 5 施工進度 ============ -->
+  <section class="tab" id="tab5">
+    <div class="tab-head">
+      <span class="tab-num">05</span><h2>施工進度頁籤</h2><span class="url">/construction-progress</span>
+    </div>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
+      <tr><td class="field">最新預定進度／最新實際進度 <span class="tag new">新增顯示</span></td><td>—</td><td>來源：施工日誌最近一筆紀錄，唯讀</td></tr>
+      <tr><td class="field">進度落後原因 <span class="tag new">新增</span></td><td>否</td><td>字數上限 500 字</td></tr>
+    </table>
+    <table class="spec-table">
+      <tr><th>快捷鍵</th><th>處理</th></tr>
+      <tr><td class="field">工程文件管理／施工日誌／工程督導／工程查驗</td><td class="tag keep">保留</td></tr>
+      <tr><td class="field">S-curve 圖／工程估驗</td><td class="tag remove">移除</td></tr>
+    </table>
+  </section>
+
+  <!-- ============ GLOBAL ============ -->
+  <div class="global-box" id="global">
+    <h2>06　跨頁籤共用規則</h2>
+    <p style="margin:0 0 14px;">不論在哪個頁籤，執行「儲存」皆須寫入操作紀錄，至少包含：<b>操作單位、操作人員、操作時間</b>；暫不需記錄異動內容細節（欄位前後差異）。</p>
+    <p style="margin:0 0 6px; font-weight:600; color:#fff;">編輯權限</p>
+    <p style="margin:0;">同屬相同管理處之人員皆可<b>查看／檢視</b>本案件所有頁籤內容；僅<b>承辦人本人</b>具有<b>編輯</b>權限，其餘同管理處人員僅能檢視、不可編輯。<br>
+    後續若串接 AD（網域帳號），建議以<b>電子郵件（mail 屬性）</b>比對承辦人身分，而非僅比對姓名，以避免同名同姓誤判為承辦人本人。</p>
+  </div>
+
+  <!-- ============ TABLE SCHEMA ============ -->
+  <section class="tab" id="schema">
+    <div class="tab-head"><span class="tab-num">07</span><h2>欄位資料結構、異動類型與驗證規則</h2></div>
+    <p style="color:var(--sub); font-size:13.5px; margin-bottom:14px;">資料庫欄位命名、型態、異動類型、必填與驗證規則；命名與型態為建議值，可依既有資料字典調整。依頁籤逐一列出，欄位順序對應各頁籤畫面顯示順序。</p>
+
+    <h3 class="block-title">7.1　基本資料頁籤</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>驗證規則</th></tr>
+      <tr><td class="field">計畫年度</td><td><code>plan_year</code></td><td>INT(3)</td><td class="tag keep">維持</td><td>是</td><td>民國年 3 碼</td></tr>
+      <tr><td class="field">計畫編號</td><td><code>plan_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
+      <tr><td class="field">計畫名稱</td><td><code>plan_name</code></td><td>VARCHAR(200)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
+      <tr><td class="field">工程核定日期</td><td><code>approval_date</code></td><td>DATE</td><td class="tag keep">維持</td><td>是</td><td>需為有效日期</td></tr>
+      <tr><td class="field">核定文號</td><td><code>approval_doc_no</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
+      <tr><td class="field">核定經費（千元）</td><td><code>approved_budget_thousand</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正數</td></tr>
+      <tr><td class="field">資金來源選項</td><td><code>fund_source_type</code></td><td>ENUM</td><td class="tag rename">改名</td><td>—</td><td>「國庫撥充作業基金」改為「自籌款」；屬查看明細畫面</td></tr>
+      <tr><td class="field">本案為跨年度</td><td><code>is_multi_year</code></td><td>BOOLEAN</td><td class="tag keep">維持</td><td>否</td><td>勾選才可新增多筆核定年度列</td></tr>
+      <tr><td class="field">核定年度</td><td><code>approval_year</code>（子表）</td><td>INT(3)[]</td><td class="tag keep">維持</td><td>是</td><td>預設一列，帶入核定日期年度；僅限當年度或下一年度</td></tr>
+      <tr><td class="field">核定金額（分年）</td><td><code>approved_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正數</td></tr>
+      <tr><td class="field">累計實際支付金額（分年）</td><td><code>accumulated_paid_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>唯讀</td><td>由實付紀錄依年度、月份自動加總帶入</td></tr>
+      <tr><td class="field">有無其他費用</td><td><code>has_other_fee</code></td><td>BOOLEAN</td><td class="tag keep">維持</td><td>否</td><td>勾選「有」才顯示下列輸入框</td></tr>
+      <tr><td class="field">其他費用累計實際支付金額</td><td><code>other_fee_paid_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>否</td><td>勾選「有」時必填</td></tr>
+      <tr><td class="field">核定碳排量</td><td><code>approved_carbon_emission</code></td><td>DECIMAL(15,3)</td><td class="tag new">新增</td><td>是</td><td>正數；至多小數點第 3 位；可後補</td></tr>
+      <tr><td class="field">取消文號／取消原因</td><td><code>cancel_doc_no</code> / <code>cancel_reason</code></td><td>VARCHAR(100)／TEXT</td><td class="tag new">新增</td><td>否</td><td>需同時填寫才視為結案</td></tr>
+      <tr><td class="field">工程編號</td><td><code>project_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>是</td><td>需唯一</td></tr>
+      <tr><td class="field">工程名稱</td><td><code>project_name</code></td><td>VARCHAR(200)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
+      <tr><td class="field">是否有分項工程</td><td><code>has_sub_project</code></td><td>BOOLEAN</td><td class="tag new">新增</td><td>否</td><td>勾選：隱藏工程位置／工程內容，改用分組Ｂ展開分項工程定位欄位</td></tr>
+      <tr><td class="field">工程位置－縣市（分組Ａ）</td><td><code>project_location_city_code</code>（子表）</td><td>VARCHAR(10)[]</td><td class="tag new">新增</td><td><b>是</b></td><td>可多筆；勾選是否有分項工程時隱藏；依管理處自動帶入（1.6 節），可修改；<b>與 <code>sub_project_city_code</code>（分組Ｂ）為不同欄位</b></td></tr>
+      <tr><td class="field">工程位置－鄉鎮（分組Ａ）</td><td><code>project_location_district_code</code>（子表）</td><td>VARCHAR(10)[]</td><td class="tag new">新增</td><td><b>是</b></td><td>可多筆；勾選是否有分項工程時隱藏；由使用者自行選擇，不自動帶入；<b>與 <code>sub_project_district_code</code>（分組Ｂ）為不同欄位</b></td></tr>
+      <tr><td class="field">座標 X／Y（TWD97，工程位置用，分組Ａ）</td><td><code>project_location_coord_x</code> / <code>project_location_coord_y</code>（子表）</td><td>INT[]</td><td class="tag new">新增</td><td><b>是</b></td><td>僅限整數；可多筆，隨分組Ａ縣市／鄉鎮逐筆對應；勾選是否有分項工程時隱藏；<b>與 <code>sub_project_coord_x</code>／<code>sub_project_coord_y</code>（分組Ｂ）為不同欄位</b></td></tr>
+      <tr><td class="field">工程內容</td><td><code>project_content</code></td><td>VARCHAR(1000)</td><td class="tag new">新增</td><td>否</td><td>上限 1000 字；勾選是否有分項工程時隱藏</td></tr>
+      <tr><td class="field">分項工程編號</td><td><code>sub_project_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>是</td><td>需勾選是否有分項工程才顯示；顯示後必填</td></tr>
+      <tr><td class="field">分項工程名稱</td><td><code>sub_project_name</code></td><td>VARCHAR(200)</td><td class="tag keep">維持</td><td>是</td><td>顯示後必填；刪除／修改需跳出警示</td></tr>
+      <tr><td class="field">分項工程內容</td><td><code>sub_project_content</code></td><td>TEXT</td><td class="tag keep">維持</td><td>否</td><td>需勾選是否有分項工程才顯示</td></tr>
+      <tr><td class="field">縣市（定位用，分組Ｂ）</td><td><code>sub_project_city_code</code></td><td>VARCHAR(10)</td><td class="tag keep">維持</td><td>是</td><td>需為 1.6 對照範圍內之值，依管理處自動帶入；僅於勾選是否有分項工程時啟用並必填</td></tr>
+      <tr><td class="field">鄉鎮（定位用，分組Ｂ）</td><td><code>sub_project_district_code</code></td><td>VARCHAR(10)</td><td class="tag keep">維持</td><td>是</td><td>勾選是否有分項工程時必填</td></tr>
+      <tr><td class="field">座標 X／Y（TWD97，分組Ｂ）</td><td><code>sub_project_coord_x</code> / <code>sub_project_coord_y</code></td><td>INT</td><td class="tag keep">維持</td><td>是</td><td>僅限整數；勾選是否有分項工程時必填</td></tr>
+      <tr><td class="field">生態檢核自評表（分級）</td><td><code>eco_check_grade</code></td><td>VARCHAR</td><td class="tag keep">維持</td><td>是</td><td>攸關第三期生態檢核管理功能</td></tr>
+      <tr><td class="field">縣市／鄉鎮（用地取得用，分組Ｃ）</td><td><code>land_city_code</code> / <code>land_district_code</code>（子表）</td><td>VARCHAR(10)[]</td><td class="tag keep">維持</td><td>否</td><td>「縣市」依「是否有分項工程」連動帶入分組Ａ或分組Ｂ之縣市值，可手動修改；「鄉鎮」由使用者自行手動輸入，不自動帶入；使用者可手動新增多筆；與分組Ａ／Ｂ為不同欄位，各自獨立儲存</td></tr>
+      <tr><td class="field">地段</td><td><code>land_section</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>否</td><td>可考慮串接地政司地籍資料</td></tr>
+      <tr><td class="field">地號－母號／子號</td><td><code>land_no_main</code> / <code>land_no_sub</code></td><td>VARCHAR(20)</td><td class="tag rename">拆欄</td><td>否</td><td>原「母號」拆分為二</td></tr>
+      <tr><td class="field">公私有</td><td><code>land_ownership_type</code></td><td>ENUM</td><td class="tag rename">改單選</td><td>否</td><td>僅限「公有」「私有」</td></tr>
+      <tr><td class="field">土地同意書檔案</td><td><code>land_agreement_file</code></td><td>FILE</td><td class="tag new">新增</td><td>否</td><td>限自籌款案件；單一檔案、PDF、上限 10MB</td></tr>
+      <tr><td class="field">管理機關</td><td><code>authority_name</code></td><td>VARCHAR</td><td class="tag keep">維持</td><td>—</td><td>固定值「農田水利署」，不可編輯</td></tr>
+      <tr><td class="field">執行單位</td><td><code>execute_unit</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>否</td><td>依管理處自動帶入</td></tr>
+      <tr><td class="field">承辦人</td><td><code>handler_name</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>是</td><td>匯入必要欄位；畫面實際顯示位置在聯絡人區塊</td></tr>
+      <tr><td class="field">電話</td><td><code>contact_phone</code></td><td>VARCHAR(20)</td><td class="tag rename">改選填</td><td>否</td><td>—</td></tr>
+      <tr><td class="field">電子郵件</td><td><code>handler_email</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>是</td><td>匯入必要欄位，Email 格式；畫面實際顯示位置在聯絡人區塊</td></tr>
+    </table>
+    <h3 class="block-title">7.2　預定期程頁籤</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>驗證規則</th></tr>
+      <tr><td class="field">測設預定完成日期</td><td><code>planned_design_survey_date</code></td><td>DATE</td><td class="tag rename">必填調整</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">預定決標日期</td><td><code>planned_award_date</code></td><td>DATE</td><td class="tag rename">必填調整</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">預定開工日期</td><td><code>planned_start_date</code></td><td>DATE</td><td class="tag rename">必填調整</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">預定竣工日期</td><td><code>planned_completion_date</code></td><td>DATE</td><td class="tag rename">必填調整</td><td><b>是</b></td><td>需為有效日期</td></tr>
+    </table>
+
+    <h3 class="block-title">7.3　執行狀況頁籤</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>驗證規則</th></tr>
+      <tr><td class="field">用地取得日期</td><td><code>land_acquisition_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">辦理說明會日期</td><td><code>briefing_session_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">工程特殊狀態</td><td><code>project_special_status</code></td><td>ENUM</td><td class="tag rename">改名＋下拉</td><td><b>是</b></td><td>原「工程辦理方式」；4 選項：自行設計監造／委託測設自行監造／委託測設監造／自行設計委託監造</td></tr>
+      <tr><td class="field">規劃設計單位</td><td><code>planning_design_unit</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">測設完成日期</td><td><code>design_survey_actual_date</code></td><td>DATE</td><td class="tag rename">合併</td><td><b>是</b></td><td>由量測完成日期＋細部設計完成日期合併；需為有效日期</td></tr>
+      <tr><td class="field">上網日期</td><td><code>tender_announcement_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">決標日期</td><td><code>award_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">標案編號</td><td><code>tender_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">契約編號</td><td><code>contract_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td><b>是</b></td><td>—</td></tr>
+      <tr><td class="field">競標家數</td><td><code>bidder_count</code></td><td>INT</td><td class="tag keep">維持</td><td>—</td><td>非負整數</td></tr>
+      <tr><td class="field">發包方式</td><td><code>contracting_method</code></td><td>ENUM</td><td class="tag keep">維持</td><td><b>是</b></td><td>3 選項：公開招標／限制性招標／其他</td></tr>
+      <tr><td class="field">監造單位</td><td><code>supervision_unit</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td><b>是</b></td><td>—</td></tr>
+      <tr><td class="field">承包廠商</td><td><code>contractor_name</code> / <code>contractor_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag keep">維持</td><td><b>是</b></td><td>單一欄位，內含廠商名稱與統一編號兩部分，皆為必填，統一編號需符合統編格式</td></tr>
+      <tr><td class="field">生態團隊</td><td><code>eco_team</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">訂約日期</td><td><code>contract_sign_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">開工日期</td><td><code>construction_start_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">施工期限</td><td><code>construction_duration</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td><b>是</b></td><td>可視需要改為日曆天數 INT</td></tr>
+      <tr><td class="field">停工／復工日期、文號、原因</td><td><code>stop_*</code> / <code>resume_*</code></td><td>DATE／VARCHAR(100)／TEXT</td><td class="tag move">改資料帶入</td><td>—</td><td>來源：施工日誌工期設定紀錄，唯讀</td></tr>
+      <tr><td class="field">竣工日期</td><td><code>construction_completion_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">驗收清單（工程驗收列表）</td><td><code>project_acceptance_record</code>（子表）</td><td>OBJECT[]</td><td class="tag move">搬移</td><td>—</td><td>來源：工程驗收頁籤，唯讀＋檢視（無刪除）</td></tr>
+      <tr><td class="field">結算清單（工程結算列表）</td><td><code>project_settlement_record</code>（子表）</td><td>OBJECT[]</td><td class="tag move">搬移＋正名</td><td>—</td><td>來源：工程結算頁籤，唯讀＋檢視（無刪除）</td></tr>
+      <tr><td class="field">決算日期</td><td><code>final_settlement_date</code></td><td>DATE</td><td class="tag rename">改名</td><td><b>是</b></td><td>原「結算完成日期」；為本頁籤獨立欄位，非「結算清單」子表之一部分</td></tr>
+    </table>
+    <p style="color:var(--sub); font-size:13px;">已移除欄位（不再顯示）：技術服務團隊、預算書完成日期、預算書核定日期、現況結案日期、現況結案文號。</p>
+
+    <h3 class="block-title">7.4　預算額度頁籤</h3>
+    <p style="color:var(--sub); font-size:13px;">本頁籤共 4 個子畫面：工程發包、變更內容、實付紀錄、工程結算；下表「所屬子畫面」欄標明各欄位歸屬，「實付紀錄」本身為子畫面名稱、非欄位。</p>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>所屬子畫面</th><th>驗證規則</th></tr>
+      <tr><td class="field">工程費</td><td><code>construction_fee</code></td><td>DECIMAL(15,0)</td><td class="tag rename">改名</td><td><b>是</b></td><td>發包／變更／實付／結算（共用）</td><td>非負數；預設值 0</td></tr>
+      <tr><td class="field">工管費</td><td><code>management_fee</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td><b>是</b></td><td>發包／變更／實付／結算（共用）</td><td>名稱邏輯不變，僅調整顯示順序；預設值 0</td></tr>
+      <tr><td class="field">空污費</td><td><code>air_pollution_fee</code></td><td>DECIMAL(15,0)</td><td class="tag rename">改名</td><td><b>是</b></td><td>發包／變更／實付／結算（共用）</td><td>非負數；預設值 0</td></tr>
+      <tr><td class="field">技術服務費</td><td><code>technical_service_fee</code></td><td>DECIMAL(15,0)</td><td class="tag rename">改名</td><td><b>是</b></td><td>發包／變更／實付／結算（共用）</td><td>非負數；預設值 0</td></tr>
+      <tr><td class="field">其他</td><td><code>other_fee</code></td><td>DECIMAL(15,0)</td><td class="tag rename">改名</td><td><b>是</b></td><td>發包／變更／實付／結算（共用）</td><td>非負數；預設值 0</td></tr>
+      <tr><td class="field">核定底價</td><td><code>approved_base_price</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td><b>是</b></td><td>工程發包</td><td>非負數</td></tr>
+      <tr><td class="field">是否需變更經費</td><td><code>needs_budget_change</code></td><td>ENUM</td><td class="tag keep">維持</td><td>—</td><td>變更內容</td><td>選項：有需變更／無需變更</td></tr>
+      <tr><td class="field">是否已付款</td><td><code>is_paid</code></td><td>BOOLEAN</td><td class="tag rename">改名＋改控制項</td><td>否</td><td><b>實付紀錄</b></td><td>勾選才展開付款輸入欄位；原「未結案付款」已移除</td></tr>
+      <tr><td class="field">是否已結算</td><td><code>is_settled</code></td><td>ENUM</td><td class="tag keep">維持</td><td>—</td><td>工程結算</td><td>選項：已結算／未結算</td></tr>
+    </table>
+    <div class="callout rule">
+      <span class="lbl">共用費用欄位預設值</span>
+      工程費、工管費、空污費、技術服務費、其他等 5 個共用費用欄位，於各子畫面（工程發包／變更內容／實付紀錄／工程結算）首次載入時，<b>預設值皆為 0</b>，避免必填檢核擋下尚未填寫金額之情境；使用者可再行覆寫為實際金額。
+    </div>
+    <div class="callout rule">
+      <span class="lbl">子畫面順序調整</span>
+      「實付紀錄」子畫面之顯示順序，已從原本排序最後一項，調整至「變更內容」與「工程結算」之間。此為子畫面排序異動，非新增／刪除欄位。
+    </div>
+    <div class="callout warn">
+      <span class="lbl">已移除欄位</span>
+      「發包賸餘款」（<code>contracting_surplus</code>）已自「工程發包」子畫面移除，不再顯示、不再儲存。
+    </div>
+
+    <h3 class="block-title">7.5　施工進度頁籤</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>驗證規則</th></tr>
+      <tr><td class="field">最新預定進度</td><td><code>latest_planned_progress</code></td><td>DECIMAL(5,2)</td><td class="tag new">新增顯示</td><td>—</td><td>百分比；來源：施工日誌最近一筆紀錄，唯讀</td></tr>
+      <tr><td class="field">最新實際進度</td><td><code>latest_actual_progress</code></td><td>DECIMAL(5,2)</td><td class="tag new">新增顯示</td><td>—</td><td>百分比；來源：施工日誌最近一筆紀錄，唯讀</td></tr>
+      <tr><td class="field">進度落後原因</td><td><code>progress_delay_reason</code></td><td>VARCHAR(500)</td><td class="tag new">新增</td><td>否</td><td>上限 500 字</td></tr>
+    </table>
+
+    <h3 class="block-title">7.6　共用參考表</h3>
+    <table class="spec-table">
+      <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>驗證規則</th></tr>
+      <tr><td class="field">管理處代碼／轄屬縣市代碼</td><td><code>agency_code</code> / <code>agency_city_code</code>（子表）</td><td>VARCHAR(10) / VARCHAR(10)[]</td><td>對應 17 個管理處，詳見 1.6 節；一個管理處可能對應多個縣市；同時供 1.3 節分組Ａ與分組Ｂ查詢使用</td></tr>
+      <tr><td class="field">操作留存紀錄（單位／人員／時間）</td><td><code>log_unit</code> / <code>log_user</code> / <code>log_time</code></td><td>VARCHAR／VARCHAR／DATETIME</td><td>每次儲存皆寫入一筆；不含異動內容細節</td></tr>
+      <tr><td class="field">編輯權限判斷</td><td><code>handler_email</code>（比對用）</td><td>VARCHAR(100)</td><td>同管理處人員：僅檢視；承辦人本人：可編輯。串接 AD 後，建議以 <code>mail</code> 屬性比對 <code>handler_email</code> 判斷承辦人身分，避免同名同姓誤判</td></tr>
+    </table>
+  </section>
+
+  <footer>本文件依需求說明彙整，如後續畫面與本文件描述有出入，以本文件規則為主；新增或變更需求請直接於對應章節增修，維持單一需求真實來源。</footer>
+
+</div>
+</body>
+</html>

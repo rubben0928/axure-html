@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>案件資料Excel匯入 - 開發雛形</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: #f4f6f9;
+    padding: 30px;
+    margin: 0;
+}
+.container {
+    max-width: 1320px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h2 { color: #1f4e79; margin-top: 0; }
+button {
+    padding: 10px 20px;
+    background: #1976d2;
+    color: white;
+    border: 0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+}
+button:disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+button.btn-success {
+    background: #1e7e34;
+}
+button.btn-success:disabled {
+    background: #95b89e;
+}
+input {
+    padding: 6px 4px;
+    border-radius: 4px;
+    border: 1.5px solid #d0d7e2;
+    width: 100%;
+    min-width: 60px;
+    text-align: center;
+    font-size: 13px;
+    transition: 0.15s;
+}
+input:focus {
+    outline: none;
+    border-color: #1976d2;
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.15);
+}
+.summary {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+.card {
+    padding: 15px 25px;
+    background: #eef5ff;
+    min-width: 150px;
+    text-align: center;
+    border-radius: 8px;
+    border-left: 5px solid #1976d2;
+}
+.card .num { font-size: 28px; font-weight: 700; color: #1f4e79; }
+.card.card-error { border-left-color: #d32f2f; }
+.card.card-error .num { color: #d32f2f; }
+.card.card-success { border-left-color: #2e7d32; }
+.card.card-success .num { color: #2e7d32; }
+.msg-bar {
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 15px;
+    margin: 15px 0 20px;
+    border-left: 5px solid;
+}
+.msg-bar.error {
+    background: #fde8e8;
+    color: #b71c1c;
+    border-left-color: #d32f2f;
+}
+.msg-bar.success {
+    background: #e6f7e6;
+    color: #1e5a2a;
+    border-left-color: #2e7d32;
+}
+.table-wrap {
+    overflow-x: auto;
+    margin: 15px 0;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 1100px;
+}
+th {
+    background: #1f4e79;
+    color: white;
+    padding: 10px 6px;
+    white-space: nowrap;
+    text-align: center;
+}
+td, th {
+    border: 1px solid #ddd;
+    padding: 6px 4px;
+    vertical-align: middle;
+    text-align: center;
+}
+td { background: #fff; }
+.cell-input.error {
+    border-color: #d32f2f !important;
+    background: #fff6f6 !important;
+    color: #d32f2f !important;
+    font-weight: 600;
+}
+.err-msg {
+    display: block;
+    font-size: 11px;
+    color: #d32f2f;
+    font-weight: 600;
+    margin-top: 2px;
+    line-height: 1.3;
+    min-height: 16px;
+}
+.err-msg.empty { visibility: hidden; }
+.status-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+.status-badge.ok { background: #e6f7e6; color: #1e7e34; }
+.status-badge.err { background: #fde8e8; color: #d32f2f; }
+.hidden { display: none !important; }
+.mt-8 { margin-top: 8px; }
+.mb-8 { margin-bottom: 8px; }
+.flex { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.upload-area {
+    background: #f8faff;
+    border: 2px dashed #b8cce4;
+    border-radius: 12px;
+    padding: 30px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 30px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>📋 自籌款案件資料 Excel 匯入</h2>
+
+    <!-- 上傳頁面 -->
+    <div id="uploadPage">
+        <div class="upload-area">
+            <div>
+                <label style="font-weight:600;color:#1f4e79;">📄 選擇 Excel 檔案</label>
+                <input type="file" id="fileInput" accept=".xlsx" style="display:block;margin-top:6px;">
+                <span style="font-size:12px;color:#6b7a8f;">只限 .xlsx 格式</span>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-outline" onclick="downloadTemplate()" style="background:#fff;color:#1976d2;border:1.5px solid #1976d2;">⬇ 下載 Excel 範本</button>
+                <button onclick="handleStartImport()">▶ 開始匯入檢核</button>
+            </div>
+        </div>
+       
+    </div>
+
+    <!-- 資料檢核頁面 -->
+    <div id="dataPage" class="hidden">
+        <h3 style="color:#1f4e79;margin:0 0 6px 0;">📊 資料檢核與線上修正</h3>
+
+        <div class="summary">
+            <div class="card"><span class="num" id="totalCount">0</span><br>總筆數</div>
+            <div class="card card-success"><span class="num" id="successCount">0</span><br>✅ 正確筆數</div>
+            <div class="card card-error"><span class="num" id="errorCount">0</span><br>⚠ 待修正筆數</div>
+        </div>
+
+        <div id="msgBar" class="msg-bar error">⚠ 請檢視下方數據，紅色欄位表示有錯誤。</div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>計畫年度</th><th>計畫編號</th><th>計畫名稱</th>
+                        <th>工程核定日期</th><th>核定文號</th><th>核定經費(千元)</th>
+                        <th>工程編號</th><th>工程名稱</th><th>承辦人</th><th>電子郵件</th>
+                        <th>狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="flex">
+            <button onclick="handleRecheck()">🔄 重新檢核</button>
+            <button id="confirmImportBtn" class="btn-success" disabled onclick="handleConfirmImport()">✔ 確認匯入</button>
+            <span style="color:#6b7a8f;font-size:13px;">（全部資料正確方可匯入）</span>
+        </div>
+    </div>
+
+    <!-- 匯入完成頁面 -->
+    <div id="finishPage" class="hidden">
+        <div style="text-align:center;padding:60px 20px;">
+            <div style="font-size:72px;color:#2e7d32;">✔</div>
+            <h2 style="color:#1e7e34;font-size:30px;">匯入完成</h2>
+            <p style="font-size:17px;color:#3d4f66;">案件資料已成功匯入系統，共 <strong id="finishTotal">0</strong> 筆。</p>
+            <br>
+            <button onclick="location.reload()">↺ 回到首頁</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ================================================================
+    //  1. 定義資料與欄位
+    // ================================================================
+    const FIELD_KEYS = [
+        'year', 'projectNo', 'projectName', 'approveDate', 'approveNo',
+        'budget', 'engNo', 'engName', 'person', 'email'
+    ];
+
+    // 內建範例資料（符合需求文件的錯誤案例）
+    const RAW_DATA = [{
+        id: 1,
+        year: '114',
+        projectNo: 'P001',
+        projectName: '渠道改善計畫',
+        approveDate: '114/05/01',
+        approveNo: '水字第001號',
+        budget: '5000',
+        engNo: 'A001',
+        engName: '渠道改善工程',
+        person: '王小明',
+        email: 'a@test.com'
+    }, {
+        id: 2,
+        year: '11',          // 錯誤
+        projectNo: 'P002',
+        projectName: '道路改善計畫',
+        approveDate: '2025/05/01', // 錯誤
+        approveNo: '府工字002號',
+        budget: '3000.5',    // 錯誤
+        engNo: 'A002',
+        engName: '道路改善工程',
+        person: '',          // 錯誤
+        email: 'abc'         // 錯誤
+    }, {
+        id: 3,
+        year: '114',
+        projectNo: 'P003',
+        projectName: '排水改善計畫',
+        approveDate: '',     // 錯誤
+        approveNo: '水字第003號',
+        budget: '2500',
+        engNo: 'A003',
+        engName: '排水工程',
+        person: '陳小姐',
+        email: 'chen@test.com'
+    }];
+
+    let currentData = [];
+    let errorMap = {};
+
+    // ================================================================
+    //  2. 檢核函式 (完全依照需求文件)
+    // ================================================================
+    function validateRecord(record) {
+        const errors = {};
+
+        const yearVal = record.year?.trim() || '';
+        if (!yearVal) errors.year = '不可空白';
+        else if (!/^\d{3}$/.test(yearVal)) errors.year = '須為3碼民國年 (例：114)';
+
+        if (!record.projectNo?.trim()) errors.projectNo = '不可空白';
+        if (!record.projectName?.trim()) errors.projectName = '不可空白';
+
+        const dateVal = record.approveDate?.trim() || '';
+        if (!dateVal) {
+            errors.approveDate = '不可空白';
+        } else if (!/^\d{3}\/\d{2}\/\d{2}$/.test(dateVal)) {
+            errors.approveDate = '格式應為 YYY/MM/DD (例：114/05/01)';
+        } else {
+            const parts = dateVal.split('/');
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+            if (m < 1 || m > 12) errors.approveDate = '月份需介於01~12';
+            else if (d < 1 || d > 31) errors.approveDate = '日期需介於01~31';
+        }
+
+        if (!record.approveNo?.trim()) errors.approveNo = '不可空白';
+
+        const budgetVal = record.budget?.trim() || '';
+        if (!budgetVal) {
+            errors.budget = '不可空白';
+        } else if (!/^-?\d+$/.test(budgetVal)) {
+            errors.budget = '僅能輸入整數 (不可小數)';
+        } else if (parseInt(budgetVal, 10) < 0) {
+            errors.budget = '須為正整數';
+        }
+
+        if (!record.engNo?.trim()) errors.engNo = '不可空白';
+        if (!record.engName?.trim()) errors.engName = '不可空白';
+        if (!record.person?.trim()) errors.person = '不可空白';
+
+        const emailVal = record.email?.trim() || '';
+        if (!emailVal) {
+            errors.email = '不可空白';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+            errors.email = 'Email格式錯誤 (例：name@domain.com)';
+        }
+
+        return errors;
+    }
+
+    // ================================================================
+    //  3. 核心操作函式
+    // ================================================================
+    function initData() {
+        currentData = RAW_DATA.map(r => ({ ...r }));
+        errorMap = {};
+        currentData.forEach(r => {
+            errorMap[r.id] = validateRecord(r);
+        });
+    }
+
+    function revalidateAll() {
+        let totalErrors = 0;
+        currentData.forEach(r => {
+            const errs = validateRecord(r);
+            errorMap[r.id] = errs;
+            totalErrors += Object.keys(errs).length;
+        });
+        return totalErrors;
+    }
+
+    function getErrors(id) {
+        return errorMap[id] || {};
+    }
+
+    function isRecordValid(id) {
+        return Object.keys(getErrors(id)).length === 0;
+    }
+
+    function calcStats() {
+        const total = currentData.length;
+        let validCount = 0;
+        currentData.forEach(r => {
+            if (isRecordValid(r.id)) validCount++;
+        });
+        return { total, validCount, errCount: total - validCount };
+    }
+
+    // ================================================================
+    //  4. 渲染表格
+    // ================================================================
+    function renderTable() {
+        const tbody = document.getElementById('dataTableBody');
+        if (!tbody) return;
+
+        const stats = calcStats();
+        document.getElementById('totalCount').textContent = stats.total;
+        document.getElementById('successCount').textContent = stats.validCount;
+        document.getElementById('errorCount').textContent = stats.errCount;
+
+        const msgBar = document.getElementById('msgBar');
+        const confirmBtn = document.getElementById('confirmImportBtn');
+        if (stats.errCount === 0) {
+            msgBar.className = 'msg-bar success';
+            msgBar.innerHTML = '✔ 所有資料檢核通過，可以進行匯入！';
+            confirmBtn.removeAttribute('disabled');   // 確保啟用
+        } else {
+            msgBar.className = 'msg-bar error';
+            msgBar.innerHTML = '⚠ 尚有 ' + stats.errCount + ' 筆資料需要修正，請處理紅色欄位。';
+            confirmBtn.setAttribute('disabled', 'disabled');
+        }
+
+        let html = '';
+        currentData.forEach(record => {
+            const errs = getErrors(record.id);
+            const valid = Object.keys(errs).length === 0;
+
+            html += '<tr>';
+            FIELD_KEYS.forEach(key => {
+                const val = record[key] !== undefined ? record[key] : '';
+                const errorMsg = errs[key] || '';
+                const isError = !!errorMsg;
+                const inputClass = 'cell-input' + (isError ? ' error' : '');
+
+                html += '<td>';
+                html += '<input type="text" class="' + inputClass + '" ';
+                html += 'data-id="' + record.id + '" ';
+                html += 'data-field="' + key + '" ';
+                html += 'value="' + escapeHtml(String(val)) + '" ';
+                html += 'autocomplete="off">';
+                html += '<span class="err-msg ' + (isError ? '' : 'empty') + '">' + (isError ? escapeHtml(errorMsg) : '&nbsp;') + '</span>';
+                html += '</td>';
+            });
+
+            html += '<td>';
+            if (valid) {
+                html += '<span class="status-badge ok">✔ OK</span>';
+            } else {
+                html += '<span class="status-badge err">✘ 錯誤</span>';
+            }
+            html += '</td>';
+
+            html += '</tr>';
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ================================================================
+    //  5. 同步輸入框到資料
+    // ================================================================
+    function syncInputsToData() {
+        document.querySelectorAll('#dataTableBody input.cell-input').forEach(input => {
+            const id = parseInt(input.dataset.id, 10);
+            const field = input.dataset.field;
+            const val = input.value;
+            const rec = currentData.find(r => r.id === id);
+            if (rec) {
+                rec[field] = val;
+            }
+        });
+    }
+
+    // ================================================================
+    //  6. 流程控制 (對應按鈕事件)
+    // ================================================================
+
+    function handleStartImport() {
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput.files && fileInput.files.length > 0) {
+            const fileName = fileInput.files[0].name;
+            if (!fileName.endsWith('.xlsx')) {
+                alert('只限上傳 .xlsx 格式的檔案。');
+                return;
+            }
+            console.log('已選擇檔案：' + fileName + '，將使用範例數據展示功能。');
+        }
+
+        initData();
+        revalidateAll();
+        renderTable();
+
+        document.getElementById('uploadPage').classList.add('hidden');
+        document.getElementById('dataPage').classList.remove('hidden');
+        document.getElementById('finishPage').classList.add('hidden');
+    }
+
+    function handleRecheck() {
+        syncInputsToData();
+        revalidateAll();
+        renderTable();
+    }
+
+    function handleConfirmImport() {
+        try {
+            // 先強制同步並重新檢核，確保最新狀態
+            syncInputsToData();
+            const totalErrors = revalidateAll();
+            renderTable();  // 更新介面
+
+            if (totalErrors > 0) {
+                alert('尚有 ' + totalErrors + ' 個錯誤欄位，請修正後再試。');
+                return;
+            }
+
+            const stats = calcStats();
+            // 二次確認
+            if (!confirm('確認要將 ' + stats.total + ' 筆案件資料匯入系統嗎？')) {
+                return;
+            }
+
+            // 匯入成功
+            document.getElementById('finishTotal').textContent = stats.total;
+            document.getElementById('dataPage').classList.add('hidden');
+            document.getElementById('finishPage').classList.remove('hidden');
+        } catch (e) {
+            alert('發生錯誤：' + e.message);
+        }
+    }
+
+    // 下載範本 (檔案名稱改為 .xlsx 以符合需求)
+    function downloadTemplate() {
+        const headers = [
+            '計畫年度', '計畫編號', '計畫名稱', '工程核定日期',
+            '核定文號', '核定經費(千元)', '工程編號', '工程名稱',
+            '承辦人', '電子郵件'
+        ];
+        const exampleRow = [
+            '114', 'P001', '範例計畫', '114/05/01',
+            '文號001', '5000', 'E001', '範例工程',
+            '王小明', 'name@domain.com'
+        ];
+        let csv = '\uFEFF' + headers.join(',') + '\n' + exampleRow.join(',') + '\n';
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '案件資料匯入範本.xlsx';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+
+    // ================================================================
+    //  7. 初始化
+    // ================================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('uploadPage').classList.remove('hidden');
+        document.getElementById('dataPage').classList.add('hidden');
+        document.getElementById('finishPage').classList.add('hidden');
+
+        // 快捷鍵：在輸入框按 Enter 觸發重新檢核
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.classList.contains('cell-input')) {
+                e.preventDefault();
+                handleRecheck();
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

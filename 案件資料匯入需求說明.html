@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>案件資料 Excel 匯入功能 – 系統開發需求說明</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #e9ecf1;
+            font-family: "Microsoft JhengHei", "PingFang TC", "Segoe UI", Roboto, sans-serif;
+            padding: 40px 20px;
+            color: #1e2a3a;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            padding: 45px 50px;
+        }
+
+        /* 標題層級 */
+        .doc-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0a2540;
+            border-left: 8px solid #1976d2;
+            padding-left: 20px;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f4e79;
+            margin-top: 38px;
+            margin-bottom: 18px;
+            padding-bottom: 6px;
+            border-bottom: 3px solid #dce6f2;
+        }
+        h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2a405c;
+            margin-top: 26px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        h4 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2a405c;
+            margin-top: 18px;
+            margin-bottom: 6px;
+        }
+
+        p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #2c3e4f;
+            margin-bottom: 14px;
+        }
+
+        /* 清單 */
+        ul,
+        ol {
+            padding-left: 24px;
+            margin-bottom: 18px;
+        }
+        li {
+            font-size: 15px;
+            line-height: 1.7;
+            margin-bottom: 6px;
+            color: #2c3e4f;
+        }
+
+        /* 表格 */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0 22px;
+            border-radius: 8px;
+            border: 1px solid #dee4ed;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 680px;
+        }
+        table thead th {
+            background: #1f4e79;
+            color: #fff;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        table tbody td {
+            border-bottom: 1px solid #e6ecf3;
+            padding: 10px 10px;
+            vertical-align: top;
+            background: #fff;
+        }
+        table tbody tr:hover td {
+            background: #f8faff;
+        }
+        table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .col-label {
+            font-weight: 600;
+            color: #0a2540;
+            white-space: nowrap;
+        }
+        .col-rule {
+            color: #1f3a57;
+        }
+        .col-msg {
+            color: #b33c3c;
+            font-weight: 500;
+        }
+        .badge {
+            display: inline-block;
+            background: #eef3f9;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f4e79;
+        }
+
+        /* 提示框 */
+        .note-box {
+            background: #f8faff;
+            border-left: 5px solid #1976d2;
+            padding: 16px 22px;
+            margin: 18px 0 22px;
+            border-radius: 4px 8px 8px 4px;
+        }
+        .note-box.warning {
+            background: #fffbee;
+            border-left-color: #e67e22;
+        }
+        .note-box.success {
+            background: #f2fcf5;
+            border-left-color: #2e7d32;
+        }
+        .note-box.danger {
+            background: #fff6f6;
+            border-left-color: #d32f2f;
+        }
+        .note-box strong {
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* 代碼 / 關鍵字 */
+        code {
+            background: #eef2f7;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: "Consolas", "Monaco", monospace;
+            font-size: 13px;
+            color: #c7254e;
+            border: 1px solid #e0e6ed;
+        }
+        .inline-code {
+            background: #f2f5f9;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #1f4e79;
+        }
+
+        /* 卡片清單 */
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin: 14px 0 18px;
+        }
+        .spec-item {
+            background: #f8faff;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid #e0e8f2;
+        }
+        .spec-item .title {
+            font-weight: 700;
+            color: #1f4e79;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* 印刷優化 */
+        @media print {
+            body {
+                background: #fff;
+                padding: 10px;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 20px;
+            }
+            .table-wrap {
+                border: 1px solid #aaa;
+            }
+            table thead th {
+                background: #1f4e79 !important;
+                color: #fff !important;
+            }
+            .badge {
+                border: 1px solid #aaa;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 20px 16px;
+            }
+            .doc-title {
+                font-size: 22px;
+                padding-left: 14px;
+            }
+            h2 {
+                font-size: 19px;
+            }
+            h3 {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- 標題 -->
+        <div class="doc-title">案件資料 Excel 匯入功能 – 系統開發需求說明</div>
+
+        <!-- ========================================================= -->
+        <!-- 壹、整體流程 -->
+        <!-- ========================================================= -->
+        <h2 id="sec1">一、整體流程與畫面切換 (User Flow)</h2>
+        <p>系統包含三個主要畫面區塊（Page），透過 JavaScript 控制顯示/隱藏 (<code>display: none / block</code>)：</p>
+        <ol>
+            <li><strong>上傳頁面 (uploadPage)</strong>：預設顯示。</li>
+            <li><strong>資料檢核頁面 (dataPage)</strong>：點擊「開始匯入檢核」後顯示，隱藏上傳頁面。</li>
+            <li><strong>匯入完成頁面 (finishPage)</strong>：點擊「確認匯入」且檢核全部通過後顯示，隱藏資料檢核頁面。</li>
+        </ol>
+
+        <!-- ========================================================= -->
+        <!-- 貳、畫面元件細部規格 -->
+        <!-- ========================================================= -->
+        <h2 id="sec2">二、畫面元件細部規格 (UI Component Spec)</h2>
+
+        <!-- 2-1 上傳頁面 -->
+        <h3>1. 上傳頁面 (uploadPage)</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th style="width:18%;">元件</th><th style="width:32%;">規格說明</th><th style="width:50%;">行為 / 事件</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td class="col-label">下載 Excel 範本</td>
+                        <td>Button 按鈕</td>
+                        <td>點擊後直接下載 <code>案件資料匯入範本.xlsx</code>。<br>
+                        <span class="badge">開發備註</span> 檔案標頭須包含：計畫年度,計畫編號,計畫名稱,工程核定日期,核定文號,核定經費(千元),工程編號,工程名稱,承辦人,電子郵件。並提供一列正確格式的範例資料。</td>
+                    </tr>
+                    <tr>
+                        <td class="col-label">選擇檔案</td>
+                        <td><code>&lt;input type="file"&gt;</code></td>
+                        <td>只限 <code>.xlsx</code>。</td>
+                    </tr>
+                    <tr>
+                        <td class="col-label">開始匯入檢核</td>
+                        <td>Button (主要按鈕)</td>
+                        <td>此階段應先讀取檔案內容。</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 2-2 資料檢核頁面 -->
+        <h3>2. 資料檢核頁面 (dataPage) <span style="font-weight:400;font-size:14px;color:#4a5a72;">—— 核心頁面</span></h3>
+        <p>此頁面需包含以下子元件：</p>
+
+        <h4>A. 統計摘要卡 (Summary Cards)</h4>
+        <ul>
+            <li><strong>總筆數</strong>：顯示 <code>currentData.length</code>。</li>
+            <li><strong>正確筆數</strong>：<code>filter(該筆所有欄位無錯誤).length</code>。</li>
+            <li><strong>待修正筆數</strong>：<code>filter(該筆有任何一個欄位錯誤).length</code>。</li>
+            <li><span class="badge">開發備註</span> 數據變動時（如重新檢核）需即時更新數字。</li>
+        </ul>
+
+        <h4>B. 動態訊息列 (Message Bar)</h4>
+        <ul>
+            <li><strong>有錯誤時</strong>：紅底／左側紅框，顯示 <span style="background:#fde8e8;padding:2px 8px;border-radius:4px;color:#b71c1c;">⚠ 尚有 N 筆資料需要修正，請處理紅色欄位。</span></li>
+            <li><strong>全部正確時</strong>：綠底／左側綠框，顯示 <span style="background:#e6f7e6;padding:2px 8px;border-radius:4px;color:#1e5a2a;">✔ 所有資料檢核通過，可以進行匯入！</span></li>
+        </ul>
+
+        <h4>C. 資料表格 (Data Table)</h4>
+        <ul>
+            <li><strong>欄位</strong>：依序顯示「計畫年度、計畫編號、計畫名稱、工程核定日期、核定文號、核定經費(千元)、工程編號、工程名稱、承辦人、電子郵件、狀態」共 11 欄。</li>
+            <li><strong>輸入模式</strong>：所有欄位（除「狀態」外）皆須為 <strong>可編輯的輸入框 (<code>&lt;input&gt;</code>)</strong>，方便使用者直接點擊修改。</li>
+            <li><strong>資料綁定</strong>：輸入框的 <code>value</code> 需綁定 <code>currentData</code> 物件的對應欄位。當使用者修改輸入框內容時，需即時更新 <code>currentData</code> 物件（監聽 <code>input</code> 事件）。</li>
+            <li><strong>錯誤樣式 (關鍵)</strong>：
+                <ul>
+                    <li>當該欄位檢核失敗时，<code>&lt;input&gt;</code> 須加上 CSS 類別 <code>error</code> (紅字 + 紅框)。</li>
+                    <li>欄位下方須顯示具體的紅色錯誤提示文字（如「不可空白」、「格式應為 YYY/MM/DD」）。</li>
+                    <li>正確欄位則維持普通樣式，且錯誤訊息區塊留白或隱藏。</li>
+                </ul>
+            </li>
+            <li><strong>狀態欄 (Status)</strong>：顯示徽章 (Badge)。
+                <ul>
+                    <li>該筆記錄<strong>全部欄位正確</strong>：顯示綠色 <code>✔ OK</code>。</li>
+                    <li>該筆記錄<strong>任一欄位錯誤</strong>：顯示紅色 <code>✘ 錯誤</code>。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>D. 操作按鈕 (Action Buttons)</h4>
+        <ul>
+            <li><strong>「重新檢核」按鈕</strong>：點擊後，系統讀取表格中所有 <code>&lt;input&gt;</code> 的最新值，同步回 <code>currentData</code>，再次執行「資料檢核函式」，並重新渲染表格與統計數據。</li>
+            <li><strong>「確認匯入」按鈕</strong>：
+                <ul>
+                    <li><strong>預設狀態</strong>：<code>disabled</code> (灰色不可點擊)。</li>
+                    <li><strong>啟用條件</strong>：當「重新檢核」後，系統判定 <code>待修正筆數 === 0</code> 時，改為 <code>enabled</code> (綠色可點擊)。</li>
+                    <li><strong>點擊行為</strong>：觸發「確認匯入」流程（顯示 Modal 二次確認對話框，或直接跳轉至完成頁面）。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <!-- 2-3 匯入完成頁面 -->
+        <h3>3. 匯入完成頁面 (finishPage)</h3>
+        <p>顯示成功圖示與訊息「案件資料已成功匯入系統，共 N 筆。」，並提供「回到首頁」按鈕（重新整理頁面）。</p>
+
+        <!-- ========================================================= -->
+        <!-- 參、業務操作邏輯 -->
+        <!-- ========================================================= -->
+        <h2 id="sec3">三、業務操作邏輯</h2>
+
+        <h3>1. 資料檢核函式 (validateRecord) — 錯誤訊息對照表</h3>
+        <p>開發人員需針對每一筆資料的 10 個欄位，實作以下<strong>精確的錯誤訊息回傳</strong>（此為減少開發來回問答的關鍵）：</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th style="width:14%;">欄位</th><th style="width:36%;">檢核規則 (順序由先至後)</th><th style="width:50%;">回傳錯誤訊息</th></tr></thead>
+                <tbody>
+                    <tr><td class="col-label">計畫年度</td><td class="col-rule">1. 不可空白<br>2. 須為3碼數字 (且僅含數字)</td><td class="col-msg">1. "不可空白"<br>2. "須為3碼民國年 (例：114)"</td></tr>
+                    <tr><td class="col-label">計畫編號</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">計畫名稱</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">工程核定日期</td><td class="col-rule">1. 不可空白<br>2. 須符合 YYY/MM/DD 正規表達式 (<code>/^\d{3}\/\d{2}\/\d{2}$/</code>)<br>3. (選修) 月份 01-12，日期 01-31</td><td class="col-msg">1. "不可空白"<br>2. "格式應為 YYY/MM/DD (例：114/05/01)"<br>3. "日期格式不合法"</td></tr>
+                    <tr><td class="col-label">核定文號</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">核定經費(千元)</td><td class="col-rule">1. 不可空白<br>2. 僅能輸入整數 (<code>/^-?\d+$/</code>)</td><td class="col-msg">1. "不可空白"<br>2. "僅能輸入整數 (不可小數)"</td></tr>
+                    <tr><td class="col-label">工程編號</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">工程名稱</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">承辦人</td><td class="col-rule">不可空白</td><td class="col-msg">"不可空白"</td></tr>
+                    <tr><td class="col-label">電子郵件</td><td class="col-rule">1. 不可空白<br>2. 符合 Email 格式 (<code>/^[^\s@]+@[^\s@]+\.[^\s@]+$/</code>)</td><td class="col-msg">1. "不可空白"<br>2. "Email格式錯誤 (例：name@domain.com)"</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>2. 匯入前二次確認 (Important)</h3>
+        <div class="note-box warning">
+            <strong>⚠️ 強烈建議：</strong> 雖然雛型直接跳轉，但基於原始需求文件第 5 點「正式匯入前應由使用者再次確認」，請開發人員在點擊「確認匯入」時，補上 <code>window.confirm('確認要將 N 筆案件資料匯入系統嗎？')</code>，按下「確定」後才執行寫入資料庫動作並跳轉完成頁面。
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- 肆、例外處理 -->
+        <!-- ========================================================= -->
+        <h2 id="sec4">四、例外處理與邊界條件 (Edge Cases)</h2>
+        <div class="spec-grid">
+            <div class="spec-item"><span class="title">🔹 無資料</span>若上傳的 Excel 僅有標頭列無資料，或檔案空白，匯入檢核時應顯示「無資料可匯入，請檢查檔案。」的警示訊息，不切換至資料頁面。</div>
+        </div>
+
+        <div style="margin-top:40px;padding-top:20px;border-top:2px solid #e6ecf3;font-size:14px;color:#6b7a8f;text-align:center;">
+            本規格書對應最終雛型畫面 · 開發人員請依此實作
+        </div>
+
+    </div>
+</body>
+</html>

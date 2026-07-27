@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程生命週期系統 — 卡控機制極簡規格 (Dev Cheat Sheet)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --secondary: #475569;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flow-list {
+            list-style: none;
+        }
+
+        .flow-list li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 10px;
+        }
+
+        .flow-list li::before {
+            content: "•";
+            position: absolute;
+            left: 8px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .gate-step {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.95rem;
+        }
+
+        .arrow {
+            color: var(--primary);
+            font-weight: bold;
+            margin: 0 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .badge-req {
+            background-color: #fee2e2;
+            color: var(--danger);
+        }
+
+        .badge-cond {
+            background-color: #fef3c7;
+            color: #b45309;
+        }
+
+        .note-tag {
+            color: #b45309;
+            font-size: 0.88rem;
+            font-weight: normal;
+            margin-left: 6px;
+        }
+
+        .timeline-box {
+            background-color: #f1f5f9;
+            border: 1px dashed #cbd5e1;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            color: #0f172a;
+            margin: 10px 0;
+        }
+
+        .sub-group {
+            margin-top: 12px;
+            padding-left: 12px;
+            border-left: 2px solid var(--border);
+        }
+
+        .sub-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--secondary);
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📌 工程生命週期系統 — 卡控機制極簡規格</h1>
+        <div class="subtitle">Dev Cheat Sheet / 開發人員邏輯與關卡對照表</div>
+    </header>
+
+    <!-- 一、跨模組解鎖門檻 -->
+    <div class="section-card">
+        <h2 class="section-title">一、 跨模組解鎖門檻 (Workflow Gates)</h2>
+        <div class="gate-step">
+            <code>[基本資料]</code> + <code>[預定期程]</code> 皆完成存檔 <span class="arrow">→</span> 解鎖 <code>[預算額度]</code> 與 <code>[執行狀況]</code>
+        </div>
+        <div class="gate-step">
+            <code>[執行狀況]</code> 輸入「實際開工日」 <span class="arrow">→</span> 解鎖 <code>[施工進度]</code>
+        </div>
+        <div class="gate-step">
+            <code>[執行狀況]</code> 輸入「實際竣工日」 <span class="arrow">→</span> 解鎖 <code>[工程驗收結算保固]</code> 與 <code>[巡查登錄]</code> <span class="note-tag">(※ 巡查登錄維持原規則：依工程驗收判斷)</span>
+        </div>
+        <div class="gate-step">
+            <code>[執行狀況]</code> 輸入「結算完成日期」 <span class="arrow">→</span> 解鎖 <code>[財產登錄]</code> <span class="note-tag">(※ 原判斷：竣工驗收後解鎖 ➔ 變更為：填寫結算完成日期後解鎖)</span>
+        </div>
+    </div>
+
+    <!-- 二、基本資料 -->
+    <div class="section-card">
+        <h2 class="section-title">二、 基本資料 (Basic Info)</h2>
+        <ul class="flow-list">
+            <li><strong>填寫順序：</strong>計畫資料 <span class="arrow">→</span> 工程資料 <span class="arrow">→</span> (是否有分項工程 Checkbox) <span class="arrow">→</span> 聯絡資料</li>
+            <li>
+                <strong>動態開關 (Checkbox Logic)：</strong>
+                <div class="sub-group">
+                    <div class="sub-title"><span class="badge badge-cond">Unchecked</span> 無分項：</div>
+                    <ul class="flow-list">
+                        <li>隱藏：分項工程欄位、按鈕、分項工程填報清單</li>
+                        <li>顯示/必填：主工程「工程內容 <span class="badge badge-req">*</span>」、「工程位置 <span class="badge badge-req">*</span>」、「XY座標 <span class="badge badge-req">*</span>」</li>
+                        <li>清單卡控：<code>[生態檢核自評表 *]</code> 為必填（未填阻擋存檔）；<code>[用地取得情形]</code> 為選填</li>
+                    </ul>
+                </div>
+                <div class="sub-group" style="margin-top: 10px;">
+                    <div class="sub-title"><span class="badge badge-cond">Checked</span> 有分項：</div>
+                    <ul class="flow-list">
+                        <li>展開：第 1 項分項工程欄位（編號 <span class="badge badge-req">*</span>、名稱 <span class="badge badge-req">*</span>、內容 <span class="badge badge-req">*</span>、工程位置 <span class="badge badge-req">*</span> 全部強制必填）、<code>[+新增分項]</code> 按鈕、動態生成「分項工程填報清單」</li>
+                        <li>清單卡控：<code>[生態檢核自評表 *]</code> 為必填（未填阻擋存檔）；<code>[用地取得情形]</code> 為選填</li>
+                    </ul>
+                </div>
+            </li>
+            <li style="margin-top: 10px;"><strong>防呆機制：</strong>取消勾選 Checkbox 時，跳出二次確認視窗，確定後清空分項欄位資料。</li>
+        </ul>
+    </div>
+
+    <!-- 三、預定期程 -->
+    <div class="section-card">
+        <h2 class="section-title">三、 預定期程 (Schedule Control)</h2>
+        <ul class="flow-list">
+            <li>
+                <strong>時間軸順序：</strong>
+                <div class="timeline-box">
+                    測設預定完成日期 ≤ 預定決標日期 ≤ 預定開工日期 ≤ 預定竣工日期
+                </div>
+            </li>
+            <li>
+                <strong>日期卡控邏輯：</strong>
+                <ul class="flow-list">
+                    <li><strong>關鍵規則：</strong>每個日期的「後者日期不可小於前者日期」（但可以等於同日）。</li>
+                    <li><strong>防呆處理：</strong>若「後者日期 &lt; 前者日期」，顯示警告訊息並阻擋儲存。</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 四、執行狀況 -->
+    <div class="section-card">
+        <h2 class="section-title">四、 執行狀況 (Execution Status)</h2>
+        <ul class="flow-list">
+            <li>
+                <strong>階段順序與解鎖門檻：</strong>
+                <ul class="flow-list">
+                    <li><strong>規劃設計階段：</strong>填寫「測設完成日期」 <span class="arrow">→</span> 解鎖 <code>[招標階段]</code></li>
+                    <li><strong>招標階段：</strong>填寫「契約編號 <span class="badge badge-req">*</span>」、「訂約日期 <span class="badge badge-req">*</span>」 <span class="arrow">→</span> 解鎖 <code>[施工階段]</code></li>
+                    <li><strong>施工階段：</strong>填寫「實際開工日 <span class="badge badge-req">*</span>」解鎖 <code>[施工進度]</code> 模組；填寫「實際竣工日 <span class="badge badge-req">*</span>」 <span class="arrow">→</span> 解鎖 <code>[驗收付款階段]</code> 模組及 <code>[巡查登錄]</code> 模組</li>
+                    <li><strong>驗收付款階段：</strong>填寫「結算完成日期」 <span class="arrow">→</span> 解鎖 <code>[財產登錄]</code> 模組</li>
+                </ul>
+            </li>
+            <li style="margin-top: 10px;">
+                <strong>時間軸順序 (後者 ≥ 前者)：</strong>
+                <div class="timeline-box">
+                    用地取得日期 ≤ 辦理說明會日期 ≤ 測設完成日期 ≤ 上網公告日期 ≤ 決標日期 ≤ 訂約日期 ≤ 實際開工日期 ≤ 實際竣工日期 ≤ 驗收日期 ≤ 結算完成日期
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 五、預算額度 -->
+    <div class="section-card">
+        <h2 class="section-title">五、 預算額度 (Budget Control)</h2>
+        <ul class="flow-list">
+            <li>
+                <strong>[工程設計]：</strong>填寫工程費、空污費、其他、技術服務費。
+                <div class="sub-title" style="font-weight: normal; margin-left: 10px;">↳ <strong>解鎖條件：</strong><code>[執行狀況]</code> 輸入「測設完成日期」</div>
+            </li>
+            <li style="margin-top: 8px;">
+                <strong>[工程發包]：</strong>填寫工程費、空污費、其他、技術服務費。
+                <div class="sub-title" style="font-weight: normal; margin-left: 10px;">↳ <strong>解鎖條件：</strong><code>[執行狀況]</code> 輸入「決標日期」</div>
+            </li>
+            <li style="margin-top: 8px;">
+                <strong>[經費變更與實付款]：</strong>填寫變更追加減、契約總價、實付款紀錄。
+                <div class="sub-title" style="font-weight: normal; margin-left: 10px;">↳ <strong>解鎖條件：</strong><code>[工程發包]</code> 解鎖時同步連動解鎖</div>
+            </li>
+            <li style="margin-top: 8px;">
+                <strong>[工程結算]：</strong>填寫工程費、空污費、其他、技術服務費。
+                <div class="sub-title" style="font-weight: normal; margin-left: 10px;">↳ <strong>解鎖條件：</strong><code>[執行狀況]</code> 輸入「結算完成日期」</div>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>

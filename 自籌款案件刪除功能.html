@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自籌款案件刪除</title>
+    <style>
+        /* ===== 全域重置 & 基礎 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", "Helvetica Neue", Arial, sans-serif;
+            background: #e9edf4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ===== 主卡片 ===== */
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.10);
+            padding: 40px 48px 36px;
+            width: 100%;
+            max-width: 680px;
+            transition: all 0.2s;
+        }
+
+        /* ===== 標題 ===== */
+        .card-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2b4a;
+            letter-spacing: 2px;
+            padding-bottom: 14px;
+            border-bottom: 3px solid #2c5f8a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-title::before {
+            content: "▍";
+            color: #2c5f8a;
+            font-weight: 400;
+            font-size: 28px;
+        }
+
+        /* ===== 表單區域 ===== */
+        .form-group {
+            margin-top: 28px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1f3a5f;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .form-label .required {
+            color: #c0392b;
+            margin-left: 2px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 2px solid #dce2ec;
+            border-radius: 8px;
+            background: #fafbfc;
+            transition: border 0.25s, box-shadow 0.25s;
+            color: #1f3a5f;
+            outline: none;
+            font-family: inherit;
+        }
+        .form-input:focus {
+            border-color: #2c5f8a;
+            box-shadow: 0 0 0 4px rgba(44, 95, 138, 0.12);
+            background: #ffffff;
+        }
+        .form-input::placeholder {
+            color: #aab3c5;
+            font-weight: 300;
+            font-size: 15px;
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 8px;
+            font-size: 14px;
+            color: #6f7d98;
+            letter-spacing: 0.3px;
+        }
+        .form-hint strong {
+            color: #2c5f8a;
+            font-weight: 600;
+        }
+
+        /* ===== 按鈕區域 ===== */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 44px;
+            font-size: 17px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            letter-spacing: 1px;
+            flex: 1 1 auto;
+            min-width: 120px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-primary {
+            background: #2c5f8a;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(44, 95, 138, 0.25);
+        }
+        .btn-primary:hover {
+            background: #1f4a6e;
+            box-shadow: 0 6px 18px rgba(44, 95, 138, 0.35);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active {
+            transform: translateY(0px);
+            box-shadow: 0 2px 8px rgba(44, 95, 138, 0.20);
+        }
+
+        /* ===== 自訂 Modal（遮罩） ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(3px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== Modal 內容 ===== */
+        .modal-box {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 540px;
+            width: 100%;
+            padding: 36px 40px 32px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.30);
+            animation: slideUp 0.30s ease;
+        }
+
+        @keyframes slideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a2b4a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e9edf4;
+            margin-bottom: 20px;
+        }
+        .modal-title .icon {
+            font-size: 26px;
+        }
+
+        .modal-body {
+            font-size: 16px;
+            color: #1f3a5f;
+            line-height: 1.7;
+            max-height: 320px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .modal-body .project-item {
+            background: #f6f8fb;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 20px;
+            font-size: 15px;
+            border-left: 4px solid #2c5f8a;
+        }
+        .modal-body .project-item .code {
+            font-weight: 600;
+            color: #1a2b4a;
+        }
+        .modal-body .project-item .name {
+            color: #2c5f8a;
+        }
+        .modal-body .confirm-text {
+            margin-top: 16px;
+            font-weight: 600;
+            font-size: 17px;
+            color: #c0392b;
+            text-align: center;
+            padding: 10px 0 4px;
+            border-top: 1px dashed #dce2ec;
+        }
+        .modal-body .success-text {
+            text-align: center;
+            font-size: 18px;
+            padding: 12px 0 6px;
+            color: #1f7a3a;
+        }
+        .modal-body .success-text .highlight {
+            font-weight: 700;
+            color: #1a2b4a;
+        }
+        .modal-body .warning-text {
+            color: #c0392b;
+            font-weight: 500;
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        /* ===== Modal 按鈕 ===== */
+        .modal-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 28px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .modal-actions .btn {
+            flex: 0 1 auto;
+            min-width: 100px;
+            padding: 11px 36px;
+            font-size: 16px;
+        }
+        .btn-danger {
+            background: #c0392b;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
+        }
+        .btn-danger:hover {
+            background: #a93226;
+            box-shadow: 0 6px 18px rgba(192, 57, 43, 0.35);
+            transform: translateY(-2px);
+        }
+        .btn-danger:active {
+            transform: translateY(0px);
+        }
+
+        .btn-success {
+            background: #1f7a3a;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(31, 122, 58, 0.25);
+        }
+        .btn-success:hover {
+            background: #16632e;
+            box-shadow: 0 6px 18px rgba(31, 122, 58, 0.35);
+            transform: translateY(-2px);
+        }
+        .btn-success:active {
+            transform: translateY(0px);
+        }
+
+        .btn-cancel {
+            background: #e9edf4;
+            color: #1f3a5f;
+        }
+        .btn-cancel:hover {
+            background: #d5dce8;
+            transform: translateY(-2px);
+        }
+        .btn-cancel:active {
+            transform: translateY(0px);
+        }
+
+        /* ===== 錯誤 / 提示 小訊息 ===== */
+        .input-error {
+            border-color: #c0392b !important;
+            box-shadow: 0 0 0 4px rgba(192, 57, 43, 0.10) !important;
+        }
+        .error-message {
+            color: #c0392b;
+            font-size: 14px;
+            margin-top: 6px;
+            font-weight: 500;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+
+        /* ===== 響應式 ===== */
+        @media (max-width: 600px) {
+            .card {
+                padding: 28px 20px 24px;
+            }
+            .card-title {
+                font-size: 21px;
+            }
+            .btn {
+                padding: 11px 24px;
+                font-size: 15px;
+                min-width: 90px;
+                flex: 1 1 100%;
+            }
+            .button-group {
+                gap: 12px;
+            }
+            .modal-box {
+                padding: 28px 20px 24px;
+            }
+            .modal-title {
+                font-size: 19px;
+            }
+            .modal-actions .btn {
+                flex: 1 1 100%;
+                min-width: 0;
+            }
+            .modal-body .project-item {
+                font-size: 14px;
+                padding: 8px 12px;
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                padding: 20px 14px 18px;
+            }
+            .form-input {
+                font-size: 15px;
+                padding: 12px 14px;
+            }
+            .modal-box {
+                padding: 20px 14px 18px;
+            }
+        }
+
+        /* ===== 滾動條樣式 ===== */
+        .modal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: #e9edf4;
+            border-radius: 6px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #b0c0d4;
+            border-radius: 6px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #8fa3bd;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 主卡片 ===== -->
+    <div class="card">
+        <div class="card-title">自籌款案件刪除</div>
+
+        <div class="form-group">
+            <label class="form-label" for="projectInput">
+                請輸入工程序號<span class="required">*</span>
+            </label>
+            <input
+            type="text"
+            id="projectInput"
+            class="form-input"
+            placeholder="請輸入工程序號，多筆請用逗號分隔"
+            autofocus
+            />
+            <span class="form-hint">
+                若一次輸入多筆請用「<strong>，</strong>」或「<strong>,</strong>」分隔，如：<strong>BP2-001,BP2-002,BP2-003</strong>
+            </span>
+            <div class="error-message" id="errorMsg">請輸入有效的工程編號</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" id="confirmBtn">確 定</button>
+        </div>
+    </div>
+
+    <!-- ===== Modal 遮罩（確認刪除） ===== -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span class="icon">⚠️</span> 確認刪除
+            </div>
+            <div class="modal-body" id="confirmBody">
+                <!-- 動態插入專案清單 -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" id="deleteBtn">刪 除</button>
+                <button class="btn btn-cancel" id="cancelDeleteBtn">取 消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Modal 遮罩（刪除成功） ===== -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-box">
+            <div class="modal-title">
+                <span class="icon">✅</span> 刪除成功
+            </div>
+            <div class="modal-body" id="successBody">
+                <!-- 動態插入成功訊息 -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-success" id="successOkBtn">確 定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ===== 模擬工程資料庫 =====
+            const projectDB = {
+                'BP2-001': '台北市道路改善工程',
+                'BP2-002': '台中市下水道工程',
+                'BP2-003': '高雄市綠化工程',
+                'BP2-004': '台南市橋樑修建工程',
+                'BP2-005': '桃園市公園新建工程',
+                'BP2-006': '新北市排水系統工程',
+                'BP2-007': '基隆市港區整修工程',
+                'BP2-008': '新竹市科技園區工程',
+                'BP2-009': '嘉義市文化廣場工程',
+                'BP2-010': '花蓮縣觀光步道工程',
+                'BP2-011': '宜蘭縣河川整治工程',
+                'BP2-012': '苗栗縣自行車道工程',
+                'BP2-013': '彰化縣農田水利工程',
+                'BP2-014': '南投縣觀光纜車工程',
+                'BP2-015': '雲林縣綠能示範工程',
+            };
+
+            // ===== DOM 參考 =====
+            const inputEl = document.getElementById('projectInput');
+            const errorMsg = document.getElementById('errorMsg');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmBody = document.getElementById('confirmBody');
+            const deleteBtn = document.getElementById('deleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+
+            const successModal = document.getElementById('successModal');
+            const successBody = document.getElementById('successBody');
+            const successOkBtn = document.getElementById('successOkBtn');
+
+            // ===== 狀態 =====
+            let pendingProjects = []; // 當前待刪除的專案列表 [{ code, name }]
+
+            // ===== 工具函數 =====
+            function trimAll(arr) {
+                return arr.map(s => s.trim()).filter(s => s !== '');
+            }
+
+            // 解析輸入，回傳 { valid: true, codes: [...] } 或 { valid: false, message: '...' }
+            function parseInput(raw) {
+                if (!raw || raw.trim() === '') {
+                    return { valid: false, message: '請輸入工程編號' };
+                }
+                // 支援全形逗號、半形逗號、空白分隔
+                const parts = raw.split(/[，,、\s]+/);
+                const codes = trimAll(parts);
+                if (codes.length === 0) {
+                    return { valid: false, message: '請輸入有效的工程編號' };
+                }
+                // 檢查是否含有非法字元（只允許英文、數字、橫線）
+                const invalid = codes.filter(c => !/^[A-Za-z0-9\-]+$/.test(c));
+                if (invalid.length > 0) {
+                    return { valid: false, message: `「${invalid.join('、')}」格式不正確，請使用英文、數字及橫線` };
+                }
+                return { valid: true, codes };
+            }
+
+            // 根據編號列表查詢專案，回傳 { found: [...], notFound: [...] }
+            function lookupProjects(codes) {
+                const found = [];
+                const notFound = [];
+                codes.forEach(code => {
+                    const name = projectDB[code];
+                    if (name) {
+                        found.push({ code, name });
+                    } else {
+                        notFound.push(code);
+                    }
+                });
+                return { found, notFound };
+            }
+
+            // ===== 顯示確認 Modal =====
+            function showConfirmModal(projects) {
+                if (!projects || projects.length === 0) return;
+
+                // 構建內容
+                let html = '';
+                projects.forEach((p, idx) => {
+                    html += `
+                        <div class="project-item">
+                            <span class="code">${p.code}</span>
+                            <span class="name">${p.name}</span>
+                        </div>
+                    `;
+                });
+                const count = projects.length;
+                const label = count === 1 ? '此筆工程' : '這 ' + count + ' 筆工程';
+                html += `
+                    <div class="confirm-text">
+                        ⚠️ 是否確定刪除 ${label}？
+                    </div>
+                `;
+
+                confirmBody.innerHTML = html;
+                pendingProjects = projects.slice(); // 複製一份
+                confirmModal.classList.add('active');
+            }
+
+            // ===== 顯示成功 Modal =====
+            function showSuccessModal(codes) {
+                const list = codes.join('、');
+                const count = codes.length;
+                const label = count === 1 ? '工程' : '工程';
+                successBody.innerHTML = `
+                    <div class="success-text">
+                        ✅ <span class="highlight">${list}</span> 已成功刪除！
+                    </div>
+                    <div style="text-align:center;color:#6f7d98;font-size:15px;margin-top:8px;">
+                        共刪除 ${count} 筆${label}
+                    </div>
+                `;
+                successModal.classList.add('active');
+            }
+
+            // ===== 關閉所有 Modal =====
+            function closeAllModals() {
+                confirmModal.classList.remove('active');
+                successModal.classList.remove('active');
+                pendingProjects = [];
+            }
+
+            // ===== 清除輸入錯誤狀態 =====
+            function clearInputError() {
+                inputEl.classList.remove('input-error');
+                errorMsg.classList.remove('show');
+            }
+
+            // ===== 顯示輸入錯誤 =====
+            function showInputError(message) {
+                inputEl.classList.add('input-error');
+                errorMsg.textContent = message || '請輸入有效的工程編號';
+                errorMsg.classList.add('show');
+                inputEl.focus();
+            }
+
+            // ===== 主要「確定」邏輯 =====
+            function handleConfirm() {
+                clearInputError();
+                const raw = inputEl.value;
+                const parseResult = parseInput(raw);
+
+                if (!parseResult.valid) {
+                    showInputError(parseResult.message);
+                    return;
+                }
+
+                const codes = parseResult.codes;
+                const { found, notFound } = lookupProjects(codes);
+
+                // 如果有查無的編號，顯示具體哪些編號不存在
+                if (notFound.length > 0) {
+                    const notFoundStr = notFound.join('、');
+                    showInputError(`沒有 ${notFoundStr} 工程序號!`);
+                    return;
+                }
+
+                // 全部找到 → 顯示確認 Modal
+                showConfirmModal(found);
+            }
+
+            // ===== 執行刪除（模擬） =====
+            function performDelete() {
+                if (pendingProjects.length === 0) return;
+
+                // 取出要刪除的編號
+                const codes = pendingProjects.map(p => p.code);
+
+                // 關閉確認 Modal
+                confirmModal.classList.remove('active');
+
+                // 顯示成功 Modal
+                showSuccessModal(codes);
+
+                // 清空輸入框（選擇性）
+                inputEl.value = '';
+                clearInputError();
+
+                // 清除待刪除清單
+                pendingProjects = [];
+            }
+
+            // ===== 事件綁定 =====
+
+            // 1. 確定按鈕
+            confirmBtn.addEventListener('click', handleConfirm);
+
+            // 2. 輸入框 Enter 鍵
+            inputEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirm();
+                }
+            });
+
+            // 3. 輸入時清除錯誤狀態
+            inputEl.addEventListener('input', function() {
+                clearInputError();
+            });
+
+            // 4. 確認 Modal - 刪除按鈕
+            deleteBtn.addEventListener('click', performDelete);
+
+            // 5. 確認 Modal - 取消按鈕
+            cancelDeleteBtn.addEventListener('click', function() {
+                confirmModal.classList.remove('active');
+                pendingProjects = [];
+                // 可選：聚焦輸入框
+                inputEl.focus();
+            });
+
+            // 6. 成功 Modal - 確定按鈕
+            successOkBtn.addEventListener('click', function() {
+                successModal.classList.remove('active');
+                inputEl.focus();
+            });
+
+            // 7. 點擊遮罩關閉 Modal（僅限點擊遮罩本身，不包含內部）
+            confirmModal.addEventListener('click', function(e) {
+                if (e.target === confirmModal) {
+                    confirmModal.classList.remove('active');
+                    pendingProjects = [];
+                    inputEl.focus();
+                }
+            });
+            successModal.addEventListener('click', function(e) {
+                if (e.target === successModal) {
+                    successModal.classList.remove('active');
+                    inputEl.focus();
+                }
+            });
+
+            // 8. 鍵盤 ESC 關閉 Modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (successModal.classList.contains('active')) {
+                        successModal.classList.remove('active');
+                        inputEl.focus();
+                    } else if (confirmModal.classList.contains('active')) {
+                        confirmModal.classList.remove('active');
+                        pendingProjects = [];
+                        inputEl.focus();
+                    }
+                }
+            });
+
+            // ===== 初始化：聚焦輸入框 =====
+            inputEl.focus();
+
+        })();
+    </script>
+
+</body>
+</html>
