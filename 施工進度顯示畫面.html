@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>施工進度管理</title>
+    <style>
+        /* ----- 全局重置 & 字型 ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang TC', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        /* ----- 主卡片容器 ----- */
+        .dashboard {
+            max-width: 820px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0, 20, 30, 0.12);
+            padding: 36px 40px 44px;
+            transition: box-shadow 0.25s ease;
+        }
+
+        .dashboard:hover {
+            box-shadow: 0 28px 60px rgba(0, 20, 30, 0.16);
+        }
+
+        /* ----- 資訊網格 (三欄只讀) ----- */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 18px;
+            padding: 18px 20px 16px;
+            border: 1px solid #e6edf4;
+            transition: background 0.2s;
+        }
+
+        .info-card:hover {
+            background: #f4f8fe;
+        }
+
+        .info-card .label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #5f7d95;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-card .value {
+            font-size: 26px;
+            font-weight: 600;
+            color: #0a2636;
+            letter-spacing: 0.3px;
+            line-height: 1.3;
+        }
+
+        .info-card .value small {
+            font-size: 16px;
+            font-weight: 400;
+            color: #5f7d95;
+            margin-left: 6px;
+        }
+
+        /* 個別卡片微調 */
+        .card-predicted .value {
+            color: #1a5a8c;
+        }
+        .card-actual .value {
+            color: #0f7b5a;
+        }
+        .card-date .value {
+            color: #7a5a3a;
+            font-size: 22px;
+        }
+
+        /* ----- 進度來源說明 ----- */
+        .source-note {
+            background: #eef6fa;
+            border-left: 5px solid #2c7aa0;
+            border-radius: 12px;
+            padding: 14px 22px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 15px;
+            color: #1a4056;
+        }
+
+        .source-note .icon {
+            font-size: 20px;
+        }
+
+        .source-note .text {
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .source-note .text strong {
+            font-weight: 600;
+            color: #003153;
+        }
+
+        /* ----- 落後原因編輯區 ----- */
+        .reason-section {
+            margin-top: 6px;
+        }
+
+        .reason-section .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .reason-section .section-header label {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0b2a3b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reason-section .section-header label::before {
+            content: "✏️";
+            font-size: 20px;
+        }
+
+        .char-counter {
+            font-size: 14px;
+            color: #6d8aa3;
+            background: #f0f5fa;
+            padding: 4px 16px;
+            border-radius: 30px;
+            border: 1px solid #dae4ef;
+            font-weight: 450;
+        }
+
+        .reason-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px 20px;
+            font-size: 15px;
+            font-family: 'Segoe UI', 'PingFang TC', sans-serif;
+            color: #0b2636;
+            background: #fbfdff;
+            border: 1.5px solid #d6e2ee;
+            border-radius: 18px;
+            resize: vertical;
+            transition: border 0.25s, box-shadow 0.25s;
+            line-height: 1.6;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .reason-textarea:focus {
+            outline: none;
+            border-color: #2c7aa0;
+            box-shadow: 0 0 0 4px rgba(44, 122, 160, 0.12), inset 0 1px 4px rgba(0, 0, 0, 0.02);
+            background: #ffffff;
+        }
+
+        .reason-textarea::placeholder {
+            color: #a7bccf;
+            font-weight: 350;
+        }
+
+        /* ----- 按鈕列 ----- */
+        .action-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 30px;
+            border-radius: 40px;
+            border: none;
+            background: #e6edf6;
+            color: #1f4a6b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background: #1e5f84;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(30, 95, 132, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: #154e6e;
+            box-shadow: 0 6px 16px rgba(30, 95, 132, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 8px rgba(30, 95, 132, 0.2);
+        }
+
+        .btn-secondary {
+            background: #eef3f9;
+            color: #1e4c6b;
+            border-color: #d0ddee;
+        }
+
+        .btn-secondary:hover {
+            background: #e4ebf4;
+            border-color: #b8cadd;
+        }
+
+        .btn-success {
+            background: #0f7b5a;
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(15, 123, 90, 0.2);
+        }
+
+        .btn-success:hover {
+            background: #0b664a;
+            box-shadow: 0 6px 16px rgba(15, 123, 90, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* ----- 儲存成功提示 (toast) ----- */
+        .toast {
+            position: fixed;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #0b2a3b;
+            color: #f0f7fc;
+            padding: 12px 32px;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 500;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast .toast-icon {
+            font-size: 20px;
+        }
+
+        /* ----- 響應式調整 ----- */
+        @media (max-width: 700px) {
+            .dashboard {
+                padding: 24px 20px 30px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .info-card .value {
+                font-size: 22px;
+            }
+
+            .action-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                justify-content: center;
+                padding: 12px 20px;
+            }
+
+            .source-note {
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+
+            .reason-textarea {
+                min-height: 100px;
+                font-size: 14px;
+                padding: 14px 16px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .dashboard {
+                padding: 18px 14px 24px;
+                border-radius: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 主面板 ===== -->
+    <div class="dashboard" role="main">
+
+        <!-- 三項唯讀資訊 -->
+        <div class="info-grid">
+
+            <!-- 最新預定進度 -->
+            <div class="info-card card-predicted">
+                <div class="label">📅 最新預定進度</div>
+                <div class="value" id="predictedProgress">78.5<small>%</small></div>
+            </div>
+
+            <!-- 最新實際進度 -->
+            <div class="info-card card-actual">
+                <div class="label">📊 最新實際進度</div>
+                <div class="value" id="actualProgress">62.3<small>%</small></div>
+            </div>
+
+            <!-- 最近填寫日期 -->
+            <div class="info-card card-date">
+                <div class="label">📆 最近填寫日期</div>
+                <div class="value" id="lastUpdateDate">2026-07-28</div>
+            </div>
+
+        </div>
+
+        <!-- 進度來源說明 -->
+        <div class="source-note">
+            <span class="icon">📌</span>
+            <span class="text">
+                <strong>進度值來源：</strong>本施工進度係抓施工日誌最新回報進度
+            </span>
+        </div>
+
+        <!-- 進度落後原因 (可編輯) -->
+        <div class="reason-section">
+            <div class="section-header">
+                <label for="reasonText">進度落後原因</label>
+                <span class="char-counter" id="charCounter">0 / 500</span>
+            </div>
+
+            <textarea
+            id="reasonText"
+            class="reason-textarea"
+            placeholder="請輸入落後原因說明（例如：天候影響、物料延遲、人力調度等）..."
+            maxlength="500"
+            aria-label="進度落後原因編輯區"
+        >因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。</textarea>
+
+        <!-- 操作按鈕 -->
+        <div class="action-bar">
+            <button class="btn btn-secondary" id="resetBtn" type="button">↺ 重設</button>
+            <button class="btn btn-success" id="saveBtn" type="button">💾 儲存原因</button>
+        </div>
+
+    </div>
+
+    <!-- ===== Toast 提示 ===== -->
+    <div id="toast" class="toast" role="alert" aria-live="polite">
+        <span class="toast-icon">✅</span>
+        <span id="toastMessage">已儲存</span>
+    </div>
+
+    <!-- ============================================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            // ----- DOM 參考 -----
+            const reasonEl = document.getElementById('reasonText');
+            const charCounter = document.getElementById('charCounter');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+
+            // 唯讀資料元素 (用於示範，未來可動態更新)
+            const predEl = document.getElementById('predictedProgress');
+            const actualEl = document.getElementById('actualProgress');
+            const dateEl = document.getElementById('lastUpdateDate');
+
+            // ----- 初始值 (模擬資料) -----
+            const INITIAL_REASON =
+                '因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。';
+
+            // 儲存上一次儲存的值 (用於重設)
+            let lastSavedReason = INITIAL_REASON;
+
+            // ----- 輔助函式：更新字數計數器 -----
+            function updateCharCounter() {
+                const len = reasonEl.value.length;
+                const max = reasonEl.maxLength;
+                charCounter.textContent = len + ' / ' + max;
+                // 接近上限時改變樣式 (提示)
+                if (len > max * 0.9) {
+                    charCounter.style.color = '#b13e3e';
+                    charCounter.style.borderColor = '#e6b3b3';
+                } else {
+                    charCounter.style.color = '#6d8aa3';
+                    charCounter.style.borderColor = '#dae4ef';
+                }
+            }
+
+            // ----- 顯示 Toast 訊息 -----
+            function showToast(message, duration = 2800) {
+                toastMsg.textContent = message || '已儲存';
+                toast.classList.add('show');
+
+                // 清除現有計時器，避免衝突
+                if (window._toastTimer) {
+                    clearTimeout(window._toastTimer);
+                    window._toastTimer = null;
+                }
+
+                window._toastTimer = setTimeout(function() {
+                    toast.classList.remove('show');
+                    window._toastTimer = null;
+                }, duration);
+            }
+
+            // ----- 儲存原因 (模擬) -----
+            function saveReason() {
+                const current = reasonEl.value.trim();
+                if (current === '') {
+                    showToast('⚠️ 請輸入落後原因', 2000);
+                    return;
+                }
+                // 更新「上次儲存」的內容，讓重設可以回到此版本
+                lastSavedReason = current;
+                showToast('✅ 進度落後原因已儲存', 2500);
+                // 可在此處加入實際的 AJAX 儲存邏輯
+                console.log('[儲存] 落後原因:', current);
+            }
+
+            // ----- 重設至上次儲存內容 -----
+            function resetToSaved() {
+                reasonEl.value = lastSavedReason;
+                updateCharCounter();
+                // 觸發變更事件以便其他監聽 (如果有)
+                reasonEl.dispatchEvent(new Event('input'));
+                showToast('↺ 已重設至上次儲存內容', 2000);
+            }
+
+            // ----- 更新唯讀資料 (模擬) -----
+            function refreshReadOnlyData() {
+                // 實際應用中可從 API 取得，此處僅示範靜態數值
+                // 為了展示「動態感」，稍微變化日期
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                dateEl.textContent = y + '-' + m + '-' + d;
+
+                // 預定與實際進度維持固定示範值 (也可隨機微調)
+                // 但保持視覺穩定，僅在首次載入時設定好
+                // 已在 HTML 中設定初始值，這裡不再異動
+            }
+
+            // ----- 初始化 -----
+            function init() {
+                // 設定初始文字
+                reasonEl.value = INITIAL_REASON;
+                lastSavedReason = INITIAL_REASON;
+                updateCharCounter();
+
+                // 更新唯讀日期 (顯示當天)
+                refreshReadOnlyData();
+
+                // ----- 事件監聽 -----
+
+                // 1. 文字區輸入 → 更新字數
+                reasonEl.addEventListener('input', updateCharCounter);
+
+                // 2. 儲存按鈕
+                saveBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    saveReason();
+                });
+
+                // 3. 重設按鈕
+                resetBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    resetToSaved();
+                });
+
+                // 4. 鍵盤快速鍵: Ctrl+Enter (或 Cmd+Enter) 儲存
+                reasonEl.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        saveReason();
+                    }
+                });
+
+                // 5. 頁面關閉前提醒 (避免遺失未儲存內容)
+                window.addEventListener('beforeunload', function(e) {
+                    const current = reasonEl.value;
+                    if (current !== lastSavedReason && current.trim() !== '') {
+                        // 標準瀏覽器會顯示自訂訊息 (部分瀏覽器可能忽略)
+                        e.preventDefault();
+                        e.returnValue = '您有未儲存的進度落後原因，確定要離開嗎？';
+                        return e.returnValue;
+                    }
+                });
+
+                // 6. 如果點擊 toast 可手動關閉
+                toast.addEventListener('click', function() {
+                    toast.classList.remove('show');
+                    if (window._toastTimer) {
+                        clearTimeout(window._toastTimer);
+                        window._toastTimer = null;
+                    }
+                });
+
+                console.log('✅ 施工進度面板初始化完成');
+            }
+
+            // ----- 啟動 -----
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
