@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>工程資訊表單</title>
+
+    <style>
+        /* ---------- 全域重置 ---------- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background: #f0f4f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* ---------- 主卡片 ---------- */
+        .form-card {
+            max-width: 820px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 30px 40px 40px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            transition: box-shadow 0.25s;
+        }
+
+        .form-card:hover {
+            box-shadow: 0 20px 56px rgba(0, 0, 0, 0.10);
+        }
+
+        /* ---------- 分項工程 Checkbox ---------- */
+        .section-checkbox {
+            background: #f7faff;
+            border-radius: 14px;
+            padding: 16px 22px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            border: 1px solid #dfe8f2;
+        }
+
+        .section-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            color: #1e2b3f;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .section-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #2a6f97;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* 提示文字已移除 */
+
+        /* ---------- 可隱藏區域（淡入淡出） ---------- */
+        .toggle-area {
+            overflow: hidden;
+            transition: opacity 0.3s ease, max-height 0.45s ease, margin 0.3s ease;
+            opacity: 1;
+            max-height: 3000px;
+            margin-top: 0;
+        }
+
+        .toggle-area.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin-top: 0;
+            pointer-events: none;
+        }
+
+        /* ---------- 區塊標題 ---------- */
+        .block-label {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1e2b3f;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .block-label .badge {
+            background: #dce6f0;
+            color: #2c3e5c;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0 12px;
+            border-radius: 30px;
+            line-height: 24px;
+        }
+
+        /* ---------- 位置列表 ---------- */
+        .location-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fafcff;
+            border: 1px solid #e2ebf5;
+            border-radius: 12px;
+            padding: 10px 16px 10px 18px;
+            transition: background 0.2s, border-color 0.2s;
+            flex-wrap: wrap;
+        }
+
+        .location-item:hover {
+            background: #f6faff;
+            border-color: #c8d8ea;
+        }
+
+        .location-item .index {
+            font-weight: 600;
+            color: #3d5a78;
+            font-size: 14px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .location-item .field-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1 1 0;
+            min-width: 140px;
+            flex-wrap: wrap;
+        }
+
+        .location-item .field-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #3f5a7a;
+            white-space: nowrap;
+        }
+
+        .location-item .field-group select,
+        .location-item .field-group input {
+            flex: 1 1 100px;
+            min-width: 70px;
+            padding: 8px 10px;
+            border: 1px solid #d3dde9;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #ffffff;
+            transition: border 0.2s, box-shadow 0.2s;
+            outline: none;
+            color: #1a2639;
+            font-family: inherit;
+        }
+
+        .location-item .field-group select {
+            cursor: pointer;
+            appearance: auto;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 8"><path fill="%234a5f7a" d="M6 8L0 0h12z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px;
+        }
+
+        .location-item .field-group select:focus,
+        .location-item .field-group input:focus {
+            border-color: #2a6f97;
+            box-shadow: 0 0 0 3px rgba(42, 111, 151, 0.15);
+        }
+
+        .location-item .field-group input::placeholder {
+            color: #a3b6cc;
+            font-size: 13px;
+        }
+
+        /* 座標輸入框較小 */
+        .location-item .field-group .coord-input {
+            flex: 1 1 70px;
+            min-width: 60px;
+        }
+
+        /* 刪除按鈕 */
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: #a0b6cd;
+            font-size: 20px;
+            width: 34px;
+            height: 34px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, color 0.2s, transform 0.15s;
+            flex-shrink: 0;
+        }
+
+        .btn-delete:hover {
+            background: #fee9e9;
+            color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        .btn-delete:active {
+            transform: scale(0.92);
+        }
+
+        /* ---------- 新增按鈕 ---------- */
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #eef5fc;
+            border: 1.5px dashed #b3cbe0;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1f4b6e;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, transform 0.15s;
+            margin-top: 2px;
+        }
+
+        .btn-add:hover {
+            background: #e2eefa;
+            border-color: #7fa3c4;
+        }
+
+        .btn-add:active {
+            transform: scale(0.96);
+        }
+
+        .btn-add .icon {
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* ---------- 工程內容 ---------- */
+        .content-area {
+            margin-top: 28px;
+            padding-top: 24px;
+            border-top: 1px solid #e8edf4;
+        }
+
+        .content-area textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #d3dde9;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: border 0.2s, box-shadow 0.2s;
+            outline: none;
+            background: #fcfdff;
+            color: #1a2639;
+            line-height: 1.6;
+        }
+
+        .content-area textarea:focus {
+            border-color: #2a6f97;
+            box-shadow: 0 0 0 3px rgba(42, 111, 151, 0.12);
+        }
+
+        .content-area textarea::placeholder {
+            color: #a3b6cc;
+            font-size: 14px;
+        }
+
+        /* 移除「單一欄位」badge，保留標題文字 */
+
+        /* ---------- 響應式 ---------- */
+        @media (max-width: 700px) {
+            .form-card {
+                padding: 24px 18px 32px;
+            }
+
+            .location-item {
+                padding: 12px 12px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .location-item .index {
+                text-align: left;
+                font-size: 13px;
+                color: #5a7492;
+            }
+
+            .location-item .field-group {
+                flex: 1 1 auto;
+                min-width: 0;
+                gap: 6px;
+            }
+
+            .location-item .field-group select,
+            .location-item .field-group input {
+                flex: 1 1 100%;
+                min-width: 50px;
+            }
+
+            .location-item .field-group .coord-input {
+                flex: 1 1 60px;
+                min-width: 50px;
+            }
+
+            .btn-delete {
+                align-self: flex-end;
+            }
+
+            .section-checkbox {
+                padding: 14px 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .location-item .field-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+            }
+            .location-item .field-group label {
+                font-size: 12px;
+            }
+            .location-item .field-group select,
+            .location-item .field-group input {
+                font-size: 13px;
+                padding: 6px 8px;
+            }
+            .btn-add {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* ---------- 工具類 ---------- */
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .text-muted {
+            color: #6f7e93;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+
+        <!-- 標題已移除 -->
+
+        <!-- 1. 是否有分項工程 -->
+        <div class="section-checkbox">
+            <label>
+                <input type="checkbox" id="chkHasSub" />
+                是否有分項工程
+            </label>
+            <!-- 提示文字已移除 -->
+        </div>
+
+        <!-- ===== 可隱藏區域 ===== -->
+        <div class="toggle-area" id="toggleArea">
+
+            <!-- 2. 工程位置與座標 -->
+            <div class="block-label">
+                📍 工程位置與座標
+                <span class="badge">可新增多筆</span>
+            </div>
+
+            <div class="location-list" id="locationList">
+                <!-- 由 JavaScript 動態渲染 -->
+            </div>
+
+            <button class="btn-add" id="btnAddLocation">
+                <span class="icon">＋</span> 新增工程位置
+            </button>
+
+            <!-- 3. 工程內容 -->
+            <div class="content-area">
+                <div class="block-label">
+                    📝 工程內容
+                    <!-- 「單一欄位」badge 已移除 -->
+                </div>
+                <textarea id="txtContent" placeholder="請填寫工程內容描述…"></textarea>
+            </div>
+
+        </div>
+        <!-- ===== 可隱藏區域結束 ===== -->
+
+        <!-- 底部按鈕已移除 -->
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ---------- DOM 參考 ----------
+            const chkHasSub = document.getElementById('chkHasSub');
+            const toggleArea = document.getElementById('toggleArea');
+            const locationList = document.getElementById('locationList');
+            const btnAdd = document.getElementById('btnAddLocation');
+            const txtContent = document.getElementById('txtContent');
+
+            // ---------- 縣市與鄉鎮資料 ----------
+            const cityDistrictMap = {
+                '台北市': ['中正區', '大同區', '中山區', '松山區', '大安區', '萬華區', '信義區', '士林區', '北投區', '內湖區', '南港區', '文山區'],
+                '新北市': ['板橋區', '新莊區', '中和區', '永和區', '土城區', '樹林區', '三峽區', '鶯歌區', '三重區', '蘆洲區', '五股區', '泰山區', '林口區', '淡水區', '金山區', '八里區', '三芝區', '石門區', '汐止區', '瑞芳區', '貢寮區', '平溪區', '雙溪區', '坪林區', '烏來區'],
+                '台中市': ['中區', '東區', '西區', '南區', '北區', '西屯區', '南屯區', '北屯區', '豐原區', '大里區', '太平區', '霧峰區', '烏日區', '后里區', '潭子區', '大雅區', '神岡區', '石岡區', '東勢區', '新社區', '和平區', '大肚區', '沙鹿區', '龍井區', '梧棲區', '清水區', '大甲區', '外埔區', '大安區'],
+                '高雄市': ['鹽埕區', '鼓山區', '左營區', '楠梓區', '三民區', '新興區', '前金區', '苓雅區', '前鎮區', '旗津區', '小港區', '鳳山區', '大寮區', '鳥松區', '林園區', '仁武區', '大樹區', '大社區', '岡山區', '路竹區', '橋頭區', '梓官區', '彌陀區', '永安區', '燕巢區', '田寮區', '阿蓮區', '茄萣區', '湖內區', '旗山區', '美濃區', '內門區', '杉林區', '甲仙區', '六龜區', '茂林區', '桃源區', '那瑪夏區'],
+                '桃園市': ['桃園區', '中壢區', '大溪區', '楊梅區', '蘆竹區', '大園區', '龜山區', '八德區', '龍潭區', '平鎮區', '新屋區', '觀音區', '復興區'],
+                '台南市': ['東區', '南區', '西區', '北區', '安平區', '安南區', '永康區', '歸仁區', '新化區', '左鎮區', '玉井區', '楠西區', '南化區', '仁德區', '關廟區', '龍崎區', '官田區', '麻豆區', '佳里區', '西港區', '七股區', '將軍區', '學甲區', '北門區', '新營區', '後壁區', '白河區', '東山區', '六甲區', '下營區', '柳營區', '鹽水區', '善化區', '大內區', '山上區', '新市區', '安定區'],
+                '基隆市': ['仁愛區', '信義區', '中正區', '中山區', '安樂區', '暖暖區', '七堵區'],
+                '新竹市': ['東區', '北區', '香山區'],
+                '嘉義市': ['東區', '西區']
+            };
+
+            const cityList = Object.keys(cityDistrictMap);
+
+            // ---------- 狀態 ----------
+            let locations = [];
+            let nextId = 1;
+
+            // ---------- 輔助：生成縣市下拉選項 ----------
+            function renderCityOptions(selectedCity) {
+                let html = '<option value="">請選擇縣市</option>';
+                cityList.forEach(city => {
+                    const sel = (city === selectedCity) ? ' selected' : '';
+                    html += `<option value="${escapeHtml(city)}"${sel}>${escapeHtml(city)}</option>`;
+                });
+                return html;
+            }
+
+            // ---------- 輔助：生成鄉鎮下拉選項 ----------
+            function renderDistrictOptions(city, selectedDistrict) {
+                let html = '<option value="">請選擇鄉鎮</option>';
+                if (city && cityDistrictMap[city]) {
+                    cityDistrictMap[city].forEach(dist => {
+                        const sel = (dist === selectedDistrict) ? ' selected' : '';
+                        html += `<option value="${escapeHtml(dist)}"${sel}>${escapeHtml(dist)}</option>`;
+                    });
+                }
+                return html;
+            }
+
+            // ---------- 渲染函數 ----------
+            function renderLocations() {
+                if (!locationList) return;
+
+                if (locations.length === 0) {
+                    locations.push({
+                        id: nextId++,
+                        city: '',
+                        district: '',
+                        x: '',
+                        y: ''
+                    });
+                }
+
+                let html = '';
+                locations.forEach((item, index) => {
+                    const idx = index + 1;
+                    const city = item.city || '';
+                    const district = item.district || '';
+                    html += `
+                        <div class="location-item" data-id="${item.id}">
+                            <span class="index">#${idx}</span>
+                            <div class="field-group">
+                                <label>縣市</label>
+                                <select class="loc-city">
+                                    ${renderCityOptions(city)}
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label>鄉鎮</label>
+                                <select class="loc-district">
+                                    ${renderDistrictOptions(city, district)}
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label>X 座標</label>
+                                <input type="text" class="loc-x coord-input" value="${escapeHtml(item.x)}" placeholder="TWD97 X" />
+                            </div>
+                            <div class="field-group">
+                                <label>Y 座標</label>
+                                <input type="text" class="loc-y coord-input" value="${escapeHtml(item.y)}" placeholder="TWD97 Y" />
+                            </div>
+                            <button class="btn-delete" data-id="${item.id}" title="刪除這筆">
+                                ✕
+                            </button>
+                        </div>
+                    `;
+                });
+
+                locationList.innerHTML = html;
+
+                // 綁定事件
+                document.querySelectorAll('.location-item').forEach(itemEl => {
+                    const id = parseInt(itemEl.dataset.id, 10);
+                    const citySelect = itemEl.querySelector('.loc-city');
+                    const districtSelect = itemEl.querySelector('.loc-district');
+                    const xInput = itemEl.querySelector('.loc-x');
+                    const yInput = itemEl.querySelector('.loc-y');
+
+                    // 更新資料
+                    const updateData = () => {
+                        const target = locations.find(l => l.id === id);
+                        if (target) {
+                            target.city = citySelect.value;
+                            target.district = districtSelect.value;
+                            target.x = xInput.value;
+                            target.y = yInput.value;
+                        }
+                    };
+
+                    // 縣市變更時更新鄉鎮選項
+                    const updateDistricts = () => {
+                        const city = citySelect.value;
+                        const currentDistrict = districtSelect.value;
+                        // 重新生成鄉鎮選項，保留當前選取值（如果仍有效）
+                        const newOptions = renderDistrictOptions(city, currentDistrict);
+                        districtSelect.innerHTML = newOptions;
+                        // 如果當前選中的鄉鎮不在新列表中，則重置為空
+                        if (currentDistrict && ![...districtSelect.options].some(opt => opt.value === currentDistrict)) {
+                            districtSelect.value = '';
+                        }
+                        updateData();
+                    };
+
+                    citySelect.addEventListener('change', function() {
+                        updateDistricts();
+                        // 更新資料
+                        updateData();
+                    });
+
+                    districtSelect.addEventListener('change', updateData);
+                    xInput.addEventListener('input', updateData);
+                    yInput.addEventListener('input', updateData);
+
+                    // 初次渲染時，若已有縣市，確保鄉鎮選項正確
+                    if (citySelect.value) {
+                        updateDistricts();
+                    }
+                });
+
+                // 刪除按鈕
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const id = parseInt(this.dataset.id, 10);
+                        deleteLocation(id);
+                    });
+                });
+            }
+
+            // ---------- 輔助：跳脫 HTML ----------
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+
+            // ---------- 新增位置 ----------
+            function addLocation() {
+                locations.push({
+                    id: nextId++,
+                    city: '',
+                    district: '',
+                    x: '',
+                    y: ''
+                });
+                renderLocations();
+                const items = locationList.querySelectorAll('.location-item');
+                if (items.length > 0) {
+                    items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            // ---------- 刪除位置 ----------
+            function deleteLocation(id) {
+                if (locations.length <= 1) {
+                    const target = locations.find(l => l.id === id);
+                    if (target) {
+                        target.city = '';
+                        target.district = '';
+                        target.x = '';
+                        target.y = '';
+                    }
+                    renderLocations();
+                    return;
+                }
+                locations = locations.filter(l => l.id !== id);
+                renderLocations();
+            }
+
+            // ---------- 切換顯示 / 隱藏 ----------
+            function toggleVisibility(show) {
+                if (show) {
+                    toggleArea.classList.remove('hidden');
+                } else {
+                    toggleArea.classList.add('hidden');
+                }
+            }
+
+            // ---------- 初始化 checkbox 狀態 ----------
+            function initCheckbox() {
+                const checked = chkHasSub.checked;
+                toggleVisibility(!checked);
+            }
+
+            // ---------- 事件綁定 ----------
+            chkHasSub.addEventListener('change', function() {
+                toggleVisibility(!this.checked);
+            });
+
+            btnAdd.addEventListener('click', addLocation);
+
+            // 按下 Enter 快速新增
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.target.closest('.location-item')) {
+                    const target = e.target;
+                    if (target.tagName === 'SELECT' || target.tagName === 'INPUT') {
+                        e.preventDefault();
+                        addLocation();
+                    }
+                }
+            });
+
+            // ---------- 啟動 ----------
+            locations = [{
+                id: nextId++,
+                city: '',
+                district: '',
+                x: '',
+                y: ''
+            }];
+            renderLocations();
+            initCheckbox();
+
+            console.log('✅ 工程資訊表單已載入（縣市/鄉鎮拆分下拉）');
+        })();
+    </script>
+
+</body>
+</html>
