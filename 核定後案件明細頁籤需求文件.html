@@ -391,11 +391,11 @@
       <tr><td class="field">計畫名稱</td><td><code>plan_name</code></td><td>VARCHAR(200)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
       <tr><td class="field">工程核定日期</td><td><code>approval_date</code></td><td>DATE</td><td class="tag keep">維持</td><td>是</td><td>需為有效日期</td></tr>
       <tr><td class="field">核定文號</td><td><code>approval_doc_no</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
-      <tr><td class="field">核定經費（千元）</td><td><code>approved_budget_thousand</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正數</td></tr>
+      <tr><td class="field">核定經費（千元）</td><td><code>approved_budget_thousand</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正整數</td></tr>
       <tr><td class="field">資金來源選項</td><td><code>fund_source_type</code></td><td>ENUM</td><td class="tag rename">改名</td><td>—</td><td>「國庫撥充作業基金」改為「自籌款」；屬查看明細畫面</td></tr>
       <tr><td class="field">本案為跨年度</td><td><code>is_multi_year</code></td><td>BOOLEAN</td><td class="tag keep">維持</td><td>否</td><td>勾選才可新增多筆核定年度列</td></tr>
       <tr><td class="field">核定年度</td><td><code>approval_year</code>（子表）</td><td>INT(3)[]</td><td class="tag keep">維持</td><td>是</td><td>預設一列，帶入核定日期年度；僅限當年度或下一年度</td></tr>
-      <tr><td class="field">核定金額（分年）</td><td><code>approved_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正數</td></tr>
+      <tr><td class="field">核定金額（分年）</td><td><code>approved_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>是</td><td>正整數</td></tr>
       <tr><td class="field">累計實際支付金額（分年）</td><td><code>accumulated_paid_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>唯讀</td><td>由實付紀錄依年度、月份自動加總帶入</td></tr>
       <tr><td class="field">有無其他費用</td><td><code>has_other_fee</code></td><td>BOOLEAN</td><td class="tag keep">維持</td><td>否</td><td>勾選「有」才顯示下列輸入框</td></tr>
       <tr><td class="field">其他費用累計實際支付金額</td><td><code>other_fee_paid_amount</code></td><td>DECIMAL(15,0)</td><td class="tag keep">維持</td><td>否</td><td>勾選「有」時必填</td></tr>
