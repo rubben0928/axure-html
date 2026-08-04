@@ -125,9 +125,64 @@
             color: #003153;
         }
 
-        /* ----- 落後原因編輯區 ----- */
-        .reason-section {
-            margin-top: 6px;
+        /* ===== 新增：checkbox 控制列 ===== */
+        .delay-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0 6px 0;
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #dce6f0;
+        }
+
+        .delay-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #1e5f84;
+            cursor: pointer;
+            flex-shrink: 0;
+            margin: 0;
+            border-radius: 4px;
+            border: 2px solid #b8ccdd;
+            transition: all 0.15s;
+        }
+
+        .delay-toggle input[type="checkbox"]:checked {
+            accent-color: #1e5f84;
+            border-color: #1e5f84;
+        }
+
+        .delay-toggle label {
+            font-size: 17px;
+            font-weight: 600;
+            color: #0b2a3b;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .delay-toggle label::before {
+            content: "📋";
+            font-size: 20px;
+        }
+
+        /* ----- 落後原因編輯區 (可被隱藏) ----- */
+        .reason-content {
+            transition: opacity 0.25s ease, max-height 0.35s ease, margin 0.25s ease;
+            overflow: hidden;
+            max-height: 800px;
+            opacity: 1;
+            margin-top: 4px;
+        }
+
+        .reason-content.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+            pointer-events: none;
+            /* 讓內部無法聚焦 */;
         }
 
         .reason-section .section-header {
@@ -324,12 +379,21 @@
                 font-size: 14px;
                 padding: 14px 16px;
             }
+
+            .delay-toggle label {
+                font-size: 15px;
+            }
         }
 
         @media (max-width: 420px) {
             .dashboard {
                 padding: 18px 14px 24px;
                 border-radius: 20px;
+            }
+
+            .delay-toggle {
+                flex-wrap: wrap;
+                gap: 8px;
             }
         }
     </style>
@@ -370,197 +434,244 @@
             </span>
         </div>
 
-        <!-- 進度落後原因 (可編輯) -->
+        <!-- ===== 進度落後原因區塊 ===== -->
         <div class="reason-section">
-            <div class="section-header">
-                <label for="reasonText">進度落後原因</label>
-                <span class="char-counter" id="charCounter">0 / 500</span>
+
+            <!-- CHECKBOX：控制是否顯示落後原因 -->
+            <div class="delay-toggle">
+                <input type="checkbox" id="delayCheckbox" checked />
+                <label for="delayCheckbox">本案有進度落後情形</label>
             </div>
 
-            <textarea
-            id="reasonText"
-            class="reason-textarea"
-            placeholder="請輸入落後原因說明（例如：天候影響、物料延遲、人力調度等）..."
-            maxlength="500"
-            aria-label="進度落後原因編輯區"
-        >因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。</textarea>
+            <!-- 可隱藏的內容區 -->
+            <div class="reason-content" id="reasonContent">
 
-        <!-- 操作按鈕 -->
-        <div class="action-bar">
-            <button class="btn btn-secondary" id="resetBtn" type="button">↺ 重設</button>
-            <button class="btn btn-success" id="saveBtn" type="button">💾 儲存原因</button>
+                <div class="section-header">
+                    <label for="reasonText">進度落後原因</label>
+                    <span class="char-counter" id="charCounter">0 / 500</span>
+                </div>
+
+                <textarea
+                id="reasonText"
+                class="reason-textarea"
+                placeholder="請輸入落後原因說明（例如：天候影響、物料延遲、人力調度等）..."
+                maxlength="500"
+                aria-label="進度落後原因編輯區"
+            >因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。</textarea>
+
+            <!-- 操作按鈕 -->
+            <div class="action-bar">
+                <button class="btn btn-secondary" id="resetBtn" type="button">↺ 重設</button>
+                <button class="btn btn-success" id="saveBtn" type="button">💾 儲存原因</button>
+            </div>
+
         </div>
+        <!-- /reason-content -->
 
     </div>
+    <!-- /reason-section -->
 
-    <!-- ===== Toast 提示 ===== -->
-    <div id="toast" class="toast" role="alert" aria-live="polite">
-        <span class="toast-icon">✅</span>
-        <span id="toastMessage">已儲存</span>
-    </div>
+</div>
+<!-- ===== end dashboard ===== -->
 
-    <!-- ============================================================ -->
-    <script>
-        (function() {
-            'use strict';
+<!-- ===== Toast 提示 ===== -->
+<div id="toast" class="toast" role="alert" aria-live="polite">
+    <span class="toast-icon">✅</span>
+    <span id="toastMessage">已儲存</span>
+</div>
 
-            // ----- DOM 參考 -----
-            const reasonEl = document.getElementById('reasonText');
-            const charCounter = document.getElementById('charCounter');
-            const saveBtn = document.getElementById('saveBtn');
-            const resetBtn = document.getElementById('resetBtn');
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMessage');
+<!-- ============================================================ -->
+<script>
+    (function() {
+        'use strict';
 
-            // 唯讀資料元素 (用於示範，未來可動態更新)
-            const predEl = document.getElementById('predictedProgress');
-            const actualEl = document.getElementById('actualProgress');
-            const dateEl = document.getElementById('lastUpdateDate');
+        // ----- DOM 參考 -----
+        const reasonEl = document.getElementById('reasonText');
+        const charCounter = document.getElementById('charCounter');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMessage');
 
-            // ----- 初始值 (模擬資料) -----
-            const INITIAL_REASON =
-                '因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。';
+        // checkbox 與 原因內容容器
+        const delayCheckbox = document.getElementById('delayCheckbox');
+        const reasonContent = document.getElementById('reasonContent');
 
-            // 儲存上一次儲存的值 (用於重設)
-            let lastSavedReason = INITIAL_REASON;
+        // 唯讀資料元素
+        const predEl = document.getElementById('predictedProgress');
+        const actualEl = document.getElementById('actualProgress');
+        const dateEl = document.getElementById('lastUpdateDate');
 
-            // ----- 輔助函式：更新字數計數器 -----
-            function updateCharCounter() {
-                const len = reasonEl.value.length;
-                const max = reasonEl.maxLength;
-                charCounter.textContent = len + ' / ' + max;
-                // 接近上限時改變樣式 (提示)
-                if (len > max * 0.9) {
-                    charCounter.style.color = '#b13e3e';
-                    charCounter.style.borderColor = '#e6b3b3';
-                } else {
-                    charCounter.style.color = '#6d8aa3';
-                    charCounter.style.borderColor = '#dae4ef';
-                }
+        // ----- 初始值 (模擬資料) -----
+        const INITIAL_REASON =
+            '因近期連續降雨及部分鋼筋供料延遲，導致基礎工程進度落後約 8.2%。已協調廠商加派工班，並調整工序，預計 8 月 10 日前可追回延誤。';
+
+        // 儲存上一次儲存的值 (用於重設)
+        let lastSavedReason = INITIAL_REASON;
+
+        // ----- 輔助：更新字數計數器 -----
+        function updateCharCounter() {
+            const len = reasonEl.value.length;
+            const max = reasonEl.maxLength;
+            charCounter.textContent = len + ' / ' + max;
+            if (len > max * 0.9) {
+                charCounter.style.color = '#b13e3e';
+                charCounter.style.borderColor = '#e6b3b3';
+            } else {
+                charCounter.style.color = '#6d8aa3';
+                charCounter.style.borderColor = '#dae4ef';
+            }
+        }
+
+        // ----- 顯示 Toast -----
+        function showToast(message, duration = 2800) {
+            toastMsg.textContent = message || '已儲存';
+            toast.classList.add('show');
+
+            if (window._toastTimer) {
+                clearTimeout(window._toastTimer);
+                window._toastTimer = null;
             }
 
-            // ----- 顯示 Toast 訊息 -----
-            function showToast(message, duration = 2800) {
-                toastMsg.textContent = message || '已儲存';
-                toast.classList.add('show');
+            window._toastTimer = setTimeout(function() {
+                toast.classList.remove('show');
+                window._toastTimer = null;
+            }, duration);
+        }
 
-                // 清除現有計時器，避免衝突
+        // ----- 儲存原因 -----
+        function saveReason() {
+            // 如果 checkbox 未勾選，提示並阻止儲存
+            if (!delayCheckbox.checked) {
+                showToast('⚠️ 請先勾選「本案有進度落後情形」再儲存', 2200);
+                return;
+            }
+
+            const current = reasonEl.value.trim();
+            if (current === '') {
+                showToast('⚠️ 請輸入落後原因', 2000);
+                return;
+            }
+            lastSavedReason = current;
+            showToast('✅ 進度落後原因已儲存', 2500);
+            console.log('[儲存] 落後原因:', current);
+        }
+
+        // ----- 重設至上次儲存內容 -----
+        function resetToSaved() {
+            reasonEl.value = lastSavedReason;
+            updateCharCounter();
+            reasonEl.dispatchEvent(new Event('input'));
+            showToast('↺ 已重設至上次儲存內容', 2000);
+        }
+
+        // ----- 切換原因區塊顯示 (根據 checkbox) -----
+        function toggleReasonContent(show) {
+            if (show) {
+                reasonContent.classList.remove('hidden');
+                // 讓內部元素可以聚焦
+                reasonContent.style.pointerEvents = '';
+            } else {
+                reasonContent.classList.add('hidden');
+                reasonContent.style.pointerEvents = 'none';
+            }
+        }
+
+        // ----- 更新唯讀日期 (模擬) -----
+        function refreshReadOnlyData() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            dateEl.textContent = y + '-' + m + '-' + d;
+        }
+
+        // ===== 初始化 =====
+        function init() {
+            // 設定初始文字
+            reasonEl.value = INITIAL_REASON;
+            lastSavedReason = INITIAL_REASON;
+            updateCharCounter();
+
+            // 更新日期
+            refreshReadOnlyData();
+
+            // ---- 根據 checkbox 初始狀態決定顯示 ----
+            // 預設為 checked (因為有落後範例文字)
+            toggleReasonContent(delayCheckbox.checked);
+
+            // ----- 事件綁定 -----
+
+            // 1. checkbox 切換
+            delayCheckbox.addEventListener('change', function(e) {
+                const checked = e.target.checked;
+                toggleReasonContent(checked);
+
+                // 如果取消勾選，且原因內容有變更但未儲存，可以考慮給提示（此處單純隱藏）
+                // 但為避免使用者困擾，不強制儲存
+                if (!checked) {
+                    // 可選：在 console 記錄
+                    console.log('[隱藏] 進度落後原因已隱藏');
+                } else {
+                    console.log('[顯示] 進度落後原因已顯示');
+                }
+            });
+
+            // 2. 文字區輸入 → 更新字數
+            reasonEl.addEventListener('input', updateCharCounter);
+
+            // 3. 儲存按鈕
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                saveReason();
+            });
+
+            // 4. 重設按鈕
+            resetBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetToSaved();
+            });
+
+            // 5. 鍵盤快速鍵: Ctrl+Enter (或 Cmd+Enter) 儲存
+            reasonEl.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    e.preventDefault();
+                    saveReason();
+                }
+            });
+
+            // 6. 頁面關閉前提醒 (僅在原因有變更且 checkbox 勾選時)
+            window.addEventListener('beforeunload', function(e) {
+                if (!delayCheckbox.checked) return; // 未勾選則不提醒
+                const current = reasonEl.value;
+                if (current !== lastSavedReason && current.trim() !== '') {
+                    e.preventDefault();
+                    e.returnValue = '您有未儲存的進度落後原因，確定要離開嗎？';
+                    return e.returnValue;
+                }
+            });
+
+            // 7. 點擊 toast 可手動關閉
+            toast.addEventListener('click', function() {
+                toast.classList.remove('show');
                 if (window._toastTimer) {
                     clearTimeout(window._toastTimer);
                     window._toastTimer = null;
                 }
+            });
 
-                window._toastTimer = setTimeout(function() {
-                    toast.classList.remove('show');
-                    window._toastTimer = null;
-                }, duration);
-            }
+            console.log('✅ 施工進度面板初始化完成 (含落後情形開關)');
+        }
 
-            // ----- 儲存原因 (模擬) -----
-            function saveReason() {
-                const current = reasonEl.value.trim();
-                if (current === '') {
-                    showToast('⚠️ 請輸入落後原因', 2000);
-                    return;
-                }
-                // 更新「上次儲存」的內容，讓重設可以回到此版本
-                lastSavedReason = current;
-                showToast('✅ 進度落後原因已儲存', 2500);
-                // 可在此處加入實際的 AJAX 儲存邏輯
-                console.log('[儲存] 落後原因:', current);
-            }
+        // ----- 啟動 -----
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
 
-            // ----- 重設至上次儲存內容 -----
-            function resetToSaved() {
-                reasonEl.value = lastSavedReason;
-                updateCharCounter();
-                // 觸發變更事件以便其他監聽 (如果有)
-                reasonEl.dispatchEvent(new Event('input'));
-                showToast('↺ 已重設至上次儲存內容', 2000);
-            }
-
-            // ----- 更新唯讀資料 (模擬) -----
-            function refreshReadOnlyData() {
-                // 實際應用中可從 API 取得，此處僅示範靜態數值
-                // 為了展示「動態感」，稍微變化日期
-                const now = new Date();
-                const y = now.getFullYear();
-                const m = String(now.getMonth() + 1).padStart(2, '0');
-                const d = String(now.getDate()).padStart(2, '0');
-                dateEl.textContent = y + '-' + m + '-' + d;
-
-                // 預定與實際進度維持固定示範值 (也可隨機微調)
-                // 但保持視覺穩定，僅在首次載入時設定好
-                // 已在 HTML 中設定初始值，這裡不再異動
-            }
-
-            // ----- 初始化 -----
-            function init() {
-                // 設定初始文字
-                reasonEl.value = INITIAL_REASON;
-                lastSavedReason = INITIAL_REASON;
-                updateCharCounter();
-
-                // 更新唯讀日期 (顯示當天)
-                refreshReadOnlyData();
-
-                // ----- 事件監聽 -----
-
-                // 1. 文字區輸入 → 更新字數
-                reasonEl.addEventListener('input', updateCharCounter);
-
-                // 2. 儲存按鈕
-                saveBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    saveReason();
-                });
-
-                // 3. 重設按鈕
-                resetBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    resetToSaved();
-                });
-
-                // 4. 鍵盤快速鍵: Ctrl+Enter (或 Cmd+Enter) 儲存
-                reasonEl.addEventListener('keydown', function(e) {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                        e.preventDefault();
-                        saveReason();
-                    }
-                });
-
-                // 5. 頁面關閉前提醒 (避免遺失未儲存內容)
-                window.addEventListener('beforeunload', function(e) {
-                    const current = reasonEl.value;
-                    if (current !== lastSavedReason && current.trim() !== '') {
-                        // 標準瀏覽器會顯示自訂訊息 (部分瀏覽器可能忽略)
-                        e.preventDefault();
-                        e.returnValue = '您有未儲存的進度落後原因，確定要離開嗎？';
-                        return e.returnValue;
-                    }
-                });
-
-                // 6. 如果點擊 toast 可手動關閉
-                toast.addEventListener('click', function() {
-                    toast.classList.remove('show');
-                    if (window._toastTimer) {
-                        clearTimeout(window._toastTimer);
-                        window._toastTimer = null;
-                    }
-                });
-
-                console.log('✅ 施工進度面板初始化完成');
-            }
-
-            // ----- 啟動 -----
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-
-        })();
-    </script>
+    })();
+</script>
 
 </body>
 </html>
