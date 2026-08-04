@@ -360,7 +360,7 @@
     <table class="spec-table">
       <tr><th>欄位</th><th>必填</th><th>規則／備註</th></tr>
       <tr><td class="field">最新預定進度／最新實際進度 <span class="tag new">新增顯示</span></td><td>—</td><td>來源：施工日誌最近一筆紀錄，唯讀</td></tr>
-      <tr><td class="field">進度落後原因 <span class="tag new">新增</span></td><td>否</td><td>字數上限 500 字</td></tr>
+      <tr><td class="field">進度落後原因 <span class="tag new">新增</span></td><td>否</td><td>字數上限 500 字(有新增勾選本案有進度落後情形的選項，若打勾，就改為必填!)</td></tr>
     </table>
     <table class="spec-table">
       <tr><th>快捷鍵</th><th>處理</th></tr>
@@ -496,7 +496,7 @@
       <tr><th>欄位</th><th>資料庫欄位</th><th>型態／長度</th><th>異動</th><th>必填</th><th>驗證規則</th></tr>
       <tr><td class="field">最新預定進度</td><td><code>latest_planned_progress</code></td><td>DECIMAL(5,2)</td><td class="tag new">新增顯示</td><td>—</td><td>百分比；來源：施工日誌最近一筆紀錄，唯讀</td></tr>
       <tr><td class="field">最新實際進度</td><td><code>latest_actual_progress</code></td><td>DECIMAL(5,2)</td><td class="tag new">新增顯示</td><td>—</td><td>百分比；來源：施工日誌最近一筆紀錄，唯讀</td></tr>
-      <tr><td class="field">進度落後原因</td><td><code>progress_delay_reason</code></td><td>VARCHAR(500)</td><td class="tag new">新增</td><td>否</td><td>上限 500 字</td></tr>
+      <tr><td class="field">進度落後原因</td><td><code>progress_delay_reason</code></td><td>VARCHAR(500)</td><td class="tag new">新增</td><td>否</td><td>上限 500 字(有新增勾選本案有進度落後情形的選項，若打勾，就改為必填!)</td></tr>
     </table>
 
     <h3 class="block-title">7.6　共用參考表</h3>
