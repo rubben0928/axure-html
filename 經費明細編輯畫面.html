@@ -19,7 +19,7 @@
     border-radius: 4px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
     overflow: hidden;
-    margin: 0 auto;
+    margin: 0 auto 20px;
   }
   .modal-header {
     background: #3f7fd1;
@@ -193,7 +193,7 @@
     animation: slideDown 0.25s ease;
   }
   .custom-confirm-header {
-    background: #d9534f;  /* 警告色 */
+    background: #d9534f;
     color: #fff;
     padding: 14px 18px;
     font-size: 16px;
@@ -249,6 +249,47 @@
 
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   @keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ===== 底部說明區塊 ===== */
+  .info-section {
+    width: 460px;
+    margin: 0 auto;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 15px 18px;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.7;
+  }
+  .info-section h4 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    color: #3f7fd1;
+  }
+  .info-section h5 {
+    margin: 12px 0 4px 0;
+    font-size: 13px;
+    color: #555;
+    border-bottom: 1px solid #e5e5e5;
+    padding-bottom: 3px;
+  }
+  .info-section ul {
+    margin: 4px 0 8px 0;
+    padding-left: 20px;
+  }
+  .info-section ul li {
+    margin-bottom: 2px;
+  }
+  .info-section ul.no-bullet {
+    list-style: none;
+    padding-left: 0;
+  }
+  .info-section ul.no-bullet li::before {
+    content: "□ ";
+    font-weight: bold;
+    color: #3f7fd1;
+  }
 </style>
 </head>
 <body>
@@ -347,11 +388,32 @@
   </div>
 </div>
 
+<!-- ===== 底部說明區塊 ===== -->
+<div class="info-section">
+  <h4>📋 系統規則與功能驗收清單</h4>
+
+  <h5>業務邏輯規則</h5>
+  <ul>
+    <li><strong>單年度限制</strong>：當「本案為跨年度」為未勾選狀態時，核定年度表格僅允許存在 1 筆資料（即第一列）。</li>
+    <li><strong>資料同步</strong>：左側「核定金額」表格新增或刪除年度列時，右側「累計實際支付金額」表格需自動同步顯示對應的年度標題（預設金額顯示為 0）。</li>
+    <li><strong>預設年度</strong>：若無特殊指定，新增列及初始化第一列的年度預設值為 115（民國年）。</li>
+  </ul>
+
+  <h5>功能需求說明</h5>
+  <ul class="no-bullet">
+    <li>初始載入時，「本案為跨年度」為未勾選，新增按鈕為禁用狀態。</li>
+    <li>勾選核取方塊後，新增按鈕變為可點擊，且能正常新增年度列。</li>
+    <li>取消勾選時，必定彈出自訂對話框，且原生 confirm 不再出現。</li>
+    <li>點擊「確定刪除」後，表格僅剩第一列，右側同步更新，新增按鈕變為禁用。</li>
+    <li>點擊「保留跨年度」或關閉對話框後，核取方塊恢復勾選，資料完全保留。</li>
+  </ul>
+</div>
+
 <script>
 const YEAR_MIN = 108;
 const YEAR_MAX = 125;
 let isProcessing = false;
-let pendingCallback = null;  // 存放確認後的動作
+let pendingCallback = null;
 
 function buildYearOptions(selectedYear) {
   let html = '';
@@ -361,13 +423,11 @@ function buildYearOptions(selectedYear) {
   return html;
 }
 
-// 顯示自訂確認對話框
 function showConfirm(callback) {
   pendingCallback = callback;
   document.getElementById('customConfirm').style.display = 'flex';
 }
 
-// 關閉對話框並回傳結果
 function closeConfirm(result) {
   document.getElementById('customConfirm').style.display = 'none';
   if (pendingCallback) {
@@ -382,15 +442,11 @@ function toggleAddRowButton() {
 
   if (!checkbox.checked) {
     isProcessing = true;
-    // 顯示自訂確認對話框
     showConfirm((confirmed) => {
       if (confirmed) {
-        // 使用者點「確定刪除」
         removeAllRowsExceptFirst();
         document.getElementById('addRowBtn').disabled = true;
-        // checkbox 維持未勾選（已經是被取消的狀態）
       } else {
-        // 使用者點「保留跨年度」→ 恢復勾選
         checkbox.checked = true;
         document.getElementById('addRowBtn').disabled = false;
       }
@@ -467,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const checkbox = document.getElementById('crossYearCheck');
   document.getElementById('addRowBtn').disabled = !checkbox.checked;
 
-  // 點擊遮罩也可關閉（等同取消）
   document.getElementById('customConfirm').addEventListener('click', function(e) {
     if (e.target === this) closeConfirm(false);
   });
