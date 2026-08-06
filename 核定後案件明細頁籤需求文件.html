@@ -266,22 +266,23 @@
       <tr><td class="field">用地取得日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">辦理說明會日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">工程特殊狀態</td><td class="tag rename">改名＋改下拉</td><td><b>必填</b>；原「工程辦理方式」；選項：自行設計監造／委託測設自行監造／委託測設監造／自行設計委託監造</td></tr>
-      <tr><td class="field">規劃設計單位</td><td class="tag keep">維持</td><td>—</td></tr>
+       <tr><td class="field">專管單位</td><td class="tag keep">新增</td><td>選填:統一編號、廠商名稱</td></tr>
+      <tr><td class="field">規劃設計單位</td><td class="tag keep">維持</td><td>必填:統一編號、廠商名稱</td></tr>
       <tr><td class="field">測設完成日期</td><td class="tag rename">合併</td><td><b>必填</b>；由「量測完成日期＋細部設計完成日期」合併而成</td></tr>
       <tr><td class="field">上網日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">決標日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
-      <tr><td class="field">標案編號</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">標案編號</td><td class="tag keep">維持</td><td>選填</td></tr>
       <tr><td class="field">契約編號</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
-      <tr><td class="field">競標家數</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">競標家數</td><td class="tag keep">維持</td><td>必填</td></tr>
       <tr><td class="field">發包方式</td><td class="tag keep">維持</td><td><b>必填</b>；下拉：公開招標、限制性招標、其他</td></tr>
-      <tr><td class="field">監造單位</td><td class="tag keep">維持</td><td><b>必填</b>；「廠商名稱」與「統一編號」兩部分，皆為必填</td></tr>
-      <tr><td class="field">承包廠商</td><td class="tag keep">維持</td><td><b>必填</b>；「廠商名稱」與「統一編號」兩部分，皆為必填</td></tr>
-      <tr><td class="field">生態團隊</td><td class="tag keep">維持</td><td>—</td></tr>
+      <tr><td class="field">監造單位</td><td class="tag keep">維持</td><td><b>必填</b>；統一編號、廠商名稱</td></tr>
+      <tr><td class="field">承包廠商</td><td class="tag keep">維持</td><td><b>必填</b>；統一編號、廠商名稱</td></tr>
+      <tr><td class="field">生態團隊</td><td class="tag keep">維持</td><td>必填</td></tr>
       <tr><td class="field">訂約日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">開工日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">施工期限</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
       <tr><td class="field">停／復工設定</td><td class="tag move">改資料帶入</td><td>資料來源改為施工日誌之工期設定紀錄（唯讀）：停工／復工日期、文號、原因</td></tr>
-      <tr><td class="field">竣工日期</td><td class="tag keep">維持</td><td><b>必填</b></td></tr>
+      <tr><td class="field">竣工日期</td><td class="tag keep">維持</td><td><b>選填</b></td></tr>
       <tr><td class="field">驗收清單（工程驗收列表）</td><td class="tag move">搬移</td><td>原「驗收付款階段」更名為「驗收決算階段」涵蓋此區塊；內容見下方說明框</td></tr>
       <tr><td class="field">結算清單（工程結算列表）</td><td class="tag move">搬移＋正名</td><td>內容見下方說明框</td></tr>
       <tr><td class="field">決算日期</td><td class="tag rename">改名</td><td><b>必填</b>；原「結算完成日期」，<b>非「結算清單」內之欄位</b>，為本頁籤獨立末項</td></tr>
@@ -442,22 +443,23 @@
       <tr><td class="field">用地取得日期</td><td><code>land_acquisition_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">辦理說明會日期</td><td><code>briefing_session_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">工程特殊狀態</td><td><code>project_special_status</code></td><td>ENUM</td><td class="tag rename">改名＋下拉</td><td><b>是</b></td><td>原「工程辦理方式」；4 選項：自行設計監造／委託測設自行監造／委託測設監造／自行設計委託監造</td></tr>
-      <tr><td class="field">規劃設計單位</td><td><code>planning_design_unit</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">專管單位</td><td><code>project_management_unit_name</code> / <code>project_management_unit_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag new">新增</td><td>否</td><td>含廠商名稱與統一編號兩部分，選填，統一編號需符合統編格式</td></tr>
+      <tr><td class="field">規劃設計單位</td><td><code>planning_design_unit_name</code> / <code>planning_design_unit_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag keep">維持</td><td>是</td><td>含廠商名稱與統一編號兩部分，統一編號需符合統編格式</td></tr>
       <tr><td class="field">測設完成日期</td><td><code>design_survey_actual_date</code></td><td>DATE</td><td class="tag rename">合併</td><td><b>是</b></td><td>由量測完成日期＋細部設計完成日期合併；需為有效日期</td></tr>
       <tr><td class="field">上網日期</td><td><code>tender_announcement_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">決標日期</td><td><code>award_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
-      <tr><td class="field">標案編號</td><td><code>tender_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">標案編號</td><td><code>tender_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td>否</td><td>—</td></tr>
       <tr><td class="field">契約編號</td><td><code>contract_no</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td><b>是</b></td><td>—</td></tr>
-      <tr><td class="field">競標家數</td><td><code>bidder_count</code></td><td>INT</td><td class="tag keep">維持</td><td>—</td><td>非負整數</td></tr>
+      <tr><td class="field">競標家數</td><td><code>bidder_count</code></td><td>INT</td><td class="tag keep">維持</td><td>是</td><td>非負整數</td></tr>
       <tr><td class="field">發包方式</td><td><code>contracting_method</code></td><td>ENUM</td><td class="tag keep">維持</td><td><b>是</b></td><td>3 選項：公開招標／限制性招標／其他</td></tr>
-      <tr><td class="field">監造單位</td><td><code>supervision_unit</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td><b>是</b></td><td>—</td></tr>
-      <tr><td class="field">承包廠商</td><td><code>contractor_name</code> / <code>contractor_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag keep">維持</td><td><b>是</b></td><td>單一欄位，內含廠商名稱與統一編號兩部分，皆為必填，統一編號需符合統編格式</td></tr>
-      <tr><td class="field">生態團隊</td><td><code>eco_team</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>—</td><td>—</td></tr>
+      <tr><td class="field">監造單位</td><td><code>supervision_unit_name</code> / <code>supervision_unit_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag keep">維持</td><td><b>是</b></td><td>含廠商名稱與統一編號兩部分，皆為必填，統一編號需符合統編格式</td></tr>
+      <tr><td class="field">承包廠商</td><td><code>contractor_name</code> / <code>contractor_tax_id</code></td><td>VARCHAR(100) / VARCHAR(20)</td><td class="tag keep">維持</td><td><b>是</b></td><td>含廠商名稱與統一編號兩部分，皆為必填，統一編號需符合統編格式</td></tr>
+      <tr><td class="field">生態團隊</td><td><code>eco_team</code></td><td>VARCHAR(100)</td><td class="tag keep">維持</td><td>是</td><td>—</td></tr>
       <tr><td class="field">訂約日期</td><td><code>contract_sign_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">開工日期</td><td><code>construction_start_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">施工期限</td><td><code>construction_duration</code></td><td>VARCHAR(50)</td><td class="tag keep">維持</td><td><b>是</b></td><td>可視需要改為日曆天數 INT</td></tr>
       <tr><td class="field">停工／復工日期、文號、原因</td><td><code>stop_*</code> / <code>resume_*</code></td><td>DATE／VARCHAR(100)／TEXT</td><td class="tag move">改資料帶入</td><td>—</td><td>來源：施工日誌工期設定紀錄，唯讀</td></tr>
-      <tr><td class="field">竣工日期</td><td><code>construction_completion_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>是</b></td><td>需為有效日期</td></tr>
+      <tr><td class="field">竣工日期</td><td><code>construction_completion_date</code></td><td>DATE</td><td class="tag keep">維持</td><td><b>否</b></td><td>需為有效日期</td></tr>
       <tr><td class="field">驗收清單（工程驗收列表）</td><td><code>project_acceptance_record</code>（子表）</td><td>OBJECT[]</td><td class="tag move">搬移</td><td>—</td><td>來源：工程驗收頁籤，唯讀＋檢視（無刪除）</td></tr>
       <tr><td class="field">結算清單（工程結算列表）</td><td><code>project_settlement_record</code>（子表）</td><td>OBJECT[]</td><td class="tag move">搬移＋正名</td><td>—</td><td>來源：工程結算頁籤，唯讀＋檢視（無刪除）</td></tr>
       <tr><td class="field">決算日期</td><td><code>final_settlement_date</code></td><td>DATE</td><td class="tag rename">改名</td><td><b>是</b></td><td>原「結算完成日期」；為本頁籤獨立欄位，非「結算清單」子表之一部分</td></tr>
