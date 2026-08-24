@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統功能需求說明：工程預算與實付款管理模組</title>
+    <style>
+        :root {
+            --primary-color: #1a56db;
+            --text-color: #1f2937;
+            --bg-color: #f9fafb;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 32px 16px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+        h1 {
+            font-size: 1.6rem;
+            color: #111827;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: #1f2937;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+        p {
+            margin: 0 0 16px 0;
+        }
+        ul {
+            margin: 0 0 16px 0;
+            padding-left: 24px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.88em;
+            color: #d97706;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>系統功能需求說明：工程預算與實付款管理模組</h1>
+
+    <h2>一、 功能目的</h2>
+    <p>優化工程管理生命週期中的預算與經費填報流程。透過自動帶入基本資料設定、自動化整數計算與彈出式視窗設計，降低工程人員填寫錯誤率，並提升各期實付款紀錄的閱讀性與操作流暢度。</p>
+
+    <h2>二、 介面與互動需求</h2>
+    <ul>
+        <li><strong>基本資料動態載入</strong>：系統需自動由「基本資料設定」載入對應之「核定金額」，並於前端顯示。該欄位設定為唯讀（Readonly）狀態，不可手動修改。</li>
+        <li><strong>單位與數值限制</strong>：全系統所有金額欄位之計價單位一律採用「元」，且輸入與計算結果<strong>僅限整數</strong>（不支援小數點，輸入非整數或符號需自動過濾）。</li>
+        <li><strong>即時動態計算</strong>：在「工程設計」、「工程發包」、「經費變更」、「工程結算」等區塊中，當使用者輸入各項費用（工程費、工管費、空污費、技術服務費、其他）時，系統需即時動態計算並更新該區塊的整數「合計」金額。</li>
+        <li><strong>自動千分位格式化</strong>：使用者完成數值輸入並離開欄位（Blur）時，系統需自動過濾非整數數字，並將數值轉為包含千分位逗號的整數格式（如 <code>7,000,000</code> 元）。</li>
+        <li><strong>區塊連動控制</strong>：依據「是否需變更經費」、「是否已付款」、「是否已結算」的單選/複選框狀態，動態展開（Show）或隱藏（Hide）對應的進階填寫區塊。</li>
+    </ul>
+
+    <h2>三、 實付款紀錄專屬需求</h2>
+    <ul>
+        <li><strong>彈出式填報視窗 (Modal)</strong>：點擊「＋ 實付紀錄」按鈕後，以置中彈出視窗呈現填報介面，避免原頁面過長。</li>
+        <li><strong>逐月動態增刪</strong>：視窗內允許使用者動態新增多筆紀錄。每筆紀錄需提供「年月」選擇器及五項費用整數輸入框，並附有單筆「刪除」按鈕。</li>
+        <li><strong>主頁面資料同步與彙總</strong>：
+            <ul>
+                <li>使用者於彈出視窗點擊「確認儲存」後，原主頁面需以「卡片」形式條列顯示各月份的實付明細，方便快速檢閱。</li>
+                <li>主頁面的「實付款」區塊需自動加總五項費用的各自整數總額（元），並將欄位鎖定為唯讀（Readonly）狀態。</li>
+                <li>於區塊底部新增「實付款合計」欄位，加總所有實付項目的最終整數總額（元）。</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

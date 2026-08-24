@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>預算額度</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    .budget-container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+
+    .last-update {
+      text-align: right;
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    /* 工程核定金額卡片 */
+    .approved-amount-card {
+      background-color: #38b2ac;
+      color: #ffffff;
+      padding: 24px 28px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+    }
+
+    .approved-amount-card .title {
+      font-size: 16px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .approved-amount-card .amount {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* 區塊樣式 */
+    .section-block {
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      color: #2d3748;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    /* 網格系統 */
+    .grid-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin: 0 -12px;
+    }
+
+    .grid-col {
+      width: 50%;
+      padding: 0 12px;
+      margin-bottom: 20px;
+    }
+
+    /* 表單欄位 */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      color: #4a5568;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group label .required {
+      color: #e53e3e;
+      margin-left: 2px;
+    }
+
+    .form-control {
+      width: 100%;
+      height: 42px;
+      padding: 8px 14px;
+      font-size: 15px;
+      color: #2d3748;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: #38b2ac;
+      box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.15);
+    }
+
+    .form-control.readonly {
+      background-color: #e6fffa;
+      color: #234e52;
+      border-color: #b2f5ea;
+    }
+
+    .select-control {
+      padding: 6px 12px;
+      height: 42px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      outline: none;
+      font-size: 14px;
+      color: #2d3748;
+      background-color: #fff;
+    }
+
+    .help-text {
+      display: block;
+      font-size: 12px;
+      color: #a0aec0;
+      margin-top: 6px;
+    }
+
+    /* 合計列 */
+    .total-row {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+      font-size: 15px;
+      color: #2d3748;
+    }
+
+    .total-row .amount {
+      font-weight: 700;
+      font-size: 18px;
+      margin-left: 8px;
+      color: #2c7a7b;
+    }
+
+    /* Radio / Checkbox 樣式 */
+    .radio-group {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .radio-label {
+      display: inline-flex;
+      align-items: center;
+      font-size: 15px;
+      color: #2d3748;
+      cursor: pointer;
+    }
+
+    .radio-label input[type="radio"],
+    .radio-label input[type="checkbox"] {
+      margin-right: 8px;
+      accent-color: #38b2ac;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* 展開區塊樣式 */
+    .budget-change-details, .settlement-details, .payment-details {
+      margin-top: 20px;
+    }
+
+    .change-option-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      color: #2d3748;
+    }
+
+    /* 奉署核定文號欄位 */
+    .approval-no-group {
+      margin-bottom: 25px;
+    }
+
+    .approval-no-inputs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .approval-no-inputs .date-picker {
+      width: 220px;
+    }
+
+    .approval-no-inputs .dept-select {
+      width: 110px;
+    }
+
+    .approval-no-inputs .no-input {
+      width: 180px;
+    }
+
+    .sub-section-title {
+      font-size: 18px;
+      color: #2d3748;
+      margin: 25px 0 20px 0;
+      font-weight: 600;
+    }
+
+    /* 實付紀錄標頭按鈕 */
+    .record-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #38b2ac;
+      color: #38b2ac;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      background-color: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .record-tag:hover {
+      background-color: #38b2ac;
+      color: #ffffff;
+    }
+
+    /* 實付款動態年月紀錄卡片(彈出視窗用) */
+    .payment-record-row {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 16px 4px 16px;
+      margin-bottom: 16px;
+      background-color: #fafcfc;
+      position: relative;
+    }
+
+    .payment-record-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .payment-record-header .month-input {
+      width: 180px;
+    }
+
+    .btn-remove-record {
+      margin-left: auto;
+      background: none;
+      border: 1px solid #e53e3e;
+      color: #e53e3e;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .btn-remove-record:hover {
+      background-color: #e53e3e;
+      color: #fff;
+    }
+
+    .payment-total-label {
+      font-size: 16px;
+      color: #2d3748;
+      font-weight: 600;
+      margin: 20px 0 15px 0;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+
+    /* 主頁面同步顯示的卡片樣式 */
+    .synced-record-card {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #38b2ac;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+    .synced-record-month {
+      font-weight: 600;
+      color: #2b6cb0;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .synced-record-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      font-size: 14px;
+      color: #4a5568;
+    }
+    .synced-record-details span {
+      background: #edf2f7;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* 按鈕樣式 */
+    .action-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 30px;
+    }
+
+    .btn-save {
+      background-color: #38b2ac;
+      color: #ffffff;
+      border: none;
+      padding: 10px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-save:hover {
+      background-color: #319795;
+    }
+
+    /* Modal 彈出視窗樣式 */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-content {
+      background: #fff;
+      width: 900px;
+      max-width: 95%;
+      max-height: 90vh;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      transform: translateY(-20px);
+      transition: transform 0.2s ease;
+    }
+    .modal-overlay.active .modal-content {
+      transform: translateY(0);
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h3 {
+      font-size: 18px;
+      color: #2d3748;
+    }
+    .btn-close-modal {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #a0aec0;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-close-modal:hover {
+      color: #4a5568;
+    }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+      border-radius: 0 0 12px 12px;
+    }
+    .btn-cancel {
+      background: #edf2f7;
+      color: #4a5568;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .btn-cancel:hover {
+      background: #e2e8f0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="budget-container">
+  <div class="last-update">
+    最後更新：苗栗管理處工程員 陳小明 113/01/14 下午 02:03:25
+  </div>
+
+  <!-- 工程核定金額 -->
+  <div class="approved-amount-card">
+    <div class="title">工程核定金額 (元)</div>
+    <div class="amount">7,000,000</div>
+  </div>
+
+  <!-- 1. 工程設計 -->
+  <div class="section-block">
+    <h3 class="section-title">工程設計</h3>
+    <div class="grid-row">
+      <div class="grid-col">
+        <div class="form-group">
+          <label>工程費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="design" value="6,206,000">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>工管費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="design" value="270,187">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>空污費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="design" value="0">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>技術服務費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="design" value="332,056">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>其他 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="design" value="17,731">
+        </div>
+      </div>
+    </div>
+    <div class="total-row">
+      工程設計合計 (元)：<span class="amount" id="total-design">7,084,865</span>
+    </div>
+  </div>
+
+  <!-- 2. 工程發包 -->
+  <div class="section-block">
+    <h3 class="section-title">工程發包</h3>
+    <div class="grid-row">
+      <div class="grid-col">
+        <div class="form-group">
+          <label>工程費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="bidding" value="5,311,000">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>工管費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="bidding" value="282,386">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>空污費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="bidding" value="0">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>技術服務費 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="bidding" value="332,056">
+        </div>
+      </div>
+      <div class="grid-col">
+        <div class="form-group">
+          <label>其他 (元) <span class="required">*</span></label>
+          <input type="text" class="form-control" data-group="bidding" value="14,163">
+        </div>
+      </div>
+    </div>
+    <div class="total-row">
+      工程發包合計 (元)：<span class="amount" id="total-bidding">6,198,496</span>
+    </div>
+  </div>
+
+  <!-- 3. 核定底價 -->
+  <div class="section-block">
+    <h3 class="section-title">核定底價</h3>
+    <div class="grid-row">
+      <div class="grid-col">
+        <div class="form-group">
+          <label>核定底價 (元)</label>
+          <input type="text" class="form-control num-format" value="5,311,000">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. 經費變更 -->
+  <div class="section-block">
+    <h3 class="section-title">經費變更</h3>
+    <div class="form-group">
+      <label>是否需變更經費？ <span class="required">*</span></label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="budgetChange" value="yes" onchange="toggleBudgetChange(true)"> 需變更
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="budgetChange" value="no" checked onchange="toggleBudgetChange(false)"> 無需變更
+        </label>
+      </div>
+    </div>
+
+    <div id="budget-change-fields" class="budget-change-details hidden">
+      <div class="change-option-row">
+        <span>本工程已奉准第</span>
+        <select class="select-control" style="height: 38px;">
+          <option value="1" selected>1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+        <span>次變更經費</span>
+      </div>
+
+      <div class="form-group">
+        <div class="radio-group">
+          <label class="radio-label">
+            <input type="radio" name="changeType" value="decrease" onchange="toggleApprovalNo(false)"> 變更追減
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="changeType" value="increase" checked onchange="toggleApprovalNo(true)"> 變更追加 <span style="color: #718096; font-size: 13px; margin-left: 4px;">(需輸入奉署核定文號)</span>
+          </label>
+        </div>
+      </div>
+
+      <div id="approval-no-block" class="form-group approval-no-group">
+        <label>奉署核定文號 <span class="required">*</span></label>
+        <div class="approval-no-inputs">
+          <input type="date" class="form-control date-picker">
+          <select class="select-control dept-select">
+            <option value="農保育" selected>農保育</option>
+            <option value="農水處">農水處</option>
+          </select>
+          <span style="color: #4a5568; font-size: 14px;">字第</span>
+          <input type="text" class="form-control no-input" placeholder="數字">
+          <span style="color: #4a5568; font-size: 14px;">號</span>
+        </div>
+      </div>
+
+      <h3 class="sub-section-title">變更內容</h3>
+      <div class="grid-row">
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工程費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="change" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工管費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="change" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>空污費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="change" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>技術服務費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="change" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>其他 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="change" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="total-row">
+        經費變更合計 (元)：<span class="amount" id="total-change">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 實付款 -->
+  <div class="section-block">
+    <h3 class="section-title">實付款</h3>
+    <div class="form-group">
+      <label class="radio-label">
+        <input type="checkbox" id="paymentCheckbox" onchange="togglePayment(this.checked)"> 是否已付款
+      </label>
+    </div>
+
+    <div id="payment-fields" class="payment-details hidden">
+      <div>
+        <button type="button" class="record-tag" onclick="openPaymentModal()">＋ 實付紀錄</button>
+      </div>
+
+      <!-- 同步顯示各月份的區域 -->
+      <div id="synced-payment-records"></div>
+
+      <div class="payment-total-label">實付款 (各項目加總)</div>
+      <div class="grid-row">
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工程費 (元)</label>
+            <input type="text" id="payment-total-eng" class="form-control readonly" value="0" readonly>
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工管費 (元)</label>
+            <input type="text" id="payment-total-mgmt" class="form-control readonly" value="0" readonly>
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>空污費 (元)</label>
+            <input type="text" id="payment-total-air" class="form-control readonly" value="0" readonly>
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>技術服務費 (元)</label>
+            <input type="text" id="payment-total-tech" class="form-control readonly" value="0" readonly>
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>其他 (元)</label>
+            <input type="text" id="payment-total-other" class="form-control readonly" value="0" readonly>
+          </div>
+        </div>
+      </div>
+      <div class="total-row" style="margin-top: 10px;">
+        實付款合計 (元)：<span class="amount" id="total-payment">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. 工程結算 -->
+  <div class="section-block">
+    <h3 class="section-title">工程結算</h3>
+    <div class="form-group">
+      <label>是否已結算？ <span class="required">*</span></label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input type="radio" name="settlement" value="yes" onchange="toggleSettlement(true)"> 已結算
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="settlement" value="no" checked onchange="toggleSettlement(false)"> 未結算
+        </label>
+      </div>
+    </div>
+
+    <!-- 工程結算明細區塊 -->
+    <div id="settlement-fields" class="settlement-details hidden">
+      <h3 class="sub-section-title">工程結算明細</h3>
+      <div class="grid-row">
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工程費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="settlement" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工管費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="settlement" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>空污費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="settlement" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>技術服務費 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="settlement" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>其他 (元) <span class="required">*</span></label>
+            <input type="text" class="form-control" data-group="settlement" value="0">
+          </div>
+        </div>
+      </div>
+      <div class="total-row">
+        工程結算合計 (元)：<span class="amount" id="total-settlement">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 儲存按鈕 -->
+  <div class="action-row">
+    <button type="button" class="btn-save">儲存表單</button>
+  </div>
+</div>
+
+<!-- 實付紀錄彈出視窗 (Modal) -->
+<div id="paymentModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>設定實付紀錄 (逐月新增)</h3>
+      <button class="btn-close-modal" onclick="closePaymentModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-payment-records">
+      <!-- 動態新增的年月紀錄會插入這裡 -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="record-tag" style="margin-bottom:0;" onclick="addModalPaymentRecord()">＋ 新增一筆</button>
+      <div style="display:flex; gap: 12px;">
+        <button type="button" class="btn-cancel" onclick="closePaymentModal()">取消</button>
+        <button type="button" class="btn-save" onclick="savePaymentModal()">確認儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 工具函式：移除逗號並轉為數字
+  function parseNum(str) {
+    if (!str) return 0;
+    const n = parseFloat(String(str).replace(/,/g, ''));
+    return isNaN(n) ? 0 : n;
+  }
+
+  // 自動綁定加總邏輯與千分位格式化
+  function bindAutoCalc() {
+    const groups = ['design', 'bidding', 'change', 'settlement'];
+    
+    groups.forEach(group => {
+      const inputs = document.querySelectorAll(`[data-group="${group}"]`);
+      inputs.forEach(input => {
+        // 輸入時即時計算合計
+        input.addEventListener('input', () => calcTotal(group));
+        
+        // 離開焦點時加上逗號
+        input.addEventListener('blur', function() {
+          this.value = parseNum(this.value).toLocaleString();
+          calcTotal(group);
+        });
+      });
+      // 網頁載入時先算一次
+      calcTotal(group);
+    });
+
+    // 針對沒有參與群組加總的數字欄位，也提供自動逗號功能
+    document.querySelectorAll('.num-format').forEach(input => {
+      input.addEventListener('blur', function() {
+        this.value = parseNum(this.value).toLocaleString();
+      });
+    });
+  }
+
+  // 依照群組計算合計
+  function calcTotal(group) {
+    const inputs = document.querySelectorAll(`[data-group="${group}"]`);
+    let sum = 0;
+    inputs.forEach(input => sum += parseNum(input.value));
+    const totalSpan = document.getElementById(`total-${group}`);
+    if (totalSpan) {
+      totalSpan.textContent = sum.toLocaleString();
+    }
+  }
+
+  // 初始化執行
+  document.addEventListener("DOMContentLoaded", function() {
+    bindAutoCalc();
+  });
+
+  // 切換區塊顯示隱藏
+  function toggleBudgetChange(show) {
+    const detailsDiv = document.getElementById('budget-change-fields');
+    if (show) detailsDiv.classList.remove('hidden');
+    else detailsDiv.classList.add('hidden');
+  }
+
+  function toggleApprovalNo(show) {
+    const approvalBlock = document.getElementById('approval-no-block');
+    if (show) approvalBlock.classList.remove('hidden');
+    else approvalBlock.classList.add('hidden');
+  }
+
+  function togglePayment(show) {
+    const paymentDiv = document.getElementById('payment-fields');
+    if (show) paymentDiv.classList.remove('hidden');
+    else paymentDiv.classList.add('hidden');
+  }
+
+  function toggleSettlement(show) {
+    const settlementDiv = document.getElementById('settlement-fields');
+    if (show) settlementDiv.classList.remove('hidden');
+    else settlementDiv.classList.add('hidden');
+  }
+
+  /* ---- 實付款 Modal 控制 ---- */
+  let paymentRecordSeq = 0;
+
+  function openPaymentModal() {
+    document.getElementById('paymentModal').classList.add('active');
+    // 如果尚未有紀錄，預設開啟時新增一筆
+    const container = document.getElementById('modal-payment-records');
+    if (container.children.length === 0) {
+      addModalPaymentRecord();
+    }
+  }
+
+  function closePaymentModal() {
+    document.getElementById('paymentModal').classList.remove('active');
+  }
+
+  function addModalPaymentRecord() {
+    paymentRecordSeq += 1;
+    const id = paymentRecordSeq;
+    const container = document.getElementById('modal-payment-records');
+
+    const row = document.createElement('div');
+    row.className = 'payment-record-row';
+    row.id = 'payment-record-' + id;
+    row.innerHTML = `
+      <div class="payment-record-header">
+        <input type="month" class="form-control month-input f-month">
+        <button type="button" class="btn-remove-record" onclick="removeModalPaymentRecord(${id})">刪除此月紀錄</button>
+      </div>
+      <div class="grid-row">
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工程費 (元)</label>
+            <input type="text" class="form-control f-eng modal-num" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>工管費 (元)</label>
+            <input type="text" class="form-control f-mgmt modal-num" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>空污費 (元)</label>
+            <input type="text" class="form-control f-air modal-num" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>技術服務費 (元)</label>
+            <input type="text" class="form-control f-tech modal-num" value="0">
+          </div>
+        </div>
+        <div class="grid-col">
+          <div class="form-group">
+            <label>其他 (元)</label>
+            <input type="text" class="form-control f-other modal-num" value="0">
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+
+    // 替 Modal 內的欄位綁定失去焦點自動加上逗號
+    row.querySelectorAll('.modal-num').forEach(input => {
+      input.addEventListener('blur', function() {
+        this.value = parseNum(this.value).toLocaleString();
+      });
+      // 在 Focus 時自動選取文字，方便修改
+      input.addEventListener('focus', function() {
+        if(this.value === '0') this.value = '';
+      });
+    });
+  }
+
+  function removeModalPaymentRecord(id) {
+    const row = document.getElementById('payment-record-' + id);
+    if (row) row.remove();
+  }
+
+  // 儲存 Modal 並更新至主頁面
+  function savePaymentModal() {
+    const rows = document.querySelectorAll('.payment-record-row');
+    const syncContainer = document.getElementById('synced-payment-records');
+    
+    // 清空同步區塊
+    syncContainer.innerHTML = '';
+    
+    let totals = { eng: 0, mgmt: 0, air: 0, tech: 0, other: 0 };
+
+    rows.forEach(row => {
+      // 取得數值
+      const rawMonth = row.querySelector('.f-month').value;
+      const engStr = row.querySelector('.f-eng').value;
+      const mgmtStr = row.querySelector('.f-mgmt').value;
+      const airStr = row.querySelector('.f-air').value;
+      const techStr = row.querySelector('.f-tech').value;
+      const otherStr = row.querySelector('.f-other').value;
+
+      const e = parseNum(engStr);
+      const m = parseNum(mgmtStr);
+      const a = parseNum(airStr);
+      const t = parseNum(techStr);
+      const o = parseNum(otherStr);
+
+      // 加總至總數
+      totals.eng += e;
+      totals.mgmt += m;
+      totals.air += a;
+      totals.tech += t;
+      totals.other += o;
+
+      // 轉換月份顯示 (YYYY-MM -> 民國年 月)
+      let displayMonth = '未設定月份';
+      if (rawMonth) {
+        const parts = rawMonth.split('-');
+        if(parts.length === 2) {
+          const rocYear = parseInt(parts[0], 10) - 1911;
+          displayMonth = `${rocYear}年 ${parts[1]}月`;
+        }
+      }
+
+      // 建立同步卡片 UI
+      const card = document.createElement('div');
+      card.className = 'synced-record-card';
+      card.innerHTML = `
+        <div class="synced-record-month">${displayMonth}</div>
+        <div class="synced-record-details">
+          <span>工程費: ${e.toLocaleString()}</span>
+          <span>工管費: ${m.toLocaleString()}</span>
+          <span>空污費: ${a.toLocaleString()}</span>
+          <span>技術服務費: ${t.toLocaleString()}</span>
+          <span>其他: ${o.toLocaleString()}</span>
+        </div>
+      `;
+      syncContainer.appendChild(card);
+    });
+
+    // 寫入主頁面的唯讀欄位
+    document.getElementById('payment-total-eng').value = totals.eng.toLocaleString();
+    document.getElementById('payment-total-mgmt').value = totals.mgmt.toLocaleString();
+    document.getElementById('payment-total-air').value = totals.air.toLocaleString();
+    document.getElementById('payment-total-tech').value = totals.tech.toLocaleString();
+    document.getElementById('payment-total-other').value = totals.other.toLocaleString();
+
+    // 計算並寫入「實付款合計」
+    const grandTotal = totals.eng + totals.mgmt + totals.air + totals.tech + totals.other;
+    document.getElementById('total-payment').textContent = grandTotal.toLocaleString();
+
+    // 關閉 Modal
+    closePaymentModal();
+  }
+</script>
+
+</body>
+</html>
