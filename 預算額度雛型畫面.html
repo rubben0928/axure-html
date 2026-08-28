@@ -245,43 +245,7 @@
       color: #ffffff;
     }
 
-    /* 實付款動態年月紀錄卡片(彈出視窗用) */
-    .payment-record-row {
-      border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 16px 16px 4px 16px;
-      margin-bottom: 16px;
-      background-color: #fafcfc;
-      position: relative;
-    }
-
-    .payment-record-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .payment-record-header .month-input {
-      width: 180px;
-    }
-
-    .btn-remove-record {
-      margin-left: auto;
-      background: none;
-      border: 1px solid #e53e3e;
-      color: #e53e3e;
-      border-radius: 6px;
-      padding: 6px 14px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-remove-record:hover {
-      background-color: #e53e3e;
-      color: #fff;
-    }
-
+    /* 實付款主頁同步摘要 */
     .payment-total-label {
       font-size: 16px;
       color: #2d3748;
@@ -291,61 +255,10 @@
       padding-bottom: 8px;
     }
 
-    /* 主頁面同步顯示的卡片樣式 */
-    .synced-record-card {
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-left: 4px solid #38b2ac;
-      border-radius: 8px;
-      padding: 14px 18px;
-      margin-bottom: 12px;
-    }
-    .synced-record-month {
-      font-weight: 600;
-      color: #2b6cb0;
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    .synced-record-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      font-size: 14px;
-      color: #4a5568;
-    }
-    .synced-record-details span {
-      background: #edf2f7;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
-
-    /* 按鈕樣式 */
-    .action-row {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 30px;
-    }
-
-    .btn-save {
-      background-color: #38b2ac;
-      color: #ffffff;
-      border: none;
-      padding: 10px 28px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .btn-save:hover {
-      background-color: #319795;
-    }
-
-    /* Modal 彈出視窗樣式 */
+    /* 實付紀錄彈出視窗 */
     .modal-overlay {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      inset: 0;
       background: rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
@@ -354,78 +267,249 @@
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.2s ease;
+      padding: 20px;
     }
+
     .modal-overlay.active {
       opacity: 1;
       pointer-events: auto;
     }
-    .modal-content {
-      background: #fff;
-      width: 900px;
-      max-width: 95%;
-      max-height: 90vh;
+
+    .payment-modal-content {
+      background: #f5f3ee;
+      width: 1500px;
+      max-width: 100%;
+      max-height: 92vh;
       border-radius: 12px;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
       box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       transform: translateY(-20px);
       transition: transform 0.2s ease;
     }
-    .modal-overlay.active .modal-content {
+
+    .modal-overlay.active .payment-modal-content {
       transform: translateY(0);
     }
-    .modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #e2e8f0;
+
+    .payment-modal-header {
+      padding: 20px 32px;
+      background: #f5f3ee;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 20px;
     }
-    .modal-header h3 {
-      font-size: 18px;
-      color: #2d3748;
+
+    .payment-modal-title {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+      color: #24394a;
+      letter-spacing: 2px;
     }
+
+    .payment-modal-header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .payment-last-update {
+      font-size: 14px;
+      font-weight: 700;
+      color: #5d6870;
+      white-space: nowrap;
+    }
+
     .btn-close-modal {
       background: none;
       border: none;
-      font-size: 24px;
-      color: #a0aec0;
+      font-size: 28px;
+      color: #718096;
       cursor: pointer;
       line-height: 1;
     }
+
     .btn-close-modal:hover {
-      color: #4a5568;
+      color: #2d3748;
     }
-    .modal-body {
-      padding: 24px;
+
+    .payment-modal-body {
+      padding: 0 32px 30px;
       overflow-y: auto;
       flex: 1;
     }
-    .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #e2e8f0;
+
+    .payment-header-line {
+      width: 100%;
+      height: 3px;
+      background-color: #3b4b58;
+      margin-bottom: 28px;
+    }
+
+    .payment-action-area {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #f8fafc;
-      border-radius: 0 0 12px 12px;
+      justify-content: flex-end;
+      margin-bottom: 24px;
     }
-    .btn-cancel {
-      background: #edf2f7;
-      color: #4a5568;
+
+    .payment-save-btn {
+      min-width: 115px;
+      height: 54px;
       border: none;
-      padding: 10px 24px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 8px;
+      border-radius: 7px;
+      background-color: #2f5b59;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
       cursor: pointer;
+      transition: 0.2s;
     }
-    .btn-cancel:hover {
-      background: #e2e8f0;
+
+    .payment-save-btn:hover {
+      background-color: #244846;
+      transform: translateY(-1px);
+    }
+
+    .payment-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+      background: #fff;
+    }
+
+    .payment-record-table {
+      width: 100%;
+      min-width: 1100px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: #ffffff;
+    }
+
+    .payment-record-table thead th {
+      height: 84px;
+      background-color: #263747;
+      color: #f2f2f2;
+      font-size: 17px;
+      font-weight: 800;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .payment-record-table thead th:first-child {
+      padding-left: 22px;
+      text-align: left;
+    }
+
+    .payment-record-table tbody tr {
+      height: 70px;
+      background-color: #ffffff;
+    }
+
+    .payment-record-table tbody td {
+      border-top: 1px solid #ddd9d2;
+      text-align: center;
+      font-size: 18px;
+      padding: 8px 10px;
+    }
+
+    .payment-record-table tbody td:first-child {
+      padding-left: 22px;
+      text-align: left;
+      font-weight: 800;
+      color: #2d4354;
+      white-space: nowrap;
+    }
+
+    .payment-table-title {
+      display: block;
+      line-height: 1.2;
+    }
+
+    .payment-table-unit {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #d8d8d8;
+    }
+
+    .payment-money-input {
+      width: 100%;
+      max-width: 150px;
+      height: 42px;
+      padding: 6px 12px;
+      border: 1px solid #d6d6d6;
+      border-radius: 5px;
+      text-align: right;
+      font-size: 17px;
+      font-weight: 600;
+      color: #3f4f5b;
+      outline: none;
+      background: #fff;
+    }
+
+    .payment-money-input:focus {
+      border-color: #2f5b59;
+      box-shadow: 0 0 0 2px rgba(47, 91, 89, 0.12);
+    }
+
+    .payment-subtotal {
+      font-weight: 800;
+      color: #2d5260;
+      white-space: nowrap;
+    }
+
+    .payment-record-table tfoot tr {
+      height: 70px;
+      background-color: #263747;
+    }
+
+    .payment-record-table tfoot td {
+      color: #f3f1eb;
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      padding: 8px 10px;
+      white-space: nowrap;
+    }
+
+    .payment-record-table tfoot td:first-child {
+      padding-left: 22px;
+      text-align: left;
+    }
+
+    .payment-record-table tfoot td:last-child {
+      color: #c6a242;
     }
 
     .hidden {
       display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .payment-modal-header,
+      .payment-modal-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .payment-modal-title {
+        font-size: 24px;
+      }
+
+      .payment-modal-header-right {
+        gap: 10px;
+      }
+
+      .payment-last-update {
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -745,19 +829,55 @@
 
 <!-- 實付紀錄彈出視窗 (Modal) -->
 <div id="paymentModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>設定實付紀錄 (逐月新增)</h3>
-      <button class="btn-close-modal" onclick="closePaymentModal()">×</button>
+  <div class="payment-modal-content">
+    <div class="payment-modal-header">
+      <h3 class="payment-modal-title">付款紀錄</h3>
+
+      <div class="payment-modal-header-right">
+        <div class="payment-last-update">
+          最後更新：<span id="paymentLastUpdate">--</span>
+        </div>
+        <button type="button" class="btn-close-modal" onclick="closePaymentModal()">×</button>
+      </div>
     </div>
-    <div class="modal-body" id="modal-payment-records">
-      <!-- 動態新增的年月紀錄會插入這裡 -->
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="record-tag" style="margin-bottom:0;" onclick="addModalPaymentRecord()">＋ 新增一筆</button>
-      <div style="display:flex; gap: 12px;">
-        <button type="button" class="btn-cancel" onclick="closePaymentModal()">取消</button>
-        <button type="button" class="btn-save" onclick="savePaymentModal()">確認儲存</button>
+
+    <div class="payment-modal-body">
+      <div class="payment-header-line"></div>
+
+      <div class="payment-action-area">
+        <button type="button" class="payment-save-btn" onclick="savePaymentRecord()">
+          儲存全部
+        </button>
+      </div>
+
+      <div class="payment-table-wrapper">
+        <table class="payment-record-table">
+          <thead>
+            <tr>
+              <th>年度月份</th>
+              <th><span class="payment-table-title">工程費</span><span class="payment-table-unit">元</span></th>
+              <th><span class="payment-table-title">工程管理費</span><span class="payment-table-unit">元</span></th>
+              <th><span class="payment-table-title">空污費</span><span class="payment-table-unit">元</span></th>
+              <th><span class="payment-table-title">技術服務費</span><span class="payment-table-unit">元</span></th>
+              <th><span class="payment-table-title">其他</span><span class="payment-table-unit">元</span></th>
+              <th><span class="payment-table-title">小計</span><span class="payment-table-unit">元</span></th>
+            </tr>
+          </thead>
+
+          <tbody id="paymentTableBody"></tbody>
+
+          <tfoot>
+            <tr>
+              <td>合計</td>
+              <td id="paymentTotalEngineering">0</td>
+              <td id="paymentTotalManagement">0</td>
+              <td id="paymentTotalAirPollution">0</td>
+              <td id="paymentTotalTechnical">0</td>
+              <td id="paymentTotalOther">0</td>
+              <td id="paymentGrandTotal">0</td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   </div>
@@ -840,159 +960,293 @@
     else settlementDiv.classList.add('hidden');
   }
 
-  /* ---- 實付款 Modal 控制 ---- */
-  let paymentRecordSeq = 0;
+  /* =========================================
+     實付紀錄 Popup 邏輯
+     ========================================= */
+
+  /*
+     正式系統請改為由「執行狀況」帶入：
+     - 開工日期
+     - 預定竣工日期
+
+     本範例保留原型測試值：
+     115/6/25 ～ 115/10/31
+  */
+  const paymentProjectInfo = {
+    startDate: '115/6/25',
+    plannedCompletionDate: '115/10/31'
+  };
+
+  /*
+     付款資料：
+     正式系統應由 API / 資料庫載入與儲存。
+  */
+  let paymentData = {};
+
+  /* 最後更新日期 */
+  let paymentLastUpdate = '--';
 
   function openPaymentModal() {
     document.getElementById('paymentModal').classList.add('active');
-    // 如果尚未有紀錄，預設開啟時新增一筆
-    const container = document.getElementById('modal-payment-records');
-    if (container.children.length === 0) {
-      addModalPaymentRecord();
-    }
+    document.getElementById('paymentLastUpdate').textContent = paymentLastUpdate;
+    renderPaymentTable();
   }
 
   function closePaymentModal() {
     document.getElementById('paymentModal').classList.remove('active');
   }
 
-  function addModalPaymentRecord() {
-    paymentRecordSeq += 1;
-    const id = paymentRecordSeq;
-    const container = document.getElementById('modal-payment-records');
-
-    const row = document.createElement('div');
-    row.className = 'payment-record-row';
-    row.id = 'payment-record-' + id;
-    row.innerHTML = `
-      <div class="payment-record-header">
-        <input type="month" class="form-control month-input f-month">
-        <button type="button" class="btn-remove-record" onclick="removeModalPaymentRecord(${id})">刪除此月紀錄</button>
-      </div>
-      <div class="grid-row">
-        <div class="grid-col">
-          <div class="form-group">
-            <label>工程費 (元)</label>
-            <input type="text" class="form-control f-eng modal-num" value="0">
-          </div>
-        </div>
-        <div class="grid-col">
-          <div class="form-group">
-            <label>工管費 (元)</label>
-            <input type="text" class="form-control f-mgmt modal-num" value="0">
-          </div>
-        </div>
-        <div class="grid-col">
-          <div class="form-group">
-            <label>空污費 (元)</label>
-            <input type="text" class="form-control f-air modal-num" value="0">
-          </div>
-        </div>
-        <div class="grid-col">
-          <div class="form-group">
-            <label>技術服務費 (元)</label>
-            <input type="text" class="form-control f-tech modal-num" value="0">
-          </div>
-        </div>
-        <div class="grid-col">
-          <div class="form-group">
-            <label>其他 (元)</label>
-            <input type="text" class="form-control f-other modal-num" value="0">
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(row);
-
-    // 替 Modal 內的欄位綁定失去焦點自動加上逗號
-    row.querySelectorAll('.modal-num').forEach(input => {
-      input.addEventListener('blur', function() {
-        this.value = parseNum(this.value).toLocaleString();
-      });
-      // 在 Focus 時自動選取文字，方便修改
-      input.addEventListener('focus', function() {
-        if(this.value === '0') this.value = '';
-      });
-    });
+  function parseRocDate(dateString) {
+    const parts = String(dateString || '').split('/');
+    return {
+      year: parseInt(parts[0], 10),
+      month: parseInt(parts[1], 10),
+      day: parseInt(parts[2], 10)
+    };
   }
 
-  function removeModalPaymentRecord(id) {
-    const row = document.getElementById('payment-record-' + id);
-    if (row) row.remove();
+  function getCurrentRocYearMonth() {
+    const today = new Date();
+    return {
+      year: today.getFullYear() - 1911,
+      month: today.getMonth() + 1
+    };
   }
 
-  // 儲存 Modal 並更新至主頁面
-  function savePaymentModal() {
-    const rows = document.querySelectorAll('.payment-record-row');
-    const syncContainer = document.getElementById('synced-payment-records');
-    
-    // 清空同步區塊
-    syncContainer.innerHTML = '';
-    
-    let totals = { eng: 0, mgmt: 0, air: 0, tech: 0, other: 0 };
+  /*
+     顯示範圍：
+     開工月份 ～ 目前月份，且不得超過預定竣工月份。
+  */
+  function generatePaymentMonths() {
+    const start = parseRocDate(paymentProjectInfo.startDate);
+    const completion = parseRocDate(paymentProjectInfo.plannedCompletionDate);
+    const current = getCurrentRocYearMonth();
 
-    rows.forEach(row => {
-      // 取得數值
-      const rawMonth = row.querySelector('.f-month').value;
-      const engStr = row.querySelector('.f-eng').value;
-      const mgmtStr = row.querySelector('.f-mgmt').value;
-      const airStr = row.querySelector('.f-air').value;
-      const techStr = row.querySelector('.f-tech').value;
-      const otherStr = row.querySelector('.f-other').value;
+    const months = [];
+    let year = start.year;
+    let month = start.month;
 
-      const e = parseNum(engStr);
-      const m = parseNum(mgmtStr);
-      const a = parseNum(airStr);
-      const t = parseNum(techStr);
-      const o = parseNum(otherStr);
-
-      // 加總至總數
-      totals.eng += e;
-      totals.mgmt += m;
-      totals.air += a;
-      totals.tech += t;
-      totals.other += o;
-
-      // 轉換月份顯示 (YYYY-MM -> 民國年 月)
-      let displayMonth = '未設定月份';
-      if (rawMonth) {
-        const parts = rawMonth.split('-');
-        if(parts.length === 2) {
-          const rocYear = parseInt(parts[0], 10) - 1911;
-          displayMonth = `${rocYear}年 ${parts[1]}月`;
-        }
+    while (true) {
+      if (
+        year > completion.year ||
+        (year === completion.year && month > completion.month)
+      ) {
+        break;
       }
 
-      // 建立同步卡片 UI
-      const card = document.createElement('div');
-      card.className = 'synced-record-card';
-      card.innerHTML = `
-        <div class="synced-record-month">${displayMonth}</div>
-        <div class="synced-record-details">
-          <span>工程費: ${e.toLocaleString()}</span>
-          <span>工管費: ${m.toLocaleString()}</span>
-          <span>空污費: ${a.toLocaleString()}</span>
-          <span>技術服務費: ${t.toLocaleString()}</span>
-          <span>其他: ${o.toLocaleString()}</span>
-        </div>
+      if (
+        year > current.year ||
+        (year === current.year && month > current.month)
+      ) {
+        break;
+      }
+
+      months.push({ year, month });
+      month += 1;
+
+      if (month > 12) {
+        month = 1;
+        year += 1;
+      }
+    }
+
+    return months;
+  }
+
+  function getVisiblePaymentKeys() {
+    return generatePaymentMonths().map(item => `${item.year}-${item.month}`);
+  }
+
+  function ensurePaymentData(key) {
+    if (!paymentData[key]) {
+      paymentData[key] = {
+        engineering: 0,
+        management: 0,
+        airPollution: 0,
+        technical: 0,
+        other: 0
+      };
+    }
+  }
+
+  function renderPaymentTable() {
+    const tbody = document.getElementById('paymentTableBody');
+    const months = generatePaymentMonths();
+    tbody.innerHTML = '';
+
+    months.forEach(item => {
+      const key = `${item.year}-${item.month}`;
+      ensurePaymentData(key);
+      const data = paymentData[key];
+
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.year}年${item.month}月</td>
+        <td><input type="text" class="payment-money-input" value="${data.engineering}" inputmode="numeric" data-field="engineering" data-month="${key}"></td>
+        <td><input type="text" class="payment-money-input" value="${data.management}" inputmode="numeric" data-field="management" data-month="${key}"></td>
+        <td><input type="text" class="payment-money-input" value="${data.airPollution}" inputmode="numeric" data-field="airPollution" data-month="${key}"></td>
+        <td><input type="text" class="payment-money-input" value="${data.technical}" inputmode="numeric" data-field="technical" data-month="${key}"></td>
+        <td><input type="text" class="payment-money-input" value="${data.other}" inputmode="numeric" data-field="other" data-month="${key}"></td>
+        <td class="payment-subtotal" data-subtotal="${key}">0</td>
       `;
-      syncContainer.appendChild(card);
+      tbody.appendChild(row);
     });
 
-    // 寫入主頁面的唯讀欄位
-    document.getElementById('payment-total-eng').value = totals.eng.toLocaleString();
-    document.getElementById('payment-total-mgmt').value = totals.mgmt.toLocaleString();
-    document.getElementById('payment-total-air').value = totals.air.toLocaleString();
-    document.getElementById('payment-total-tech').value = totals.tech.toLocaleString();
-    document.getElementById('payment-total-other').value = totals.other.toLocaleString();
-
-    // 計算並寫入「實付款合計」
-    const grandTotal = totals.eng + totals.mgmt + totals.air + totals.tech + totals.other;
-    document.getElementById('total-payment').textContent = grandTotal.toLocaleString();
-
-    // 關閉 Modal
-    closePaymentModal();
+    bindPaymentMoneyEvents();
+    calculatePaymentAll();
   }
+
+  /*
+     僅允許非負整數：0~9。
+     因此負號、小數點、英文及其他符號都會被移除。
+  */
+  function bindPaymentMoneyEvents() {
+    document.querySelectorAll('.payment-money-input').forEach(input => {
+      input.addEventListener('input', function () {
+        const sanitized = this.value.replace(/[^0-9]/g, '');
+        this.value = sanitized;
+
+        const month = this.dataset.month;
+        const field = this.dataset.field;
+        ensurePaymentData(month);
+        paymentData[month][field] = sanitized === '' ? 0 : parseInt(sanitized, 10);
+
+        calculatePaymentAll();
+      });
+
+      input.addEventListener('blur', function () {
+        if (this.value === '') {
+          this.value = '0';
+          const month = this.dataset.month;
+          const field = this.dataset.field;
+          ensurePaymentData(month);
+          paymentData[month][field] = 0;
+          calculatePaymentAll();
+        }
+      });
+    });
+  }
+
+  function calculatePaymentAll() {
+    let totalEngineering = 0;
+    let totalManagement = 0;
+    let totalAirPollution = 0;
+    let totalTechnical = 0;
+    let totalOther = 0;
+    let grandTotal = 0;
+
+    /* 只計算目前 Popup 顯示的月份 */
+    getVisiblePaymentKeys().forEach(key => {
+      ensurePaymentData(key);
+      const data = paymentData[key];
+
+      const subtotal =
+        data.engineering +
+        data.management +
+        data.airPollution +
+        data.technical +
+        data.other;
+
+      const subtotalElement = document.querySelector(`[data-subtotal="${key}"]`);
+      if (subtotalElement) {
+        subtotalElement.textContent = formatPaymentNumber(subtotal);
+      }
+
+      totalEngineering += data.engineering;
+      totalManagement += data.management;
+      totalAirPollution += data.airPollution;
+      totalTechnical += data.technical;
+      totalOther += data.other;
+      grandTotal += subtotal;
+    });
+
+    document.getElementById('paymentTotalEngineering').textContent = formatPaymentNumber(totalEngineering);
+    document.getElementById('paymentTotalManagement').textContent = formatPaymentNumber(totalManagement);
+    document.getElementById('paymentTotalAirPollution').textContent = formatPaymentNumber(totalAirPollution);
+    document.getElementById('paymentTotalTechnical').textContent = formatPaymentNumber(totalTechnical);
+    document.getElementById('paymentTotalOther').textContent = formatPaymentNumber(totalOther);
+    document.getElementById('paymentGrandTotal').textContent = formatPaymentNumber(grandTotal);
+  }
+
+  function formatPaymentNumber(number) {
+    return Number(number || 0).toLocaleString('zh-TW');
+  }
+
+  function getTodayRocDate() {
+    const today = new Date();
+    const rocYear = today.getFullYear() - 1911;
+    return `${rocYear}/${today.getMonth() + 1}/${today.getDate()}`;
+  }
+
+  function savePaymentRecord() {
+    document.querySelectorAll('.payment-money-input').forEach(input => {
+      const sanitized = input.value.replace(/[^0-9]/g, '');
+      input.value = sanitized === '' ? '0' : sanitized;
+
+      const month = input.dataset.month;
+      const field = input.dataset.field;
+      ensurePaymentData(month);
+      paymentData[month][field] = parseInt(input.value, 10) || 0;
+    });
+
+    calculatePaymentAll();
+
+    /* 儲存成功後更新日期 */
+    paymentLastUpdate = getTodayRocDate();
+    document.getElementById('paymentLastUpdate').textContent = paymentLastUpdate;
+
+    /* 同步至主畫面 */
+    syncPaymentTotalsToMainPage();
+
+    /*
+      正式系統請在此串接 API，例如：
+      fetch('/api/payment-records', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentData,
+          lastUpdate: paymentLastUpdate
+        })
+      })
+    */
+
+    alert('付款紀錄已儲存');
+  }
+
+  function syncPaymentTotalsToMainPage() {
+    let engineering = 0;
+    let management = 0;
+    let airPollution = 0;
+    let technical = 0;
+    let other = 0;
+
+    /* 主畫面加總同樣以目前應顯示的月份為準 */
+    getVisiblePaymentKeys().forEach(key => {
+      ensurePaymentData(key);
+      const data = paymentData[key];
+      engineering += data.engineering;
+      management += data.management;
+      airPollution += data.airPollution;
+      technical += data.technical;
+      other += data.other;
+    });
+
+    document.getElementById('payment-total-eng').value = formatPaymentNumber(engineering);
+    document.getElementById('payment-total-mgmt').value = formatPaymentNumber(management);
+    document.getElementById('payment-total-air').value = formatPaymentNumber(airPollution);
+    document.getElementById('payment-total-tech').value = formatPaymentNumber(technical);
+    document.getElementById('payment-total-other').value = formatPaymentNumber(other);
+
+    const total = engineering + management + airPollution + technical + other;
+    document.getElementById('total-payment').textContent = formatPaymentNumber(total);
+  }
+
+  /* 點擊遮罩區域關閉 Popup */
+  document.getElementById('paymentModal').addEventListener('click', function (event) {
+    if (event.target === this) {
+      closePaymentModal();
+    }
+  });
 </script>
 
 </body>
