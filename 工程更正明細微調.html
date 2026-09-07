@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>水土保持工程管考系統 - 工程更正申請作業</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .navbar {
+            background-color: #5bb2e5;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 20px;
+            height: 45px;
+            color: #fff;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        .user-bar {
+            background-color: #5bb2e5;
+            padding: 10px 20px 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .user-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: #5bb2e5;
+            font-size: 20px;
+        }
+
+        .user-info {
+            color: #fff;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .container {
+            padding: 15px 20px;
+            background-color: #fff;
+        }
+
+        .page-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #b192cb;
+            padding-bottom: 8px;
+        }
+
+        .page-title-icon {
+            background-color: #555;
+            color: #fff;
+            padding: 3px 6px;
+            font-size: 12px;
+            border-radius: 2px;
+            margin-right: 8px;
+        }
+
+        .sub-header {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #c0c0c0;
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
+
+        .table-header {
+            background-color: #60c080;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .field-label {
+            background-color: #82c8a0;
+            color: #111;
+            font-weight: bold;
+            width: 12%;
+            text-align: center;
+        }
+
+        .col-after {
+            background-color: #eef7f2;
+            width: 44%;
+        }
+
+        .col-before {
+            background-color: #ececec;
+            color: #555;
+            width: 44%;
+            font-style: italic;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            border: 1px solid #a9a9a9;
+            padding: 3px 6px;
+            font-size: 13px;
+            border-radius: 2px;
+            background-color: #fff;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: 1px solid #4a90e2;
+        }
+
+        input[readonly] {
+            background-color: #f0f0f0;
+            cursor: default;
+        }
+
+        .input-full {
+            width: 98%;
+        }
+
+        .input-small {
+            width: 100px;
+        }
+
+        .input-number {
+            width: 100px;
+        }
+
+        textarea {
+            width: 98%;
+            resize: vertical;
+        }
+
+        .hint-text {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .radio-group {
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        .btn-submit {
+            background-color: #e1e1e1;
+            border: 1px solid #adadad;
+            padding: 4px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .btn-submit:hover {
+            background-color: #e5e5e5;
+        }
+
+        .action-row {
+            text-align: center;
+            background-color: #fff !important;
+            padding: 10px !important;
+        }
+
+        .auto-calc-hint {
+            font-size: 11px;
+            color: #888;
+            margin-left: 4px;
+        }
+
+        /* 调整部分工程内容区域的样式 */
+        .adjust-area {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .adjust-area .adjust-label {
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .adjust-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
+        }
+
+        .adjust-row label {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .adjust-row input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 3px 6px;
+            border: 1px solid #a9a9a9;
+            border-radius: 2px;
+            font-size: 13px;
+        }
+
+        .adjust-row input[type="text"]:focus {
+            outline: 1px solid #4a90e2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="#">首頁</a>
+        <a href="#">下載專區</a>
+        <a href="#">Q&A</a>
+        <a href="#">系統公告</a>
+        <a href="#">網站地圖</a>
+        <a href="#">數據分析</a>
+        <a href="#">參獎工程遴選</a>
+    </div>
+
+    <div class="user-bar">
+        <div class="user-icon">👤</div>
+        <div class="user-info">
+            保育治理組坡地保育科<br>
+            系統管理者 ▼
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page-title">
+            <span class="page-title-icon">📊</span> 工程更正申請作業
+        </div>
+
+        <div class="sub-header">
+            115年度整體性治山防災計畫－保育治理(土砂災害防治)工程更正明細表(115-ADE-21-3-007)
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr class="table-header">
+                    <th style="width: 12%;">資料項</th>
+                    <th style="width: 44%;">更正後</th>
+                    <th style="width: 44%;">更正前</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="field-label">編號</td>
+                    <td class="col-after">
+                        <input type="text" value="115-ADE-21-3-007" class="input-full">
+                    </td>
+                    <td class="col-before">115-ADE-21-3-007</td>
+                </tr>
+                <tr>
+                    <td class="field-label">工程名稱</td>
+                    <td class="col-after">
+                        <input type="text" value="保甲林下游排洪斷面改善工程" class="input-full">
+                    </td>
+                    <td class="col-before">保甲林下游排洪斷面</td>
+                </tr>
+                <tr>
+                    <td class="field-label">縣市鄉鎮</td>
+                    <td class="col-after">
+                        <input type="text" value="南投縣" class="input-small">
+                        <input type="text" value="信義鄉" class="input-small">
+                    </td>
+                    <td class="col-before">南投縣信義鄉</td>
+                </tr>
+                <tr>
+                    <td class="field-label">核定經費<br>(千元)</td>
+                    <td class="col-after">
+                        115年： 10,000
+                    </td>
+                    <td class="col-before">115年：10,000</td>
+                </tr>
+                <!-- 碳排量上限 -->
+                <tr>
+                    <td class="field-label">碳排量上限</td>
+                    <td class="col-after">
+                        <select style="width:140px;">
+                            <option>野溪治理</option>
+                            <option selected>崩塌地處理</option>
+                            <option>農塘營造</option>
+                            <option>農路改善</option>
+                            <option>水保不分類</option>
+                        </select>
+                        <span style="margin-left:5px;">115年：<input type="text" value="300.63" style="width:80px;" readonly></span>
+                        <span class="auto-calc-hint">(自動計算)</span>
+                    </td>
+                    <td class="col-before">113年：364.63 <span style="font-size:12px;color:#555;">(工程類型：崩塌地處理)</span></td>
+                </tr>
+                <tr>
+                    <td class="field-label">發包金額<br>(千元)</td>
+                    <td class="col-after">
+                        115年： 5,258
+                    </td>
+                    <td class="col-before">115年：5,258</td>
+                </tr>
+                <tr>
+                    <td class="field-label">本次變更<br>(千元)</td>
+                    <td class="col-after">
+                        115年： <input type="text" value="6521" class="input-number">
+                        116年： <input type="text" value="0" class="input-number">
+                    </td>
+                    <td class="col-before"></td>
+                </tr>
+                <tr>
+                    <td class="field-label">工程內容</td>
+                    <td class="col-after">
+                        <textarea rows="3">土方清淤約28,441M3、培厚長度450m</textarea>
+                    </td>
+                    <td class="col-before">土方清淤約22361m</td>
+                </tr>
+                <tr>
+                    <td class="field-label">坐標(TWD97)</td>
+                    <td class="col-after">
+                        X： <input type="text" value="235963" class="input-small">，
+                        Y： <input type="text" value="2623524" class="input-small">
+                        <a href="#" style="color: blue; font-size: 12px; margin-left: 5px;">[有多組坐標按此展開]</a>
+                    </td>
+                    <td class="col-before">X：235963，Y：2623524</td>
+                </tr>
+                <!-- 生態等級（更正前已加入階段文字） -->
+                <tr>
+                    <td class="field-label">生態等級</td>
+                    <td class="col-after">
+                        <button type="button" style="padding:2px 10px;">系統判斷生態等級</button>
+                        <!-- 階段下拉選單 -->
+                        <select style="width:150px; margin-left:5px;">
+                            <option>提報審議階段</option>
+                            <option>設計階段</option>
+                            <option>施工階段(施工前)</option>
+                            <option selected>施工階段(施工期間)</option>
+                            <option>結案驗收</option>
+                            <option>維護管理階段</option>
+                        </select>
+                        <!-- 分級下拉選單 -->
+                        <select style="width:100px; margin-left:5px;">
+                            <option>1級</option>
+                            <option selected>強化2級</option>
+                            <option>2級</option>
+                            <option>不適用</option>
+                        </select>
+                        <span style="font-size:11px;color:gray;margin-left:3px;">(可手動變更)</span>
+                    </td>
+                    <!-- 更正前：加上「提報審議階段-」前綴 -->
+                    <td class="col-before">提報審議階段-2級</td>
+                </tr>
+                <tr>
+                    <td class="field-label">執行機關</td>
+                    <td class="col-after">
+                        <input type="text" value="南投分署" class="input-small">
+                    </td>
+                    <td class="col-before">南投分署</td>
+                </tr>
+                <!-- ===== 變更原因（已調整「調整部分工程內容」輸入框） ===== -->
+                <tr>
+                    <td class="field-label">變更原因</td>
+                    <td class="col-after">
+                        <textarea id="changeReason" rows="4">本工程原設計清淤土方為22,361M3(實方)，經廠商施作發現總運輸量因開挖後為鬆方，施作完成後收方測量結果確有實方鬆方數量差異，清淤量應調整為28,441M3(鬆方)</textarea>
+
+                        <!-- 調整部分工程內容（依照圖片內容調整） -->
+                        <div class="adjust-area">
+                            <span class="adjust-label">調整部分工程內容</span>
+                            <div class="adjust-row">
+                                <label>
+                                    <input type="radio" name="change_type" checked>
+                                    增加
+                                </label>
+                                <input type="text" id="increaseContent" value="灌岸57公尺、客土袋376包、裸露覆盖草席114m2">
+                            </div>
+                            <div class="adjust-row">
+                                <label>
+                                    <input type="radio" name="change_type">
+                                    減少
+                                </label>
+                                <input type="text" id="decreaseContent" value="" placeholder="請輸入減少的工程內容">
+                            </div>
+                        </div>
+
+                        <!-- 生態分級異動原因說明 -->
+                        <div style="margin-top:6px;">
+                            <label style="font-weight:bold;">生態分級異動原因說明：</label><br>
+                            <input type="text" id="ecoReason" style="width:98%;" placeholder="請輸入生態分級異動原因">
+                        </div>
+                    </td>
+                    <td class="col-before"></td>
+                </tr>
+                <!-- ===== 變更原因結束 ===== -->
+                <tr>
+                    <td class="field-label">備註</td>
+                    <td class="col-after" colspan="2">
+                        <div class="hint-text">
+                            提示：備註欄填寫變更原因及異動金額或項目(例：本工程因...，所需經費調整為5,103仟元，增加734仟元)。<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;於下方備註欄輸入格點一下，自動帶入變更原因及生態分級異動原因。
+                        </div>
+                        <!-- 備註欄位 -->
+                        <textarea id="remark" rows="4" onfocus="
+                            var change = document.getElementById('changeReason').value;
+                            var eco = document.getElementById('ecoReason').value;
+                            var combined = change;
+                            if (eco.trim() !== '') {
+                                combined += '\n生態分級異動原因：' + eco;
+                            }
+                            document.getElementById('remark').value = combined;
+                        "></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="field-label">發文字號</td>
+                    <td class="col-after" colspan="2">
+                        <input type="text" style="width: 150px;"> 字第 
+                        <input type="text" style="width: 120px;"> 號
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" class="action-row">
+                        <button class="btn-submit">儲存資料</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
