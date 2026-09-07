@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申請更動預定完工日期 － 畫面與需求規格對照</title>
+    <style>
+        /* ===== 基礎重置 & 左右並排 ===== */
+        * {
+            box-sizing: border-box;
+        }
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            background-color: #e9edf2;
+            color: #2c3e50;
+        }
+
+        .split-layout {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            align-items: stretch;
+        }
+        .panel-left,
+        .panel-right {
+            overflow-y: auto;
+            height: 100vh;
+            padding: 24px;
+        }
+        .panel-left {
+            width: 58%;
+            background-color: #f0f2f5;
+            border-right: 4px solid #cfd8e3;
+        }
+        .panel-right {
+            width: 42%;
+            background-color: #f4f6f9;
+        }
+        .panel-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #3c6382;
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 4px;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+        .panel-right .panel-label {
+            background-color: #2b6cb0;
+        }
+
+        @media (max-width: 1000px) {
+            .split-layout {
+                flex-direction: column;
+            }
+            .panel-left,
+            .panel-right {
+                width: 100%;
+                height: auto;
+                max-height: none;
+            }
+            .panel-left {
+                border-right: none;
+                border-bottom: 4px solid #cfd8e3;
+            }
+        }
+
+        /* ===== 左側：Demo（取自右邊 HTML） ===== */
+        .demo-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+        .demo-container .header-bar {
+            border-bottom: 2px solid #3c6382;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .demo-container h2 {
+            color: #0a3d62;
+            font-size: 20px;
+            margin: 0;
+        }
+
+        .demo-container .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .demo-container .form-table th {
+            background-color: #78e08f;
+            color: #0c2461;
+            width: 22%;
+            padding: 12px 16px;
+            text-align: left;
+            border: 1px solid #b8e994;
+            font-size: 14px;
+        }
+        .demo-container .form-table th .required {
+            color: #eb2f06;
+            margin-right: 4px;
+        }
+        .demo-container .form-table td {
+            background-color: #f8f9fa;
+            padding: 10px 16px;
+            border: 1px solid #dcdde1;
+        }
+
+        .demo-container input[type="text"],
+        .demo-container input[type="number"],
+        .demo-container textarea {
+            padding: 7px 12px;
+            border: 1px solid #ced6e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .demo-container textarea {
+            width: 100%;
+            height: 75px;
+            resize: vertical;
+        }
+
+        .demo-container .roc-datepicker-wrapper {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            width: 180px;
+        }
+        .demo-container .roc-datepicker-wrapper input[type="text"] {
+            width: 100%;
+            padding-right: 36px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .demo-container .calendar-trigger-btn {
+            position: absolute;
+            right: 6px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #57606f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .demo-container .hidden-date-picker {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+            border: none;
+            pointer-events: none;
+        }
+
+        .demo-container .readonly-text {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 15px;
+        }
+        .demo-container .days-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .demo-container .days-group .unit-label {
+            font-weight: bold;
+            color: #0c2461;
+            font-size: 15px;
+        }
+        .demo-container .days-group input[type="number"] {
+            width: 80px;
+        }
+        .demo-container .calc-preview-box {
+            display: inline-flex;
+            align-items: center;
+            background-color: #fff3bf;
+            border: 1px solid #ffe066;
+            color: #d9480f;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .demo-container .btn-submit {
+            background-color: #38ada9;
+            color: white;
+            border: none;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .demo-container .btn-submit:hover {
+            background-color: #079992;
+        }
+
+        .demo-container .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 12px;
+        }
+        .demo-container .history-table th {
+            background-color: #8c7ae6;
+            color: white;
+            padding: 10px 6px;
+            border: 1px solid #7d5fff;
+            text-align: center;
+        }
+        .demo-container .history-table td {
+            padding: 10px 6px;
+            border: 1px solid #dcdde1;
+            text-align: center;
+            vertical-align: middle;
+            word-break: break-all;
+        }
+
+        .demo-container .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .demo-container .bg-approved {
+            background-color: #2ed573;
+        }
+        .demo-container .bg-rejected {
+            background-color: #ff4757;
+        }
+        .demo-container .bg-pending {
+            background-color: #ffa502;
+        }
+        .demo-container .bg-canceled {
+            background-color: #a4b0be;
+        }
+
+        .demo-container .btn-cancel {
+            background-color: #eb2f06;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .demo-container .btn-cancel:hover {
+            background-color: #b71540;
+        }
+        .demo-container .btn-disabled {
+            background-color: #dcdde1;
+            color: #7f8c8d;
+            cursor: not-allowed;
+            border: 1px solid #ccc;
+        }
+        .demo-container .file-link {
+            color: #1e90ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .demo-container .file-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ===== 右側：需求規格說明（沿用原樣式） ===== */
+        .spec-container {
+            max-width: 100%;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 28px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        .spec-doc-title {
+            color: #1a365d;
+            font-size: 22px;
+            border-bottom: 3px solid #2b6cb0;
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        .spec-section-title {
+            color: #2b6cb0;
+            font-size: 17px;
+            font-weight: bold;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2b6cb0;
+            padding-left: 10px;
+        }
+        .spec-subsection-title {
+            color: #2d3748;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        .spec-container ol,
+        .spec-container ul {
+            padding-left: 24px;
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+        .spec-container li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .spec-container code {
+            background-color: #edf2f7;
+            color: #c53030;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: Consolas, Monaco, monospace;
+        }
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+        .spec-table th {
+            background-color: #4a5568;
+            color: #ffffff;
+            padding: 10px 8px;
+            border: 1px solid #2d3748;
+            text-align: center;
+            font-weight: bold;
+        }
+        .spec-table td {
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            vertical-align: middle;
+        }
+        .spec-table tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        .status-active {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        .status-disabled {
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-layout">
+
+        <!-- ============ 左側：畫面 Demo（採用右邊 HTML 的樣式與內容） ============ -->
+        <div class="panel-left">
+            <span class="panel-label">畫面 DEMO</span>
+
+            <div class="demo-container">
+
+                <div class="header-bar">
+                    <h2>申請更動預定完工日期</h2>
+                </div>
+
+                <form id="applyForm" onsubmit="handleFormSubmit(event)">
+                    <table class="form-table">
+                        <tr>
+                            <th><span class="required">*</span>原預定完工日期(申請前)</th>
+                            <td>
+                                <span class="readonly-text" id="baseCompletionDateDisplay">115年03月22日</span>
+                                <input type="hidden" id="baseCompletionDate" value="2026-03-22">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><span class="required">*</span>同意展延日期</th>
+                            <td>
+                                <div class="roc-datepicker-wrapper">
+                                    <input type="text" id="agreeDateDisplay" value="115/06/28" placeholder="YYY/MM/DD" onclick="openDatePicker()" required>
+                                    <button type="button" class="calendar-trigger-btn" onclick="openDatePicker()">📅</button>
+                                    <input type="date" id="agreeDateNative" class="hidden-date-picker" value="2026-06-28" onchange="syncDateToROC(this.value)">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><span class="required">*</span>同意展延文號</th>
+                            <td><input type="text" id="agreeDocNo" style="width: 280px;" value="12245448" required></td>
+                        </tr>
+                        <tr>
+                            <th><span class="required">*</span>同意展延天數</th>
+                            <td>
+                                <div class="days-group">
+                                    <span class="unit-label" id="unitLabel">日曆天</span>
+                                    <input type="number" id="extendDays" value="5" min="0" step="0.5" oninput="calculateNewDate()" required> 天
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <div class="calc-preview-box">
+                                        預計展延後完工日期：<span id="calculatedDateDisplay">計算中...</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th><span class="required">*</span>展延原因</th>
+                            <td><textarea id="extendReason" required>因辦理用地許可及完成混凝土鑽心取樣，工期展延。</textarea></td>
+                        </tr>
+                        <tr>
+                            <th>上傳公文檔</th>
+                            <td><input type="file" id="docFile" accept=".pdf"></td>
+                        </tr>
+                    </table>
+                    <div style="text-align: center; margin-bottom: 36px;">
+                        <button type="submit" class="btn-submit">送出申請</button>
+                    </div>
+                </form>
+
+                <div class="header-bar">
+                    <h2>預定完工日期歷次異動紀錄</h2>
+                </div>
+
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 7%;">異動次數</th>
+                            <th style="width: 8%;">狀態</th>
+                            <th style="width: 11%;">原預定完工日期</th>
+                            <th style="width: 10%;">同意展延日期</th>
+                            <th style="width: 10%;">同意展延文號</th>
+                            <th style="width: 11%;">同意展延天數</th>
+                            <th style="width: 12%;">預計展延後完工日期</th>
+                            <th style="width: 16%;">展延原因</th>
+                            <th style="width: 7%;">公文檔</th>
+                            <th style="width: 8%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody"></tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <!-- ============ 右側：需求規格說明 ============ -->
+        <div class="panel-right">
+            <span class="panel-label">需求規格說明</span>
+
+            <div class="spec-container">
+
+                <h1 class="spec-doc-title">需求規格說明書：申請更動預定完工日期與歷次異動紀錄微調</h1>
+
+                <div class="spec-section-title">一、 功能調整重點摘要</div>
+                <ol>
+                    <li>
+                        <strong>狀態控管機制（「取消申請」）</strong>：
+                        <ul>
+                            <li>歷程紀錄新增「狀態」欄位（包含：<strong>審核中</strong>、<strong>同意</strong>、<strong>不同意</strong>、<strong>取消申請</strong> 四種樣態）。</li>
+                            <li><strong>審核中</strong>：提供【取消申請】按鈕供使用者撤回。</li>
+                            <li><strong>同意</strong> / <strong>不同意</strong> / <strong>取消申請</strong>：按鈕呈灰色停用狀態（不可再進行取消申請）。</li>
+                        </ul>
+                    </li>
+                    <li><strong>申請後歷程即時顯示</strong>：表單送出後，歷程表格區域立即新增該筆異動紀錄。</li>
+                    <li>
+                        <strong>表單天數輸入與計算調整</strong>：
+                        <ul>
+                            <li>「原預定完工日期(申請前)」為純展示之檢視欄位，不可由使用者自行變更。</li>
+                            <li>展延天數可輸入 0.5、1.5、2.5 等 0.5 的倍數，至於顯示為日曆天或工作天，則依原本施工期限所採計之單位為準（即原施工期限採日曆天計者顯示日曆天，採工作天計者顯示工作天）。</li>
+                            <li>預計展延後完工日期（例如：115年03月31日）之計算，依管考原有計算規則顯示，例如以開工日期加施工期限自動推導出預定完工日期之相同邏輯辦理。</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>區塊二（歷程表格）新增欄位</strong>：
+                        <ul>
+                            <li>歷程表格新增：狀態、同意展延天數、預計展延後完工日期、操作 四個欄位。</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <div class="spec-section-title">二、 畫面欄位與 UI 規格</div>
+                <div class="spec-subsection-title">區塊二：預定完工日期歷次異動紀錄（新增欄位說明）</div>
+                <div style="font-weight: bold; margin-bottom: 6px; font-size: 14px;">表格欄位清單：</div>
+                <ul>
+                    <li><strong>狀態</strong>：顯示標籤（審核中 / 同意 / 不同意 / 取消申請）</li>
+                    <li><strong>同意展延天數</strong>：格式範例 <code>5日曆天 或2工作天</code></li>
+                    <li><strong>預定完工日期</strong>：展延計算後的新預定完工日（格式：<code>115年05月17日</code>）</li>
+                    <li><strong>操作</strong>：【取消申請】按鈕</li>
+                </ul>
+
+                <div class="spec-section-title">三、 狀態與操作按鈕行為對照表 (Action Matrix)</div>
+                <table class="spec-table">
+                    <thead>
+                        <tr>
+                            <th colspan="4">歷程單據目前狀態</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 25%;">審核中</th>
+                            <th style="width: 25%;">同意</th>
+                            <th style="width: 25%;">不同意</th>
+                            <th style="width: 25%;">取消申請</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>顯示：[取消申請]<br><span class="status-active">狀態：可點擊 (紅色)</span></td>
+                            <td>顯示：[取消申請]<br><span class="status-disabled">狀態：停用 disabled</span></td>
+                            <td>顯示：[取消申請]<br><span class="status-disabled">狀態：停用 disabled</span></td>
+                            <td>顯示：[取消申請]<br><span class="status-disabled">狀態：停用 disabled</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ===== 取自右邊 HTML 的腳本 =====
+        // 單位設定：'calendar' 表示日曆天，'work' 表示工作天（可根據「原本採計」調整）
+        let extendUnit = 'calendar'; // 預設為日曆天
+
+        const holidays2026 = ["2026-01-01", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-27", "2026-04-03", "2026-04-06", "2026-06-19", "2026-09-25", "2026-10-09"];
+
+        // 初始模擬資料
+        let historyRecords = [{
+            id: 1,
+            seqName: "第 1 次",
+            status: "同意",
+            baseDate: "115年03月22日",
+            agreeDate: "115/03/20",
+            agreeDocNo: "115001234",
+            calendarDays: 5,
+            workDays: 0,
+            targetDateText: "115年03月27日",
+            reason: "因連續豪雨導致土方無法施工展延",
+            fileName: "核准函_115001234.pdf"
+        }, {
+            id: 2,
+            seqName: "第 2 次",
+            status: "不同意",
+            baseDate: "115年03月27日",
+            agreeDate: "115/04/10",
+            agreeDocNo: "115001588",
+            calendarDays: 0,
+            workDays: 0,
+            targetDateText: "115年03月27日",
+            reason: "廠商物料調度延遲申請展延（退回）",
+            fileName: ""
+        }, {
+            id: 3,
+            seqName: "第 3 次",
+            status: "審核中",
+            baseDate: "115年03月27日",
+            agreeDate: "115/06/28",
+            agreeDocNo: "12245448",
+            calendarDays: 5,
+            workDays: 2,
+            targetDateText: "115年04月07日",
+            reason: "因辦理用地許可及完成混凝土鑽心取樣，工期展延。",
+            fileName: "同意函文_12245448.pdf"
+        }];
+
+        window.onload = function() {
+            updateUnitLabel();
+            calculateNewDate();
+            renderHistoryTable();
+        };
+
+        function updateUnitLabel() {
+            const label = document.getElementById('unitLabel');
+            if (extendUnit === 'work') {
+                label.textContent = '工作天';
+            } else {
+                label.textContent = '日曆天';
+            }
+        }
+
+        function openDatePicker() {
+            const picker = document.getElementById('agreeDateNative');
+            if (picker.showPicker) {
+                picker.showPicker();
+            } else {
+                picker.focus();
+                picker.click();
+            }
+        }
+
+        function syncDateToROC(isoDateStr) {
+            if (!isoDateStr) return;
+            const [yyyy, mm, dd] = isoDateStr.split('-');
+            const rocYear = parseInt(yyyy, 10) - 1911;
+            document.getElementById('agreeDateDisplay').value = `${rocYear}/${mm}/${dd}`;
+        }
+
+        function formatROCFullDateText(dateObj) {
+            const rocYear = dateObj.getFullYear() - 1911;
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            return `${rocYear}年${mm}月${dd}日`;
+        }
+
+        function isNonWorkingDay(dateObj) {
+            const day = dateObj.getDay();
+            if (day === 0 || day === 6) return true;
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            return holidays2026.includes(`${yyyy}-${mm}-${dd}`);
+        }
+
+        function calculateNewDate() {
+            const baseVal = document.getElementById('baseCompletionDate').value;
+            let days = parseFloat(document.getElementById('extendDays').value) || 0;
+            if (days < 0) days = 0;
+
+            if (!baseVal) return;
+
+            let targetDate = new Date(baseVal + 'T00:00:00');
+
+            if (extendUnit === 'work') {
+                // 工作天：跳過週末與國定假日
+                let added = 0;
+                while (added < days) {
+                    targetDate.setDate(targetDate.getDate() + 1);
+                    if (!isNonWorkingDay(targetDate)) added++;
+                }
+            } else {
+                // 日曆天：直接加天數
+                targetDate.setDate(targetDate.getDate() + days);
+            }
+
+            const resText = formatROCFullDateText(targetDate);
+            document.getElementById('calculatedDateDisplay').innerText = resText;
+            return resText;
+        }
+
+        function formatDaysText(cDays, wDays) {
+            let res = [];
+            if (cDays > 0) res.push(`${cDays}日曆天`);
+            if (wDays > 0) res.push(`${wDays}工作天`);
+            return res.length > 0 ? res.join(' + ') : '0天';
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = "";
+
+            historyRecords.forEach((item) => {
+                let badgeClass = "bg-pending";
+                if (item.status === "同意") badgeClass = "bg-approved";
+                if (item.status === "不同意") badgeClass = "bg-rejected";
+                if (item.status === "取消申請") badgeClass = "bg-canceled";
+
+                let actionBtnHtml = (item.status === "審核中") ?
+                    `<button class="btn-cancel" onclick="cancelRecord(${item.id})">取消申請</button>` :
+                    `<button class="btn-cancel btn-disabled" disabled>取消申請</button>`;
+
+                let fileHtml = item.fileName ?
+                    `<a href="#" class="file-link" onclick="alert('模擬下載檔案：${item.fileName}'); return false;">📎 下載</a>` :
+                    `<span style="color:#aaa;">無</span>`;
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td><strong>${item.seqName}</strong></td>
+                        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+                        <td>${item.baseDate}</td>
+                        <td>${item.agreeDate}</td>
+                        <td>${item.agreeDocNo}</td>
+                        <td>${formatDaysText(item.calendarDays, item.workDays)}</td>
+                        <td style="font-weight: bold; color: #d9480f;">${item.targetDateText}</td>
+                        <td style="text-align: left;">${item.reason}</td>
+                        <td>${fileHtml}</td>
+                        <td>${actionBtnHtml}</td>
+                    `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            let days = parseFloat(document.getElementById('extendDays').value) || 0;
+            if (days < 0) {
+                alert("展延天數請輸入正整數！");
+                return;
+            }
+
+            const calculatedTargetDate = calculateNewDate();
+            const fileInput = document.getElementById('docFile');
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : "";
+
+            const nextSeq = historyRecords.length + 1;
+
+            // 根據單位類型賦值
+            let cDays = 0,
+                wDays = 0;
+            if (extendUnit === 'work') {
+                wDays = days;
+            } else {
+                cDays = days;
+            }
+
+            historyRecords.push({
+                id: Date.now(),
+                seqName: `第 ${nextSeq} 次`,
+                status: "審核中",
+                baseDate: document.getElementById('baseCompletionDateDisplay').innerText,
+                agreeDate: document.getElementById('agreeDateDisplay').value,
+                agreeDocNo: document.getElementById('agreeDocNo').value,
+                calendarDays: cDays,
+                workDays: wDays,
+                targetDateText: calculatedTargetDate,
+                reason: document.getElementById('extendReason').value,
+                fileName: fileName
+            });
+
+            renderHistoryTable();
+            alert("已成功送出申請，歷程紀錄已即時更新顯示！");
+        }
+
+        function cancelRecord(id) {
+            if (confirm("確定要取消此筆展延申請嗎？")) {
+                const item = historyRecords.find(r => r.id === id);
+                if (item && item.status === "審核中") {
+                    item.status = "取消申請";
+                    renderHistoryTable();
+                }
+            }
+        }
+
+        // 可透過此函數切換單位（例如配合「原施工期限」設定）
+        function setExtendUnit(unit) {
+            if (unit === 'work' || unit === 'calendar') {
+                extendUnit = unit;
+                updateUnitLabel();
+                calculateNewDate();
+            }
+        }
+
+        // 範例：若原施工期限為「工作天」，可呼叫 setExtendUnit('work')
+        // 此處僅示範，實際可依需求開啟
+        // setExtendUnit('work');  // 若需要預設為工作天，取消註解
+    </script>
+
+</body>
+</html>
