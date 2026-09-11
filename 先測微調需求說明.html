@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雙螢幕對照 - 左右各半 + 智慧連動</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background: #e0e0e0;
+            font-family: "Microsoft JhengHei", "PMingLiU", sans-serif;
+        }
+        .panel {
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: #fff;
+            flex: 1;
+            width: 50%;
+        }
+        .panel iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        .panel-label {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            padding: 4px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10;
+            pointer-events: none;
+            white-space: nowrap;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* 分隔線 - 極細，不占空間 */
+        #divider {
+            flex: 0 0 4px;
+            background: #d0d0d0;
+            border: none;
+            box-shadow: inset 0 0 2px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+            user-select: none;
+            z-index: 5;
+            position: relative;
+        }
+        /* 滑鼠懸停時微微變色，提示為分隔區 */
+        #divider:hover {
+            background: #b0b0b0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .panel {
+                height: 50vh;
+                width: 100% !important;
+                flex: 0 0 50% !important;
+            }
+            #divider {
+                flex: 0 0 4px;
+                width: 100%;
+                height: 4px;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 左側 -->
+    <div class="panel" id="leftPanel">
+        <div class="panel-label">📋 先測案件管理 (原系統)</div>
+        <iframe id="leftFrame"></iframe>
+    </div>
+
+    <!-- 極細分隔線 -->
+    <div id="divider"></div>
+
+    <!-- 右側 -->
+    <div class="panel" id="rightPanel">
+        <div class="panel-label">📄 微調需求說明</div>
+        <iframe id="rightFrame"></iframe>
+    </div>
+
+    <!-- ========== 左側 HTML (完整系統) ========== -->
+    <textarea id="leftHtml" style="display:none;">
+    <!DOCTYPE html>
+    <html lang="zh-Hant">
+    <head>
+        <meta charset="UTF-8">
+        <title>分署工程提報作業 - 先測案件管理</title>
+        <style>
+            :root {
+                --green: #8fbf72;
+                --green-border: #7aad5e;
+                --blue-tab: #4472c4;
+                --purple-th: #c9a7d8;
+                --purple-th-border: #b98fcc;
+                --page-bg: #f2f2f2;
+                --panel-border: #cfcfcf;
+                --link-blue: #2f6fb0;
+                --text-dark: #333;
+            }
+            * { box-sizing: border-box; }
+            body {
+                margin: 0;
+                padding: 0;
+                background: var(--page-bg);
+                font-family: "Microsoft JhengHei", "PMingLiU", Arial, sans-serif;
+                color: var(--text-dark);
+                font-size: 14px;
+            }
+            .wrap {
+                max-width: 1750px;
+                margin: 0 auto;
+                background: #fff;
+                border: 1px solid var(--panel-border);
+                padding: 0 0 20px 0;
+            }
+            /* 需求對照工具列 - 固定在頂部 */
+            .sync-toolbar {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                background: #4472c4;
+                padding: 6px 16px;
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                align-items: center;
+                color: #fff;
+                font-size: 13px;
+                border-bottom: 2px solid #2a4a7a;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            }
+            .sync-toolbar .label {
+                font-weight: bold;
+                margin-right: 6px;
+                font-size: 14px;
+            }
+            .sync-toolbar button {
+                background: rgba(255,255,255,0.15);
+                border: 1px solid rgba(255,255,255,0.3);
+                color: #fff;
+                padding: 4px 14px;
+                border-radius: 30px;
+                cursor: pointer;
+                font-size: 12px;
+                transition: all 0.2s;
+                white-space: nowrap;
+                font-weight: 500;
+            }
+            .sync-toolbar button:hover {
+                background: rgba(255,255,255,0.35);
+                transform: translateY(-1px);
+            }
+            .sync-toolbar button:active {
+                transform: scale(0.96);
+            }
+            .title-bar {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 14px 18px 8px 18px;
+                font-size: 20px;
+                color: #555;
+            }
+            .title-bar .icon {
+                display: inline-grid;
+                grid-template-columns: repeat(2, 6px);
+                grid-gap: 3px;
+                width: 20px;
+            }
+            .title-bar .icon span {
+                width: 6px; height: 6px; background: #999; display: block;
+            }
+            .gradient-bar {
+                height: 6px;
+                width: 100%;
+                background: linear-gradient(90deg,
+                    #f5e6a8 0%, #f0c96b 15%, #e8905a 30%, #d9584f 45%,
+                    #b98fcc 60%, #8fa8d8 75%, #7ec0e0 90%, #8fd3d8 100%);
+                margin-bottom: 14px;
+            }
+            .info-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 0 0 16px 0;
+            }
+            .info-table td {
+                border: 1px solid var(--panel-border);
+                padding: 8px 14px;
+                vertical-align: middle;
+            }
+            .info-table td.label {
+                background: var(--green);
+                border-color: var(--green-border);
+                color: #fff;
+                font-weight: bold;
+                width: 180px;
+            }
+            .info-table td.value { background: #fafafa; }
+            .info-table select {
+                padding: 5px 8px;
+                font-size: 13px;
+                border: 1px solid #9aa;
+                border-radius: 3px;
+                min-width: 220px;
+                background: #fff;
+                color: #333;
+            }
+
+            .tab-bar {
+                display: flex;
+                background: var(--blue-tab);
+                margin: 0 0 14px 0;
+                padding: 0 18px;
+            }
+            .tab-bar .tab-item {
+                padding: 10px 22px;
+                color: #eaf1ff;
+                font-size: 14px;
+                cursor: pointer;
+                border-right: 1px solid rgba(255,255,255,0.25);
+            }
+            .tab-bar .tab-item:hover { background: rgba(255,255,255,0.12); }
+            .tab-bar .tab-item.active {
+                background: #fff;
+                color: #333;
+                font-weight: bold;
+                border-bottom: 3px solid #d1518f;
+                border-right: none;
+            }
+            .placeholder-panel {
+                margin: 0 18px 20px 18px;
+                padding: 60px 20px;
+                text-align: center;
+                color: #999;
+                border: 1px dashed var(--panel-border);
+                font-size: 14px;
+                display: none;
+            }
+
+            .list-toolbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0 18px 8px 18px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .list-toolbar .left-tools,
+            .list-toolbar .right-tools {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .table-scroll {
+                width: calc(100% - 36px);
+                margin: 0 18px;
+                overflow-x: auto;
+            }
+            table.case-table {
+                width: 100%;
+                border-collapse: collapse;
+                min-width: 1200px;
+            }
+            table.case-table th {
+                background: var(--purple-th);
+                border: 1px solid var(--purple-th-border);
+                color: #4a2a5a;
+                padding: 8px 6px;
+                font-size: 13px;
+                white-space: nowrap;
+                text-align: center;
+            }
+            table.case-table td {
+                border: 1px solid var(--panel-border);
+                padding: 6px 6px;
+                font-size: 13px;
+                text-align: center;
+                vertical-align: middle;
+                white-space: nowrap;
+            }
+            table.case-table tr:nth-child(even) td { background: #faf7fb; }
+            table.case-table input[type="text"],
+            table.case-table input[type="number"],
+            table.case-table select {
+                width: 100px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                padding: 3px 4px;
+                font-size: 12px;
+                text-align: center;
+                box-sizing: border-box;
+            }
+            table.case-table select {
+                width: 70px;
+                margin-right: 4px;
+            }
+            table.case-table td.name-col {
+                text-align: left;
+                padding-left: 10px;
+                white-space: normal;
+                min-width: 160px;
+            }
+            table.case-table td.workseq-col {
+                white-space: normal;
+                min-width: 140px;
+            }
+            table.case-table td.view-col { color: #444; }
+            table.case-table tr.locked-row td {
+                background: #f0f0f0 !important;
+                color: #888;
+            }
+            .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+            .empty-row td {
+                text-align: center;
+                color: var(--link-blue);
+                padding: 24px 0;
+            }
+            .bottom-bar {
+                display: flex;
+                justify-content: flex-end;
+                padding: 16px 18px 0 18px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .bottom-bar .right-btns {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+            .btn {
+                border: 1px solid #6a9fd8;
+                background: linear-gradient(#eaf2fc, #cfe0f5);
+                color: #25507f;
+                padding: 7px 18px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+            .btn:hover { background: linear-gradient(#dceafc, #bcd6f0); }
+            .btn.primary {
+                background: linear-gradient(#7fa8dc, #4472c4);
+                border-color: #3a5f9e;
+                color: #fff;
+            }
+            .btn.primary:hover { background: linear-gradient(#6f98cc, #385fa8); }
+            .btn.approve {
+                background: linear-gradient(#f5cfa0, #e8a95c);
+                border-color: #c8873a;
+                color: #5a3a10;
+            }
+            .btn.approve:hover { background: linear-gradient(#f0c48a, #dd9c4a); }
+            .btn.register {
+                background: linear-gradient(#c8e0a8, #9bc96e);
+                border-color: #6f9e42;
+                color: #2f4a10;
+            }
+            .btn.register:hover { background: linear-gradient(#bcd894, #8fbf5e); }
+            .btn.schedule {
+                background: linear-gradient(#d8c8f0, #b393d9);
+                border-color: #8f5fc4;
+                color: #3a1a5a;
+            }
+            .btn.schedule:hover { background: linear-gradient(#ccb8ea, #a780cc); }
+            .btn.small { padding: 4px 10px; font-size: 12px; }
+            .btn.self-check {
+                background: linear-gradient(#f7e8b0, #eace7a);
+                border-color: #b89c3a;
+                color: #5a4a10;
+            }
+            .btn.self-check:hover { background: linear-gradient(#f0df9a, #dbbd5a); }
+            .btn.export-first {
+                background: linear-gradient(#b8d4f0, #7aafd8);
+                border-color: #4a7fa8;
+                color: #1a3a5a;
+            }
+            .btn.export-first:hover { background: linear-gradient(#a8c8e8, #6a9fc8); }
+            .btn.export-second {
+                background: linear-gradient(#f0d4b8, #d8af7a);
+                border-color: #a87f4a;
+                color: #5a3a1a;
+            }
+            .btn.export-second:hover { background: linear-gradient(#e8c8a8, #c89f6a); }
+
+            .coord-marker {
+                display: inline-block;
+                background: #4472c4;
+                color: #fff;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                line-height: 18px;
+                font-size: 11px;
+                font-weight: bold;
+                text-align: center;
+                margin-left: 6px;
+                cursor: help;
+                vertical-align: middle;
+            }
+            .review-pass {
+                color: #2f7d32;
+                font-weight: bold;
+                cursor: pointer;
+                text-decoration: underline dotted #2f7d32;
+            }
+            .review-pass:hover { color: #1a5a1a; }
+            .review-pending { color: #999; }
+
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.4);
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+            .modal-overlay.show { display: flex; }
+            .modal-box {
+                background: #fff;
+                width: 460px;
+                border: 1px solid var(--panel-border);
+                border-radius: 4px;
+                overflow: hidden;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-box.wide { width: 680px; }
+            .modal-box.narrow { width: 420px; }
+            .modal-header {
+                background: var(--blue-tab);
+                color: #fff;
+                padding: 10px 16px;
+                font-size: 15px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 2;
+            }
+            .modal-header .close-x {
+                cursor: pointer;
+                font-size: 18px;
+                font-weight: bold;
+            }
+            .modal-body { padding: 16px; }
+            .modal-body .selected-note {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 12px;
+            }
+            .modal-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 12px;
+            }
+            .modal-row label {
+                width: 160px;
+                color: var(--text-dark);
+                font-weight: bold;
+                font-size: 13px;
+                flex-shrink: 0;
+            }
+            .modal-row input[type="text"],
+            .modal-row input[type="date"],
+            .modal-row input[type="number"],
+            .modal-row select {
+                flex: 1;
+                padding: 6px 8px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                font-size: 13px;
+                text-align: left;
+            }
+            .modal-row input:disabled {
+                background: #f0f0f0;
+                color: #888;
+                cursor: not-allowed;
+            }
+            .modal-footer {
+                padding: 10px 16px 16px 16px;
+                text-align: right;
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+                position: sticky;
+                bottom: 0;
+                background: #fff;
+                border-top: 1px solid #eee;
+            }
+            .section-divider {
+                border-top: 1px dashed var(--panel-border);
+                margin: 14px 0;
+                padding-top: 12px;
+            }
+            .section-title {
+                font-size: 13px;
+                font-weight: bold;
+                color: var(--text-dark);
+                margin-bottom: 10px;
+            }
+            .batch-case-list {
+                max-height: 220px;
+                overflow-y: auto;
+                border: 1px solid var(--panel-border);
+                border-radius: 3px;
+            }
+            .batch-case-list table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .batch-case-list th {
+                position: sticky;
+                top: 0;
+                background: var(--purple-th);
+                border: 1px solid var(--purple-th-border);
+                color: #4a2a5a;
+                padding: 6px;
+                font-size: 12px;
+            }
+            .batch-case-list td {
+                border-bottom: 1px solid #eee;
+                padding: 6px 8px;
+                font-size: 12px;
+                text-align: left;
+            }
+            .batch-case-list td.chk-col {
+                text-align: center;
+                width: 36px;
+            }
+            .batch-case-list tr.locked td {
+                color: #aaa;
+                background: #f7f7f7;
+            }
+
+            .toast {
+                position: fixed;
+                left: 50%;
+                bottom: 36px;
+                transform: translateX(-50%) translateY(10px);
+                background: #333;
+                color: #fff;
+                padding: 10px 20px;
+                border-radius: 4px;
+                font-size: 13px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+                z-index: 200;
+                max-width: 90%;
+            }
+            .toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            .work-item-hover {
+                cursor: help;
+                border-bottom: 1px dashed #999;
+            }
+            .eco-checkbox {
+                width: 18px; height: 18px;
+                cursor: pointer;
+                vertical-align: middle;
+                margin-left: 4px;
+            }
+            .eco-label { margin-right: 4px; }
+
+            .review-detail-item {
+                padding: 6px 0;
+                font-size: 14px;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .review-detail-item strong {
+                display: inline-block;
+                width: 100px;
+                color: #555;
+            }
+            @media (max-width: 768px) {
+                .modal-box.wide { width: 95%; }
+                .modal-box { width: 95%; }
+                .modal-row { flex-wrap: wrap; }
+                .modal-row label { width: 100%; margin-bottom: 4px; }
+                .list-toolbar { flex-direction: column; align-items: stretch; }
+                .bottom-bar .right-btns { flex-wrap: wrap; }
+                .bottom-bar { justify-content: center; }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <!-- 需求對照工具列 -->
+            <div class="sync-toolbar">
+                <span class="label">🔗 點擊按鈕，右側自動跳轉：</span>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-1'},'*')">📌 核定情形</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-2'},'*')">📌 工程內容</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-3'},'*')">📌 坐標合併</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-4'},'*')">📌 審議狀態</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-5'},'*')">📌 碳排量</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-2'},'*')">📌 登錄功能</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-3-1'},'*')">📌 序號產生</button>
+                <button onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-5'},'*')">📌 匯出功能</button>
+            </div>
+
+            <div class="title-bar">
+                <span class="icon"><span></span><span></span><span></span><span></span></span>
+                分署工程提報作業
+            </div>
+            <div class="gradient-bar"></div>
+
+            <table class="info-table">
+                <tr>
+                    <td class="label">年度</td>
+                    <td class="value">
+                        <select id="selYear" onchange="renderTable()">
+                            <option value="113">113</option>
+                            <option value="114" selected>114</option>
+                            <option value="115">115</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">計畫</td>
+                    <td class="value">
+                        <select id="selPlan" onchange="onPlanChange()">
+                            <option value="整體性治山防災計畫" selected>整體性治山防災計畫</option>
+                            <option value="區域排水整體改善計畫">區域排水整體改善計畫</option>
+                            <option value="海岸環境營造計畫">海岸環境營造計畫</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">選擇提送批次</td>
+                    <td class="value">
+                        <select id="selBatch"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="label">分署轄區</td>
+                    <td class="value">
+                        <select id="selDistrictOffice">
+                            <option value="台北分署轄區">台北分署轄區</option>
+                            <option value="新竹分署轄區">新竹分署轄區</option>
+                            <option value="台中分署轄區" selected>台中分署轄區</option>
+                            <option value="嘉義分署轄區">嘉義分署轄區</option>
+                            <option value="台南分署轄區">台南分署轄區</option>
+                            <option value="高雄分署轄區">高雄分署轄區</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="tab-bar">
+                <div class="tab-item" data-tab="1" onclick="switchTab(1)">1.搜尋工程</div>
+                <div class="tab-item" data-tab="2" onclick="switchTab(2)">2.非先測案件管理</div>
+                <div class="tab-item active" data-tab="3" onclick="switchTab(3)">3.先測案件管理</div>
+                <div class="tab-item" data-tab="4" onclick="switchTab(4)">4.核定情形查詢</div>
+            </div>
+
+            <div class="placeholder-panel" id="placeholderPanel">此頁籤內容尚未串接，僅為示意。</div>
+
+            <div id="caseMgmtContent">
+                <div class="list-toolbar">
+                    <div class="left-tools">
+                        <button class="btn primary" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-3-1'},'*'); assignWorkSeqNo()">自動產生工程序號</button>
+                    </div>
+                    <div class="right-tools">
+                        <button class="btn schedule" onclick="openBatchScheduleModal()">多案件期程設定</button>
+                    </div>
+                </div>
+
+                <div class="table-scroll">
+                    <table class="case-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+                                <th>工程名稱</th>
+                                <th>工程序號</th>
+                                <th>工作項目</th>
+                                <th>執行單位</th>
+                                <th>縣市</th>
+                                <th>鄉鎮市區</th>
+                                <th>概估經費<br>(仟元)</th>
+                                <th>碳排量上限<br>(tonCO2e)</th>
+                                <th>設計碳排量<br>(tonCO2e)</th>
+                                <th>坐標</th>
+                                <th>生態檢核分級</th>
+                                <th>核章版</th>
+                                <th>生態資料是否完成</th>
+                                <th>核定情形</th>
+                                <th>審議狀態</th>
+                                <th>登錄</th>
+                            </tr>
+                        </thead>
+                        <tbody id="caseTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="bottom-bar">
+                    <div class="right-btns">
+                        <button class="btn self-check" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-5-2'},'*'); generateSelfCheck()">產出自主檢核表</button>
+                        <button class="btn export-first" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-5-1'},'*'); exportDetailForm('first')">匯出工程核定明細表(一階)</button>
+                        <button class="btn export-second" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-5-1'},'*'); exportDetailForm('second')">匯出工程核定明細表(二階)</button>
+                        <button class="btn" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-2-2'},'*'); exportScheduleForm()">匯出期程管控表</button>
+                        <button class="btn approve" id="sendToAgencyBtn" onclick="openSendModal()">傳送至農村水保署</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal 區塊 (簡化保留核心功能) -->
+        <div class="modal-overlay" id="seqConfirmModal">
+            <div class="modal-box" style="width:400px;">
+                <div class="modal-header"><span>提示</span><span class="close-x" onclick="closeSeqConfirmModal()">&times;</span></div>
+                <div class="modal-body"><div id="seqConfirmMsg">工程序號已自動編碼與帶入，若點確定，系統將視為正式工程序號</div></div>
+                <div class="modal-footer"><button class="btn" onclick="closeSeqConfirmModal()">取消</button><button class="btn primary" onclick="confirmAssignWorkSeqNo()">確定</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="registerModal">
+            <div class="modal-box wide">
+                <div class="modal-header"><span>登錄</span><span class="close-x" onclick="closeRegisterModal()">&times;</span></div>
+                <div class="modal-body">
+                    <div class="selected-note" id="registerCaseName"></div>
+                    <div class="modal-row"><label>規劃設計單位統編</label><input type="text" id="regDesignUnitId" placeholder="請輸入統一編號"></div>
+                    <div class="modal-row"><label>提報階段生態團隊</label><select id="regPhaseEcoTeam"><option value="">請選擇</option><option value="生態觀察家">生態觀察家</option><option value="生態顧問公司A">生態顧問公司A</option><option value="生態顧問公司B">生態顧問公司B</option><option value="生態顧問公司C">生態顧問公司C</option><option value="生態研究團隊">生態研究團隊</option><option value="環境生態顧問">環境生態顧問</option><option value="自然生態工作室">自然生態工作室</option><option value="其他">其他</option></select></div>
+                    <div class="modal-row"><label>設計階段生態團隊</label><select id="regDesignEcoTeam"><option value="">請選擇</option><option value="生態觀察家">生態觀察家</option><option value="生態顧問公司A">生態顧問公司A</option><option value="生態顧問公司B">生態顧問公司B</option><option value="生態顧問公司C">生態顧問公司C</option><option value="生態研究團隊">生態研究團隊</option><option value="環境生態顧問">環境生態顧問</option><option value="自然生態工作室">自然生態工作室</option><option value="其他">其他</option></select></div>
+                    <div class="modal-row"><label>分署提報先測日期</label><input type="date" id="regReportDate"></div>
+                    <div class="modal-row"><label>本署核定先測日期</label><input type="date" id="regReviewDate"></div>
+                    <div class="modal-row"><label>工程來源</label><input type="text" id="regSource" placeholder="請輸入工程來源"></div>
+                    <div class="modal-row"><label>預計完成預算書日期</label><input type="date" id="regBudgetFinalDate"></div>
+                    <div class="section-divider"><div class="section-title">審議資訊</div>
+                        <div class="modal-row"><label>審議狀態</label><select id="regReviewStatus"><option value="尚未提報">尚未提報</option><option value="通過">通過</option></select></div>
+                        <div class="modal-row"><label>審查會議</label><input type="text" id="regReviewMeeting" placeholder="請輸入審查會議名稱"></div>
+                        <div class="modal-row"><label>案由</label><input type="text" id="regReviewReason" placeholder="請輸入案由"></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn" onclick="closeRegisterModal()">取消</button><button class="btn primary" onclick="saveRegister()">儲存</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="batchScheduleModal">
+            <div class="modal-box wide">
+                <div class="modal-header"><span>多案件期程設定</span><span class="close-x" onclick="closeBatchScheduleModal()">&times;</span></div>
+                <div class="modal-body">
+                    <div class="section-title">1. 輸入共用期程資料</div>
+                    <div class="modal-row"><label>分署提報先測日期</label><input type="date" id="batchReportDate"></div>
+                    <div class="modal-row"><label>本署核定先測日期</label><input type="date" id="batchReviewDate"></div>
+                    <div class="modal-row"><label>工程來源</label><input type="text" id="batchSource" placeholder="請輸入工程來源"></div>
+                    <div class="modal-row"><label>預計完成預算書日期</label><input type="date" id="batchBudgetFinalDate"></div>
+                    <div class="section-divider"><div class="section-title">2. 勾選要帶入的工程</div>
+                        <div class="batch-case-list"><table><thead><tr><th class="chk-col"><input type="checkbox" id="batchCheckAll" onchange="toggleBatchAll(this)"></th><th>工程名稱</th><th>工程序號</th></tr></thead><tbody id="batchCaseListBody"></tbody></table></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button class="btn" onclick="closeBatchScheduleModal()">取消</button><button class="btn primary" onclick="applyBatchSchedule()">套用至勾選案件</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="sendModal">
+            <div class="modal-box">
+                <div class="modal-header"><span id="sendModalTitle">傳送至農村水保署</span><span class="close-x" onclick="closeSendModal()">&times;</span></div>
+                <div class="modal-body"><div class="selected-note" id="selectedNote">已選取 0 筆案件</div><div style="font-size:13px; color:#666;">確認送出後，所選案件將傳送至農村水保署，該筆資料整列將變成僅能檢視，不能編輯或移除。</div></div>
+                <div class="modal-footer"><button class="btn" onclick="closeSendModal()">取消</button><button class="btn primary" onclick="confirmSend()">確認傳送</button></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="reviewDetailModal">
+            <div class="modal-box narrow">
+                <div class="modal-header"><span>審議詳情</span><span class="close-x" onclick="closeReviewDetailModal()">&times;</span></div>
+                <div class="modal-body">
+                    <div class="review-detail-item"><strong>案件名稱：</strong><span id="rdCaseName">-</span></div>
+                    <div class="review-detail-item"><strong>審查會議：</strong><span id="rdMeeting">-</span></div>
+                    <div class="review-detail-item"><strong>案由：</strong><span id="rdReason">-</span></div>
+                </div>
+                <div class="modal-footer"><button class="btn" onclick="closeReviewDetailModal()">關閉</button></div>
+            </div>
+        </div>
+
+        <div class="toast" id="toast"></div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script>
+        // ===== 核心邏輯 =====
+        let toastTimer = null;
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+        }
+
+        function switchTab(tabNum) {
+            document.querySelectorAll('.tab-item').forEach(el => {
+                el.classList.toggle('active', parseInt(el.dataset.tab, 10) === tabNum);
+            });
+            const caseContent = document.getElementById('caseMgmtContent');
+            const placeholder = document.getElementById('placeholderPanel');
+            if (tabNum === 3) {
+                caseContent.style.display = "block";
+                placeholder.style.display = "none";
+            } else {
+                caseContent.style.display = "none";
+                placeholder.style.display = "block";
+            }
+        }
+
+        const planBatchMap = {
+            "整體性治山防災計畫": ["荖濃溪防災韌性計畫-1", "荖濃溪防災韌性計畫-2", "旗山溪防災韌性計畫-1"],
+            "區域排水整體改善計畫": ["某某排水系統改善計畫-1", "某某排水系統改善計畫-2"],
+            "海岸環境營造計畫": ["西南沿海環境營造計畫-1"]
+        };
+        function onPlanChange() {
+            const plan = document.getElementById('selPlan').value;
+            const batchSel = document.getElementById('selBatch');
+            batchSel.innerHTML = "";
+            const allOpt = document.createElement('option');
+            allOpt.value = "全部"; allOpt.textContent = "全部";
+            batchSel.appendChild(allOpt);
+            (planBatchMap[plan] || []).forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b; opt.textContent = b;
+                batchSel.appendChild(opt);
+            });
+        }
+
+        let cases = [{
+            seq:1, name:"荖濃溪堤防護岸補強工程", content:"位於荖濃溪中游，堤防長度約850公尺...",
+            workSeqNo:"", workItem:"護岸新建", execUnit:"臺南分署", county:"高雄市", district:"六龜區",
+            estBudget:"12,500", designCarbon:"", carbonType:"水保", carbonCap:"120",
+            coordList:[{x:"215432",y:"2531876"},{x:"215688",y:"2532120"},{x:"215900",y:"2532350"}],
+            ecoLevel:"第二級", signVersion:"核章版_v1.pdf", ecoFileUploaded:true, ecoRead:false,
+            approvalStatus:"尚未傳送(一階)", designUnitId:"", phaseEcoTeam:"", designEcoTeam:"",
+            reportDate:"", reviewDate:"", source:"", budgetFinalDate:"",
+            approve:{done:false,date:""}, reviewStatus:"尚未提報", reviewMeeting:"", reviewReason:""
+        }, {
+            seq:2, name:"荖濃溪上游土石流防治壩體檢修", content:"位於桃源區勤和里，針對既有防砂壩進行掏空補強...",
+            workSeqNo:"114-RFR-01-001", workItem:"壩體檢修", execUnit:"臺南分署", county:"高雄市", district:"桃源區",
+            estBudget:"8,900", designCarbon:"62.7", carbonType:"農路", carbonCap:"95",
+            coordList:[{x:"218760",y:"2548120"}],
+            ecoLevel:"第一級", signVersion:"核章版_v2.pdf", ecoFileUploaded:true, ecoRead:true,
+            approvalStatus:"已核定", designUnitId:"83456123", phaseEcoTeam:"生態顧問公司A", designEcoTeam:"生態顧問公司B",
+            reportDate:"2025-01-10", reviewDate:"2025-02-15", source:"前瞻基礎建設計畫", budgetFinalDate:"2025-06-30",
+            approve:{done:true,date:"2025-03-01"}, reviewStatus:"通過", reviewMeeting:"114年度第3次工程審查會議", reviewReason:"荖濃溪上游防災治理案"
+        }, {
+            seq:3, name:"旗山溪左岸護岸新建工程", content:"旗山溪左岸約1.2公里護岸新建...",
+            workSeqNo:"114-RFR-01-002", workItem:"護岸新建", execUnit:"臺南分署", county:"高雄市", district:"旗山區",
+            estBudget:"15,300", designCarbon:"45.2", carbonType:"水保", carbonCap:"150",
+            coordList:[{x:"198234",y:"2523456"},{x:"198560",y:"2523780"}],
+            ecoLevel:"第二級", signVersion:"核章版_v3.pdf", ecoFileUploaded:true, ecoRead:true,
+            approvalStatus:"已傳送(一階)", designUnitId:"88123456", phaseEcoTeam:"生態觀察家", designEcoTeam:"生態研究團隊",
+            reportDate:"2025-02-01", reviewDate:"", source:"整體性治山防災計畫", budgetFinalDate:"2025-07-15",
+            approve:{done:true,date:"2025-02-20"}, reviewStatus:"尚未提報", reviewMeeting:"", reviewReason:""
+        }, {
+            seq:4, name:"南化水庫集水區治理工程", content:"南化水庫上游集水區崩塌地處理及植生復育。",
+            workSeqNo:"114-RFR-01-003", workItem:"集水區治理", execUnit:"臺南分署", county:"臺南市", district:"南化區",
+            estBudget:"6,700", designCarbon:"28.3", carbonType:"水保", carbonCap:"70",
+            coordList:[{x:"205432",y:"2551234"}],
+            ecoLevel:"第一級", signVersion:"核章版_v4.pdf", ecoFileUploaded:true, ecoRead:true,
+            approvalStatus:"尚未傳送(二階)", designUnitId:"88765432", phaseEcoTeam:"環境生態顧問", designEcoTeam:"自然生態工作室",
+            reportDate:"2025-03-01", reviewDate:"2025-04-10", source:"區域排水整體改善計畫", budgetFinalDate:"2025-08-20",
+            approve:{done:false,date:""}, reviewStatus:"通過", reviewMeeting:"114年度第5次治理審查會議", reviewReason:"南化水庫上游崩塌地治理案"
+        }];
+
+        function isCaseLocked(c) {
+            const s = c.approvalStatus;
+            return s === '已傳送(一階)' || s === '已傳送(二階)' || s === '已核定';
+        }
+        function canSend(c) {
+            return c.approvalStatus === '尚未傳送(一階)' || c.approvalStatus === '尚未傳送(二階)';
+        }
+        function getCaseStage(c) {
+            const s = c.approvalStatus;
+            if (s.includes('一階')) return 'first';
+            if (s.includes('二階') || s === '已核定' || s === '退回修正') return 'second';
+            return 'first';
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('caseTableBody');
+            tbody.innerHTML = "";
+            if (cases.length === 0) {
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="17">尚無轉入案件</td></tr>';
+                return;
+            }
+            cases.forEach((c, idx) => {
+                const locked = isCaseLocked(c);
+                const tr = document.createElement('tr');
+                if (locked) tr.classList.add('locked-row');
+
+                const carbonCapHtml = `<select onchange="updateField(${idx},'carbonType',this.value)" style="width:60px;"><option value="水保" ${c.carbonType==='水保'?'selected':''}>水保</option><option value="農路" ${c.carbonType==='農路'?'selected':''}>農路</option></select><span class="view-col">${c.carbonCap}</span>`;
+                const designCarbonCell = `<input type="number" step="0.1" value="${c.designCarbon || ''}" onchange="updateField(${idx},'designCarbon',this.value)">`;
+
+                let statusColor = '#b03a2e';
+                if (c.approvalStatus === '已核定') statusColor = '#2f7d32';
+                else if (c.approvalStatus === '已傳送(一階)' || c.approvalStatus === '已傳送(二階)') statusColor = '#d68910';
+                else if (c.approvalStatus === '退回修正') statusColor = '#c0392b';
+                const approvalCell = `<span style="color:${statusColor}; font-weight:bold;">${c.approvalStatus}</span>`;
+
+                const workItemDisplay = `<span class="work-item-hover" title="工程名稱：${c.name}\\n工程內容：${c.content || '無'}" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-2'},'*')" style="cursor:pointer;">${c.workItem} <span style="font-size:10px;color:#4472c4;">📄</span></span>`;
+
+                const signStatus = c.signVersion ? '已上傳' : '未上傳';
+                const signColor = c.signVersion ? '#2f7d32' : '#b03a2e';
+
+                const ecoCheckbox = `<input type="checkbox" class="eco-checkbox" ${c.ecoRead ? 'checked' : ''} onchange="toggleEcoRead(${idx}, this.checked)">`;
+                const ecoStatusText = c.ecoFileUploaded ? '已完成' : '未完成';
+                const ecoStatusColor = c.ecoFileUploaded ? '#2f7d32' : '#b03a2e';
+                const ecoCell = `<div><span class="eco-label">已閱讀</span>${ecoCheckbox} <span style="color:${ecoStatusColor};">${ecoStatusText}</span></div>`;
+
+                let coordDisplay = '';
+                const coords = c.coordList || [{x:c.coordX||'', y:c.coordY||''}];
+                const validCoords = coords.filter(p => p.x || p.y);
+                if (validCoords.length === 0) coordDisplay = '<span style="color:#aaa;">-</span>';
+                else {
+                    const first = validCoords[0];
+                    if (validCoords.length === 1) coordDisplay = `X:${first.x} Y:${first.y}`;
+                    else {
+                        let titleText = validCoords.map((p,i) => `#${i+1} X:${p.x||'?'} Y:${p.y||'?'}`).join('\n');
+                        coordDisplay = `X:${first.x} Y:${first.y} <span class="coord-marker" title="${titleText}" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-3'},'*')">${validCoords.length}</span>`;
+                    }
+                }
+
+                let reviewCell = '';
+                if (c.reviewStatus === '通過') {
+                    reviewCell = `<span class="review-pass" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-4'},'*'); openReviewDetail(${idx})">通過</span>`;
+                } else {
+                    reviewCell = `<span class="review-pending" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-1-4'},'*')">尚未提報</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="row-check" data-idx="${idx}"></td>
+                    <td class="name-col">${c.name}</td>
+                    <td class="workseq-col view-col" id="workSeqNo-${idx}">${c.workSeqNo || ''}</td>
+                    <td class="view-col">${workItemDisplay}</td>
+                    <td class="view-col">${c.execUnit}</td>
+                    <td class="view-col">${c.county}</td>
+                    <td class="view-col">${c.district}</td>
+                    <td class="view-col">${c.estBudget}</td>
+                    <td>${carbonCapHtml}</td>
+                    <td>${designCarbonCell}</td>
+                    <td class="view-col" style="text-align:left;padding:4px 8px;">${coordDisplay}</td>
+                    <td class="view-col">${c.ecoLevel}</td>
+                    <td class="view-col"><span style="color:${signColor};">${signStatus}</span></td>
+                    <td>${ecoCell}</td>
+                    <td>${approvalCell}</td>
+                    <td>${reviewCell}</td>
+                    <td><button class="btn register small" onclick="window.parent.postMessage({type:'scrollTo',sectionId:'s-1-2'},'*'); openRegisterModal(${idx})">登錄</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('sendToAgencyBtn').textContent = '傳送至農村水保署';
+        }
+
+        function updateField(idx, field, value) { cases[idx][field] = value; }
+        function toggleEcoRead(idx, checked) {
+            const c = cases[idx];
+            c.ecoRead = checked;
+            if (checked) {
+                let levelText = c.ecoLevel.includes('第一級')?'生態 1級':'強化2級';
+                alert(`${levelText} 請至生態系統 (https://eco.swcb.gov.tw) 檢視內容是否有上傳。`);
+            }
+            renderTable();
+        }
+        function toggleAll(master) {
+            document.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
+        }
+
+        function assignWorkSeqNo() {
+            const year = document.getElementById('selYear').value;
+            let canGenerate = true, msg = '';
+            cases.forEach((c) => {
+                if (c.workSeqNo) return;
+                if (isCaseLocked(c)) return;
+                const missing = [];
+                if (!c.signVersion) missing.push('核章版未上傳');
+                if (!c.ecoFileUploaded) missing.push('生態資料未完成');
+                if (!c.ecoRead) missing.push('生態資料尚未閱讀');
+                if (missing.length > 0) { canGenerate = false; msg += `\n- ${c.name}：${missing.join('、')}`; }
+            });
+            if (!canGenerate) { showToast(`以下案件不符合自動編號條件：${msg}`); return; }
+            document.getElementById('seqConfirmMsg').textContent = '所有無序號且符合條件的案件將自動產生序號，確定繼續？';
+            document.getElementById('seqConfirmModal').classList.add('show');
+        }
+        function closeSeqConfirmModal() { document.getElementById('seqConfirmModal').classList.remove('show'); }
+        function confirmAssignWorkSeqNo() {
+            const year = document.getElementById('selYear').value;
+            let maxNum = 0;
+            cases.forEach(c => { if(c.workSeqNo){ const m = c.workSeqNo.match(/(\d+)$/); if(m) maxNum = Math.max(maxNum, parseInt(m[1],10)); } });
+            let generated = 0;
+            cases.forEach(c => {
+                if(c.workSeqNo) return;
+                if(isCaseLocked(c)) return;
+                if(c.signVersion && c.ecoFileUploaded && c.ecoRead) {
+                    maxNum++;
+                    c.workSeqNo = `${year}-RFR-01-${String(maxNum).padStart(3,'0')}`;
+                    generated++;
+                }
+            });
+            renderTable();
+            closeSeqConfirmModal();
+            showToast(`已成功產生 ${generated} 筆工程序號。`);
+        }
+
+        let currentRegisterIndex = null;
+        function openRegisterModal(idx) {
+            currentRegisterIndex = idx;
+            const c = cases[idx];
+            document.getElementById('registerCaseName').textContent = `工程名稱：${c.name}`;
+            document.getElementById('regDesignUnitId').value = c.designUnitId || "";
+            document.getElementById('regPhaseEcoTeam').value = c.phaseEcoTeam || "";
+            document.getElementById('regDesignEcoTeam').value = c.designEcoTeam || "";
+            document.getElementById('regReportDate').value = c.reportDate || "";
+            document.getElementById('regReviewDate').value = c.reviewDate || "";
+            document.getElementById('regSource').value = c.source || "";
+            document.getElementById('regBudgetFinalDate').value = c.budgetFinalDate || "";
+            document.getElementById('regReviewStatus').value = c.reviewStatus || "尚未提報";
+            document.getElementById('regReviewMeeting').value = c.reviewMeeting || "";
+            document.getElementById('regReviewReason').value = c.reviewReason || "";
+            document.getElementById('registerModal').classList.add('show');
+        }
+        function closeRegisterModal() { document.getElementById('registerModal').classList.remove('show'); currentRegisterIndex=null; }
+        function saveRegister() {
+            if (currentRegisterIndex === null) return;
+            const c = cases[currentRegisterIndex];
+            const oldStatus = c.approvalStatus;
+            c.designUnitId = document.getElementById('regDesignUnitId').value;
+            c.phaseEcoTeam = document.getElementById('regPhaseEcoTeam').value;
+            c.designEcoTeam = document.getElementById('regDesignEcoTeam').value;
+            c.reportDate = document.getElementById('regReportDate').value;
+            c.reviewDate = document.getElementById('regReviewDate').value;
+            c.source = document.getElementById('regSource').value;
+            c.budgetFinalDate = document.getElementById('regBudgetFinalDate').value;
+            c.reviewStatus = document.getElementById('regReviewStatus').value;
+            c.reviewMeeting = document.getElementById('regReviewMeeting').value;
+            c.reviewReason = document.getElementById('regReviewReason').value;
+            if (c.reviewDate && oldStatus === '已傳送(一階)') {
+                c.approvalStatus = '尚未傳送(二階)';
+                showToast('已輸入本署核定先測日期，案件升級為二階段，請重新傳送。');
+            }
+            closeRegisterModal();
+            renderTable();
+            showToast("已儲存登錄資料。");
+        }
+
+        function openReviewDetail(idx) {
+            const c = cases[idx];
+            document.getElementById('rdCaseName').textContent = c.name || '-';
+            document.getElementById('rdMeeting').textContent = c.reviewMeeting || '未填寫';
+            document.getElementById('rdReason').textContent = c.reviewReason || '未填寫';
+            document.getElementById('reviewDetailModal').classList.add('show');
+        }
+        function closeReviewDetailModal() { document.getElementById('reviewDetailModal').classList.remove('show'); }
+
+        function openBatchScheduleModal() {
+            document.getElementById('batchReportDate').value = "";
+            document.getElementById('batchReviewDate').value = "";
+            document.getElementById('batchSource').value = "";
+            document.getElementById('batchBudgetFinalDate').value = "";
+            document.getElementById('batchCheckAll').checked = false;
+            const tbody = document.getElementById('batchCaseListBody');
+            tbody.innerHTML = "";
+            if (cases.length === 0) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#999;padding:16px;">尚無可設定之案件</td></tr>'; }
+            else {
+                cases.forEach((c, idx) => {
+                    const locked = isCaseLocked(c);
+                    const tr = document.createElement('tr');
+                    if (locked) tr.classList.add('locked');
+                    tr.innerHTML = `<td class="chk-col"><input type="checkbox" class="batch-row-check" data-idx="${idx}" ${locked?'disabled':''}></td><td>${c.name}</td><td>${c.workSeqNo||''}</td>`;
+                    tbody.appendChild(tr);
+                });
+            }
+            document.getElementById('batchScheduleModal').classList.add('show');
+        }
+        function closeBatchScheduleModal() { document.getElementById('batchScheduleModal').classList.remove('show'); }
+        function toggleBatchAll(master) {
+            document.querySelectorAll('.batch-row-check').forEach(cb => { if(!cb.disabled) cb.checked = master.checked; });
+        }
+        function applyBatchSchedule() {
+            const reportDate = document.getElementById('batchReportDate').value;
+            const reviewDate = document.getElementById('batchReviewDate').value;
+            const source = document.getElementById('batchSource').value;
+            const budgetFinalDate = document.getElementById('batchBudgetFinalDate').value;
+            const checkedIdxs = Array.from(document.querySelectorAll('.batch-row-check:checked')).map(cb => parseInt(cb.dataset.idx,10));
+            if (checkedIdxs.length === 0) { showToast("請至少勾選一筆案件後再套用。"); return; }
+            checkedIdxs.forEach(idx => {
+                const c = cases[idx];
+                if (isCaseLocked(c)) return;
+                if (reportDate) c.reportDate = reportDate;
+                if (reviewDate) c.reviewDate = reviewDate;
+                if (source) c.source = source;
+                if (budgetFinalDate) c.budgetFinalDate = budgetFinalDate;
+                if (reviewDate && c.approvalStatus === '已傳送(一階)') c.approvalStatus = '尚未傳送(二階)';
+            });
+            closeBatchScheduleModal();
+            renderTable();
+            showToast(`已將期程資料套用至 ${checkedIdxs.length} 筆案件。`);
+        }
+
+        function exportDetailForm(stage) {
+            let filtered = stage === 'first' ? cases.filter(c => getCaseStage(c)==='first') : cases.filter(c => getCaseStage(c)==='second');
+            if (filtered.length === 0) { showToast(`目前無 ${stage==='first'?'一階':'二階'} 案件可匯出。`); return; }
+            const stageLabel = stage === 'first' ? '一階' : '二階';
+            const headers = ["工程名稱","工程序號","工作項目","執行單位","縣市","鄉鎮市區","概估經費(仟元)","碳排量上限(tonCO2e)","類型","設計碳排量(tonCO2e)","坐標","生態檢核分級","核章版","生態資料是否完成","生態已閱讀","核定情形","規劃設計單位統編","提報階段生態團隊","設計階段生態團隊","分署提報先測日期","本署核定先測日期","工程來源","預計完成預算書日期","審議狀態","審查會議","案由"];
+            const rows = filtered.map(c => {
+                const coordStr = (c.coordList||[]).map(p => `X:${p.x||''} Y:${p.y||''}`).join('; ') || '-';
+                return [c.name, c.workSeqNo||'', c.workItem, c.execUnit, c.county, c.district, c.estBudget, c.carbonCap, c.carbonType, c.designCarbon||'', coordStr, c.ecoLevel, c.signVersion||'', c.ecoFileUploaded?'已完成':'未完成', c.ecoRead?'是':'否', c.approvalStatus, c.designUnitId||'', c.phaseEcoTeam||'', c.designEcoTeam||'', c.reportDate||'', c.reviewDate||'', c.source||'', c.budgetFinalDate||'', c.reviewStatus||'', c.reviewMeeting||'', c.reviewReason||''];
+            });
+            const wsData = [headers, ...rows];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws['!cols'] = headers.map(() => ({wch:16}));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `工程核定明細表(${stageLabel})`);
+            XLSX.writeFile(wb, `工程核定明細表(${stageLabel}).xlsx`);
+            showToast(`已匯出 ${filtered.length} 筆 ${stageLabel} 案件。`);
+        }
+        function exportScheduleForm() {
+            const headers = ["工程名稱","工程序號","執行單位","分署提報先測日期","本署核定先測日期","工程來源","預計完成預算書日期","是否已傳送農村水保署","傳送日期","審議狀態"];
+            const rows = cases.map(c => [c.name, c.workSeqNo||'', c.execUnit, c.reportDate||'', c.reviewDate||'', c.source||'', c.budgetFinalDate||'', (c.approve&&c.approve.done)?"是":"否", (c.approve&&c.approve.date)?c.approve.date:"", c.reviewStatus||'']);
+            const wsData = [headers, ...rows];
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            ws['!cols'] = headers.map(() => ({wch:18}));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "期程管控表");
+            XLSX.writeFile(wb, "期程管控表.xlsx");
+            showToast("已匯出期程管控表。");
+        }
+
+        function generateSelfCheck() {
+            let content = "=== 自主檢核表 ===\n\n";
+            cases.forEach((c, idx) => {
+                content += `案件 ${idx+1}: ${c.name}\n`;
+                content += `  序號: ${c.workSeqNo || '未編號'}\n`;
+                content += `  核定情形: ${c.approvalStatus}\n`;
+                content += `  核章版: ${c.signVersion ? '已上傳' : '未上傳'}\n`;
+                content += `  生態資料: ${c.ecoFileUploaded ? '已完成' : '未完成'}, 已閱讀: ${c.ecoRead ? '是' : '否'}\n`;
+                content += `  設計碳排量: ${c.designCarbon || '未填'}\n`;
+                content += `  類型: ${c.carbonType}\n`;
+                content += `  生態團隊(提報): ${c.phaseEcoTeam || '未填'}\n`;
+                content += `  生態團隊(設計): ${c.designEcoTeam || '未填'}\n`;
+                content += `  本署核定先測日期: ${c.reviewDate || '未填'}\n`;
+                content += `  審議狀態: ${c.reviewStatus || '未填'}\n`;
+                if (c.reviewStatus === '通過') { content += `  審查會議: ${c.reviewMeeting||'未填'}\n  案由: ${c.reviewReason||'未填'}\n`; }
+                content += `  坐標點數: ${(c.coordList||[]).length}\n\n`;
+            });
+            alert(content);
+        }
+
+        let selectedIndexes = [];
+        function openSendModal() {
+            selectedIndexes = Array.from(document.querySelectorAll('.row-check:checked')).map(cb => parseInt(cb.dataset.idx,10)).filter(idx => { const c = cases[idx]; return c && canSend(c) && !isCaseLocked(c); });
+            if (selectedIndexes.length === 0) { showToast("請勾選處於「尚未傳送(一階)」或「尚未傳送(二階)」狀態的案件。"); return; }
+            let errorMsg='', hasError=false;
+            selectedIndexes.forEach(idx => {
+                const c = cases[idx];
+                if(c.approvalStatus === '尚未傳送(一階)') {
+                    if(!c.workSeqNo) { hasError=true; errorMsg += `案件「${c.name}」尚未產生工程序號。\n`; }
+                } else if(c.approvalStatus === '尚未傳送(二階)') {
+                    if(!c.reviewDate) { hasError=true; errorMsg += `案件「${c.name}」尚未登錄「本署核定先測日期」。\n`; }
+                    if(!c.designCarbon) { hasError=true; errorMsg += `案件「${c.name}」尚未填寫「設計碳排量」。\n`; }
+                }
+            });
+            if(hasError) { showToast(errorMsg); return; }
+            document.getElementById('selectedNote').textContent = `已選取 ${selectedIndexes.length} 筆案件`;
+            document.getElementById('sendModal').classList.add('show');
+        }
+        function closeSendModal() { document.getElementById('sendModal').classList.remove('show'); }
+        function confirmSend() {
+            const today = new Date().toISOString().slice(0,10);
+            selectedIndexes.forEach(idx => {
+                const c = cases[idx];
+                if(!c) return;
+                if(c.approvalStatus === '尚未傳送(一階)') c.approvalStatus = '已傳送(一階)';
+                else if(c.approvalStatus === '尚未傳送(二階)') c.approvalStatus = '已傳送(二階)';
+                c.approve.done = true;
+                c.approve.date = today;
+            });
+            closeSendModal();
+            document.getElementById('checkAll').checked = false;
+            renderTable();
+            showToast(`已將 ${selectedIndexes.length} 筆案件傳送至農村水保署。`);
+        }
+
+        onPlanChange();
+        renderTable();
+        </script>
+    </body>
+    </html>
+    </textarea>
+
+    <!-- ========== 右側 HTML (需求說明) ========== -->
+    <textarea id="rightHtml" style="display:none;">
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><title>微調需求說明</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "PMingLiU", sans-serif;
+            padding: 30px 40px;
+            background: #fcfcfc;
+            color: #1e1e1e;
+            line-height: 1.7;
+            font-size: 15px;
+            margin: 0;
+        }
+        h1 { font-size: 24px; border-bottom: 3px solid #4472c4; padding-bottom: 8px; color: #2a4a7a; }
+        h2 { font-size: 20px; margin-top: 28px; color: #3a5a8a; border-left: 6px solid #4472c4; padding-left: 14px; }
+        h3 { font-size: 17px; margin-top: 20px; color: #3a5a8a; }
+        h4 { font-size: 15px; margin-top: 16px; color: #4a6a9a; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+        th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: left; vertical-align: top; }
+        th { background: #e6edf5; font-weight: bold; }
+        .note { background: #fff9e6; padding: 10px 16px; border-left: 4px solid #e8a95c; margin: 12px 0; border-radius: 0 4px 4px 0; }
+        .footer { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 16px; font-size: 13px; color: #666; text-align: right; }
+        hr { border: 0; border-top: 2px dashed #ccc; margin: 30px 0; }
+        .highlight { background: #fef7e0; padding: 2px 6px; border-radius: 3px; }
+        .highlight-target {
+            transition: background 0.6s ease;
+        }
+    </style>
+    </head>
+    <body>
+
+    <h1>工程提報作業－先測案件管理功能微調需求說明</h1>
+
+    <h2>1. 詳細功能需求</h2>
+
+    <h3>1.1 案件清單頁面</h3>
+
+    <h4 id="s-1-1-1" class="highlight-target">1.1.1 核定情形狀態顯示</h4>
+    <ul>
+        <li><strong>欄位名稱</strong>：核定情形</li>
+        <li><strong>狀態與定義</strong>：</li>
+    </ul>
+    <table>
+        <thead><tr><th>狀態值</th><th>顯示文字</th><th>觸發條件</th></tr></thead>
+        <tbody>
+            <tr><td>尚未傳送(一階)</td><td>尚未傳送(一階)</td><td>案件新增後之預設狀態。</td></tr>
+            <tr><td>尚未傳送(二階)</td><td>尚未傳送(二階)</td><td>當案件為一階且已輸入「本署核定先測日期」後，自動升級為此狀態。或若為已傳送(二階)，此時，工程轉入核定作業會有這一案件，若水保署把它移除後，也會顯示尚未傳送(二階)。</td></tr>
+            <tr><td>已傳送(一階)</td><td>已傳送(一階)</td><td>使用者點選「傳送至農村水保署」且案件為「尚未傳送(一階)」時變更。</td></tr>
+            <tr><td>已傳送(二階)</td><td>已傳送(二階)</td><td>使用者點選「傳送至農村水保署」且案件為「尚未傳送(二階)」時變更。</td></tr>
+            <tr><td>已核定</td><td>已核定</td><td>由系統後台或管考程序轉入。</td></tr>
+        </tbody>
+    </table>
+    <ul><li><strong>顯示樣式</strong>：以顏色區分（例如：未傳送灰色、已傳送橘色、已核定綠色）。</li></ul>
+
+    <h4 id="s-1-1-2" class="highlight-target">1.1.2 工程內容顯示</h4>
+    <ul><li><strong>操作方式</strong>：點選清單中「工作項目」欄位，可彈出視窗顯示該案件之詳細工程描述（如勘查表的工程概估內容）。</li></ul>
+
+    <h4 id="s-1-1-3" class="highlight-target">1.1.3 坐標合併顯示</h4>
+    <ul><li>將原有 X、Y 兩獨立欄位合併為單一「坐標」欄位，預設顯示第一組坐標（X, Y）；若案件有多組坐標，則於該欄位顯示「X:xxx Y:yyy + [N]」標記，滑鼠懸停或點擊標記時，以 popup 列出所有坐標組。</li></ul>
+
+    <h4 id="s-1-1-4" class="highlight-target">1.1.4 審議狀態欄位</h4>
+    <ul>
+        <li><strong>新增欄位</strong>：審議狀態，位於核定情形旁。</li>
+        <li><strong>狀態值</strong>：「通過」或「尚未提報」等。</li>
+        <li><strong>通過時可點擊</strong>：點擊「通過」文字彈出視窗，顯示該案件所屬之「審查會議名稱」及「案由」。資料來源可參考提報資料查詢功能的審查結果。</li>
+    </ul>
+
+    <h4 id="s-1-1-5" class="highlight-target">1.1.5 碳排量相關</h4>
+    <ul>
+        <li><strong>碳排量上限</strong>：欄位保留，但不可編輯（由系統依所選「碳排類別」自動計算帶入）。碳排類別（如「水保」、「農路」）可下拉選擇，選擇後自動計算上限值。</li>
+        <li><strong>設計碳排量</strong>：改為開放輸入框（原為唯讀），可自由填寫數值。<span class="highlight">一階時非必填，二階傳送時必須填寫</span>（否則無法傳送至農村水保署）。</li>
+    </ul>
+
+    <h3 id="s-1-2" class="highlight-target">1.2 登錄功能（案件編輯視窗）</h3>
+
+    <h4 id="s-1-2-1" class="highlight-target">1.2.1 生態團隊下拉式選單</h4>
+    <ul><li><strong>提報階段生態團隊</strong> 與 <strong>設計階段生態團隊</strong> 改為下拉式選單，下拉選單應支援<strong>關鍵字搜尋</strong>（輸入文字可過濾選項）。</li></ul>
+
+    <h4 id="s-1-2-2" class="highlight-target">1.2.2 本署核定先測日期</h4>
+    <ul><li>此日期為二階段之關鍵，當輸入此日期且案件為「已傳送(一階)」時，系統自動將狀態改為「尚未傳送(二階)」，並提示使用者需重新傳送。</li></ul>
+
+    <h3 id="s-1-3" class="highlight-target">1.3 工程序號自動產生</h3>
+
+    <h4 id="s-1-3-1" class="highlight-target">1.3.1 觸發條件</h4>
+    <ul>
+        <li>必須同時滿足以下三項，方可執行「自動產生工程序號」：</li>
+        <ol>
+            <li>已上傳「核章版」檔案。</li>
+            <li>生態資料已完成（即「生態資料是否完成」欄位為「已完成」）。</li>
+            <li>已勾選「生態資料已閱讀」核取方塊。</li>
+        </ol>
+        <li>若任一條件未滿足，點選產生序號時，系統需有提示文字內容。</li>
+    </ul>
+
+    <h3 id="s-1-4" class="highlight-target">1.4 生態檢核與閱讀機制</h3>
+
+    <h4 id="s-1-4-1" class="highlight-target">1.4.1 生態資料是否完成</h4>
+    <ul>
+        <li>欄位顯示「已完成」或「未完成」，由系統判斷（透過與生態系統介接或手動上傳檔案標記）。</li>
+        <li>若為「未完成」，則自動產生序號及傳送至水保署之功能應被阻擋。</li>
+    </ul>
+
+    <h4 id="s-1-4-2" class="highlight-target">1.4.2 生態已閱讀勾選</h4>
+    <ul>
+        <li>新增核取方塊「已閱讀」，置於生態資料是否完成的欄位內。</li>
+        <li>當使用者勾選時，系統依據生態檢核分級（第一級或第二級）彈出提示訊息，例如：「生態 1級 請至生態系統（網址）檢視內容是否有上傳。」（訊息內容依分級不同調整）。</li>
+    </ul>
+
+    <h3 id="s-1-5" class="highlight-target">1.5 匯出功能調整</h3>
+
+    <h4 id="s-1-5-1" class="highlight-target">1.5.1 工程核定明細表拆分</h4>
+    <ul>
+        <li>原「匯出工程核定明細表」拆為兩個按鈕：</li>
+        <ul>
+            <li><strong>匯出工程核定明細表(一階)</strong></li>
+            <li><strong>匯出工程核定明細表(二階)</strong></li>
+        </ul>
+    </ul>
+
+    <h4 id="s-1-5-2" class="highlight-target">1.5.2 自主檢核表產製</h4>
+    <ul><li>新增「產出自主檢核表」功能，除民眾參與平台會議紀錄跟備註欄位留空白外，其餘可以經判斷來打V。</li></ul>
+
+    <hr>
+
+    <h2>2. 流程與規則總整理</h2>
+
+    <h3 id="s-2-1" class="highlight-target">2.1 一階→二階轉換規則</h3>
+    <ul>
+        <li>案件初始為「尚未傳送(一階)」。</li>
+        <li>當使用者於登錄畫面填寫「本署核定先測日期」且案件狀態為「已傳送(一階)」時，自動變更為「尚未傳送(二階)」。</li>
+        <li>二階案件須填寫「設計碳排量」才可傳送至農村水保署。</li>
+    </ul>
+
+    <h3 id="s-2-2" class="highlight-target">2.2 傳送至水保署之檢查</h3>
+    <ul>
+        <li><strong>一階傳送</strong>：須有工程序號、核章版已上傳、生態資料已完成、已閱讀勾選。</li>
+        <li><strong>二階傳送</strong>：除上述條件外，尚須「本署核定先測日期」已填、設計碳排量已填。</li>
+    </ul>
+
+    <h3 id="s-2-3" class="highlight-target">2.3 鎖定機制</h3>
+    <ul><li>案件狀態為「已傳送(一階)」、「已傳送(二階)」、「已核定」時，整列資料僅供檢視（唯讀），不可編輯或移除。</li></ul>
+
+    <div class="footer">
+        <strong>文件版本</strong>：1.1 &nbsp;|&nbsp; <strong>製作日期</strong>：2026-09-02 &nbsp;|&nbsp; <strong>承辦單位</strong>：農村水保署資訊小組
+    </div>
+
+    <script>
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'scrollTo') {
+                const sectionId = event.data.sectionId;
+                const target = document.getElementById(sectionId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    document.querySelectorAll('.highlight-target').forEach(el => {
+                        el.style.background = '';
+                    });
+                    target.style.background = '#fff3cd';
+                    setTimeout(() => {
+                        target.style.background = '';
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+
+    </body>
+    </html>
+    </textarea>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('leftFrame').srcdoc = document.getElementById('leftHtml').value;
+            document.getElementById('rightFrame').srcdoc = document.getElementById('rightHtml').value;
+
+            window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'scrollTo') {
+                    const rightFrame = document.getElementById('rightFrame');
+                    const rightDoc = rightFrame.contentDocument || rightFrame.contentWindow.document;
+                    if (!rightDoc || !rightDoc.getElementById) {
+                        setTimeout(() => {
+                            window.postMessage(event.data, '*');
+                        }, 300);
+                        return;
+                    }
+                    const target = rightDoc.getElementById(event.data.sectionId);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        rightDoc.querySelectorAll('.highlight-target').forEach(el => {
+                            el.style.background = '';
+                        });
+                        target.style.background = '#fff3cd';
+                        setTimeout(() => {
+                            target.style.background = '';
+                        }, 3000);
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
