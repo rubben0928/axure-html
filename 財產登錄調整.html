@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>土地改良物財產登錄 - Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: #222;
+        }
+        .section-title {
+            font-weight: bold;
+            color: #1976d2;
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 6px;
+            margin: 20px 0 16px 0;
+            font-size: 0.95rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px 24px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .form-group label {
+            font-size: 0.88rem;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #444;
+        }
+        .code-hint {
+            color: #666;
+            font-weight: normal;
+        }
+        .form-control, .form-select {
+            height: 38px;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 100%;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1976d2;
+        }
+        .custom-input {
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* --- 下拉複選選單樣式 --- */
+        .multi-select-box {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            min-height: 38px;
+            padding: 4px 8px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+        .tag-chip {
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 0.82rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .tag-chip .close-btn {
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+        }
+        .tag-chip .close-btn:hover {
+            color: #000;
+        }
+        .dropdown-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 10;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+        .dropdown-item-option {
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+        .dropdown-item-option:hover {
+            background-color: #f0f0f0;
+        }
+        .dropdown-item-option input {
+            margin-right: 8px;
+        }
+
+        .readonly-text {
+            padding: 8px 0;
+            font-weight: 500;
+            color: #333;
+        }
+        .btn-submit {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            float: right;
+            margin-top: 20px;
+        }
+        .btn-submit:hover {
+            background-color: #1565c0;
+        }
+        .placeholder-text {
+            color: #888;
+            font-size: 0.88rem;
+        }
+
+        /* --- 「其他」材質：可新增多列輸入 --- */
+        .other-material-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .other-material-row .form-control {
+            flex: 1;
+        }
+        .remove-row-btn {
+            cursor: pointer;
+            font-weight: bold;
+            color: #888;
+            font-size: 1.1rem;
+            line-height: 1;
+            padding: 0 6px;
+            flex-shrink: 0;
+        }
+        .remove-row-btn:hover {
+            color: #d32f2f;
+        }
+        .btn-add-other {
+            background: none;
+            border: 1px dashed #1976d2;
+            color: #1976d2;
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .btn-add-other:hover {
+            background-color: #e3f2fd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>土地改良物財產登錄</h2>
+    
+    <div class="section-title">登錄內容</div>
+    
+    <div class="form-grid">
+        <!-- 財產名稱代碼 (單選 + 自訂) -->
+        <div class="form-group">
+            <label>財產名稱代碼 <span class="code-hint">(propertyCode)</span></label>
+            <select class="form-select" id="propertyCodeSelect" onchange="checkSelectOther(this, 'propertyCodeOther')">
+                <option value="明渠" selected>明渠</option>
+                <option value="暗渠">暗渠</option>
+                <option value="護岸">護岸</option>
+                <option value="排水溝">排水溝</option>
+                <option value="圳路">圳路</option>
+                <option value="堤防">堤防</option>
+                <option value="其他">其他</option>
+            </select>
+            <input type="text" id="propertyCodeOther" class="form-control custom-input" placeholder="請輸入自訂財產名稱">
+        </div>
+
+        <!-- 財產別名 -->
+        <div class="form-group">
+            <label>財產別名 <span class="code-hint">(propertyAlias)</span></label>
+            <input type="text" class="form-control" value="Property happy-path test">
+        </div>
+
+        <!-- 渠道名稱 -->
+        <div class="form-group">
+            <label>渠道名稱 <span class="code-hint">(channelName)</span></label>
+            <input type="text" class="form-control" placeholder="可空白">
+        </div>
+
+        <!-- 耐用年限 -->
+        <div class="form-group">
+            <label>耐用年限 <span class="code-hint">(usefulLife)</span></label>
+            <input type="number" class="form-control" value="1">
+        </div>
+
+        <!-- 主要材質 (複選 + 其他自訂輸入，可新增多列) -->
+        <div class="form-group">
+            <label>主要材質 <span class="code-hint">(mainMaterial)</span> [可複選]</label>
+            <!-- 顯示目前已選取的材質 -->
+            <div class="multi-select-box" id="materialBox" onclick="toggleDropdown('materialPanel')">
+                <!-- 標籤會靠 JS 動態生成在此處 -->
+            </div>
+
+            <!-- 點擊展開的勾選清單；以下為系統提供的標準材質，不因使用者輸入而新增到共用清單 -->
+            <div class="dropdown-panel" id="materialPanel">
+                <label class="dropdown-item-option"><input type="checkbox" value="混凝土" checked onchange="updateMaterials()">混凝土</label>
+                <label class="dropdown-item-option"><input type="checkbox" value="鋼筋混凝土" onchange="updateMaterials()">鋼筋混凝土</label>
+                <label class="dropdown-item-option"><input type="checkbox" value="砌石" onchange="updateMaterials()">砌石</label>
+                <label class="dropdown-item-option"><input type="checkbox" value="土堤" onchange="updateMaterials()">土堤</label>
+                <label class="dropdown-item-option"><input type="checkbox" value="預鑄混凝土" onchange="updateMaterials()">預鑄混凝土</label>
+                <label class="dropdown-item-option"><input type="checkbox" value="鋼材" onchange="updateMaterials()">鋼材</label>
+                <div style="border-top:1px solid #eee; margin:4px 0;"></div>
+                <label class="dropdown-item-option"><input type="checkbox" value="其他" id="matOtherChk" onchange="toggleMatOtherInput()">其他</label>
+            </div>
+
+            <!-- 選「其他」時，可針對本筆資料輸入自訂材質；按「＋新增」可再增加下一列輸入。
+                 這些輸入僅屬於本筆資料，不會新增成系統共用選項。 -->
+            <div id="matOtherInputGroup" class="custom-input">
+                <div id="matOtherRows"></div>
+                <button type="button" class="btn-add-other" onclick="addOtherMaterialRow(true)">＋新增</button>
+            </div>
+        </div>
+
+        <!-- 計量數值 -->
+        <div class="form-group">
+            <label>計量數值 <span class="code-hint">(measureValue)</span></label>
+            <input type="number" class="form-control" value="1">
+        </div>
+
+        <!-- 計量單位 (單選 + 自訂) -->
+        <div class="form-group">
+            <label>計量單位 <span class="code-hint">(measureUnit)</span></label>
+            <select class="form-select" id="measureUnitSelect" onchange="checkSelectOther(this, 'measureUnitOther')">
+                <option value="公尺(m)" selected>公尺(m)</option>
+                <option value="公里(km)">公里(km)</option>
+                <option value="平方公尺(m²)">平方公尺(m²)</option>
+                <option value="立方公尺(m³)">立方公尺(m³)</option>
+                <option value="公頃">公頃</option>
+                <option value="座">座</option>
+                <option value="處">處</option>
+                <option value="其他">其他</option>
+            </select>
+            <input type="text" id="measureUnitOther" class="form-control custom-input" placeholder="請輸入自訂計量單位">
+        </div>
+
+        <!-- 總價 -->
+        <div class="form-group">
+            <label>總價 <span class="code-hint">(totalPrice)</span></label>
+            <input type="number" class="form-control" value="1">
+        </div>
+    </div>
+
+    <!-- 系統推導欄位 -->
+    <div class="section-title">系統推導欄位（唯讀）</div>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>購置日期 (purchaseDate)</label>
+            <div class="readonly-text">115/08/28</div>
+        </div>
+        <div class="form-group">
+            <label>取得日期 (acquireDate)</label>
+            <div class="readonly-text">115/08/28</div>
+        </div>
+    </div>
+
+    <button type="button" class="btn-submit">儲存登錄</button>
+    <div style="clear: both;"></div>
+</div>
+
+<script>
+    // 1. 單選選單 (財產名稱代碼、計量單位) 切換「其他」輸入框
+    function checkSelectOther(selectObj, customInputId) {
+        var inputObj = document.getElementById(customInputId);
+        if (selectObj.value === '其他') {
+            inputObj.style.display = 'block';
+        } else {
+            inputObj.style.display = 'none';
+        }
+    }
+
+    // 2. 切換主要材質的下拉選單展開/收合
+    function toggleDropdown(panelId) {
+        var panel = document.getElementById(panelId);
+        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // 點擊頁面其他地方時自動關閉下拉面板
+    document.addEventListener('click', function(e) {
+        var box = document.getElementById('materialBox');
+        var panel = document.getElementById('materialPanel');
+        var otherGroup = document.getElementById('matOtherInputGroup');
+        
+        if (!box.contains(e.target) && !panel.contains(e.target) && !otherGroup.contains(e.target)) {
+            panel.style.display = 'none';
+        }
+    });
+
+    // 3. 更新主要材質已選取的標籤
+    function updateMaterials() {
+        var box = document.getElementById('materialBox');
+        var checkboxes = document.querySelectorAll('#materialPanel input[type="checkbox"]');
+        var otherChk = document.getElementById('matOtherChk');
+        var otherInputs = document.querySelectorAll('#matOtherRows .mat-other-input');
+
+        box.innerHTML = '';
+        var hasValue = false;
+
+        checkboxes.forEach(function(chk) {
+            if (chk.checked && chk.value !== '其他') {
+                hasValue = true;
+                var chip = document.createElement('span');
+                chip.className = 'tag-chip';
+                chip.innerHTML = chk.value + ' <span class="close-btn" onclick="removeTag(\'' + chk.value + '\', event)">&times;</span>';
+                box.appendChild(chip);
+            }
+        });
+
+        // 「其他」的每一列各自對應一個標籤，皆為本筆資料自訂內容，不會建立新的共用 Checkbox
+        if (otherChk.checked) {
+            otherInputs.forEach(function(input) {
+                var val = input.value.trim();
+                if (val) {
+                    hasValue = true;
+                    var rowId = input.closest('.other-material-row').id;
+                    var customChip = document.createElement('span');
+                    customChip.className = 'tag-chip';
+                    customChip.innerHTML = escapeHtml(val) +
+                        ' <span class="close-btn" onclick="removeOtherMaterialRow(\'' + rowId + '\', event)">&times;</span>';
+                    box.appendChild(customChip);
+                }
+            });
+        }
+
+        if (!hasValue) {
+            box.innerHTML = '<span class="placeholder-text">請選擇材質...</span>';
+        }
+    }
+
+    // 避免自訂材質文字直接當成 HTML 插入
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // 4. 點擊標籤上的 X 刪除標準材質
+    function removeTag(val, event) {
+        event.stopPropagation();
+        var checkboxes = document.querySelectorAll('#materialPanel input[type="checkbox"]');
+        checkboxes.forEach(function(chk) {
+            if (chk.value === val) {
+                chk.checked = false;
+            }
+        });
+        updateMaterials();
+    }
+
+    // 5. 控制「其他」輸入區塊的顯示/隱藏
+    function toggleMatOtherInput() {
+        var chk = document.getElementById('matOtherChk');
+        var inputGroup = document.getElementById('matOtherInputGroup');
+        var rowsContainer = document.getElementById('matOtherRows');
+
+        if (chk.checked) {
+            inputGroup.style.display = 'block';
+            // 勾選「其他」時，若尚未有任何一列，先自動產生第一列供輸入
+            if (rowsContainer.children.length === 0) {
+                addOtherMaterialRow(true);
+            }
+        } else {
+            inputGroup.style.display = 'none';
+            rowsContainer.innerHTML = '';
+        }
+
+        updateMaterials();
+    }
+
+    // 6. 新增一列「其他」材質輸入框
+    var otherRowCounter = 0;
+    function addOtherMaterialRow(focusInput) {
+        otherRowCounter++;
+        var rowId = 'otherRow' + otherRowCounter;
+        var rowsContainer = document.getElementById('matOtherRows');
+
+        var row = document.createElement('div');
+        row.className = 'other-material-row';
+        row.id = rowId;
+        row.innerHTML =
+            '<input type="text" class="form-control mat-other-input" placeholder="請輸入本筆資料的其他材質">' +
+            '<span class="remove-row-btn" onclick="removeOtherMaterialRow(\'' + rowId + '\', event)">&times;</span>';
+
+        rowsContainer.appendChild(row);
+
+        var input = row.querySelector('.mat-other-input');
+        input.addEventListener('input', updateMaterials);
+        if (focusInput) {
+            input.focus();
+        }
+    }
+
+    // 7. 移除指定的「其他」材質列；若全部移除則自動取消勾選「其他」
+    function removeOtherMaterialRow(rowId, event) {
+        if (event) {
+            event.stopPropagation();
+        }
+        var row = document.getElementById(rowId);
+        if (row) {
+            row.remove();
+        }
+
+        var rowsContainer = document.getElementById('matOtherRows');
+        if (rowsContainer.children.length === 0) {
+            document.getElementById('matOtherChk').checked = false;
+            document.getElementById('matOtherInputGroup').style.display = 'none';
+        }
+
+        updateMaterials();
+    }
+
+    // 頁面初始化執行一次
+    window.onload = function() {
+        updateMaterials();
+    };
+</script>
+
+</body>
+</html>
