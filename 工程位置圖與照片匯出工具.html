@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工程施工位置圖 / 現況照片 產生器</title>
+<style>
+  :root {
+    --panel-bg: #f4f5f7;
+    --panel-border: #d7dbe0;
+    --accent: #2f6fed;
+    --accent-dark: #1f4fb8;
+    --text: #1c2430;
+    --muted: #6b7480;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: #e7e9ec;
+    color: var(--text);
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+  }
+  .sidebar {
+    background: #fff;
+    border-right: 1px solid var(--panel-border);
+    padding: 20px 18px 60px;
+    overflow-y: auto;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .sidebar h1 {
+    font-size: 16px;
+    margin: 0 0 4px;
+  }
+  .sidebar .sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  fieldset {
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 12px 12px 14px;
+  }
+  legend {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-dark);
+    padding: 0 6px;
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin: 8px 0 3px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+  }
+  textarea { resize: vertical; min-height: 40px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  input[type="file"] {
+    width: 100%;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--accent-dark); }
+  .btn.secondary {
+    background: #fff;
+    color: var(--accent-dark);
+  }
+  .btn.secondary:hover { background: #eef3ff; }
+  .btn.danger {
+    background: #fff;
+    color: #c0392b;
+    border-color: #c0392b;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  .btn.danger:hover { background: #fdecea; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .photo-item {
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 8px;
+    margin-top: 8px;
+    background: var(--panel-bg);
+  }
+  .photo-item .thumb-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .photo-item img.thumb {
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--panel-border);
+    background: #fff;
+  }
+  .photo-item .thumb-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    border: 1px dashed var(--panel-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    text-align: center;
+  }
+  .photo-item .meta { flex: 1; }
+  .photo-item .meta input { margin-bottom: 4px; }
+  .photo-item .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .empty-hint {
+    font-size: 11px;
+    color: var(--muted);
+    padding: 10px 0;
+  }
+  .file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin-top: 8px;
+    background: var(--panel-bg);
+    font-size: 12px;
+  }
+  .file-item .file-meta { flex: 1; min-width: 0; }
+  .file-item .file-name {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .file-item .file-size { color: var(--muted); font-size: 11px; }
+  .file-item .file-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .file-item .btn.tiny {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  .file-error {
+    font-size: 11px;
+    color: #c0392b;
+    margin-top: 6px;
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .export-note {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+
+  /* ---------- Preview / print area (screen: hidden, print: shown) ---------- */
+  .canvas {
+    display: none;
+  }
+  .sheet {
+    width: 210mm;
+    min-height: 297mm;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    padding: 14mm 12mm;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .sheet .doc-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .sheet .doc-subtitle {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .sheet .route-name {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  .map-frame {
+    border: 2px solid #222;
+    flex: 1;
+    min-height: 190mm;
+    position: relative;
+    overflow: hidden;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .map-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .map-frame .placeholder {
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+  }
+  .map-frame .compass {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    width: 46px;
+    height: 46px;
+    opacity: 0.85;
+  }
+  .map-frame .compass svg { width: 100%; height: 100%; }
+  .map-frame .scale-badge {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid #333;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .meta-strip {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    border: 1px solid #222;
+    border-top: none;
+    padding: 4px 8px;
+  }
+  .coord-block {
+    margin-top: 10px;
+    font-size: 12px;
+    display: flex;
+    gap: 40px;
+  }
+  .coord-block .grp { line-height: 1.7; }
+  .coord-block .grp b { display: block; }
+  #mapSheet { display: none; }
+  @media print {
+    #mapSheet { display: flex; }
+  }
+
+  /* photo page */
+  .photo-sheet { padding: 14mm 10mm; }
+  .photo-sheet .doc-title { margin-bottom: 8px; }
+  .photo-rows {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #222;
+  }
+  .photo-row {
+    display: flex;
+    flex: 1;
+    border-bottom: 1px solid #222;
+    min-height: 80mm;
+  }
+  .photo-row:last-child { border-bottom: none; }
+  .photo-cell {
+    flex: 0 0 68%;
+    border-right: 1px solid #222;
+    position: relative;
+    overflow: hidden;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .photo-cell img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-cell .placeholder {
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    padding: 12px;
+  }
+  .info-cell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px 8px;
+    font-size: 10.5px;
+    line-height: 1.6;
+  }
+  .info-cell .project-info b { display: block; font-size: 11px; margin-bottom: 2px; }
+  .info-cell .mileage {
+    align-self: flex-end;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .info-cell textarea.note {
+    border: none;
+    resize: none;
+    font-size: 10.5px;
+    font-family: inherit;
+    width: 100%;
+    flex: 1;
+    background: transparent;
+    padding: 0;
+  }
+  .info-cell textarea.note:focus { outline: 1px dashed var(--accent); }
+
+  @media print {
+    body { background: #fff; }
+    .app { display: block; }
+    .sidebar { display: none !important; }
+    .canvas {
+      padding: 0;
+      gap: 0;
+      height: auto;
+      display: block;
+    }
+    .sheet {
+      box-shadow: none;
+      margin: 0;
+      page-break-after: always;
+      width: auto;
+      min-height: auto;
+    }
+    .sheet:last-child { page-break-after: auto; }
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <h1>檔案上傳</h1>
+    <div class="sub">填寫資料、上傳圖片後可分區塊按「儲存」保存資料，或按「匯出 Word 檔」下載該區塊內容。</div>
+
+    <fieldset>
+      <legend>工程資訊</legend>
+      <label>路段 / 分區名稱</label>
+      <input type="text" id="routeName" value="後龍圳第10輪區主給1小給2">
+      <div class="row2">
+        <div>
+          <label>起點 X</label>
+          <input type="text" id="startX" value="228732">
+        </div>
+        <div>
+          <label>起點 Y</label>
+          <input type="text" id="startY" value="2724816">
+        </div>
+      </div>
+      <div class="row2">
+        <div>
+          <label>迄點 X</label>
+          <input type="text" id="endX" value="228674">
+        </div>
+        <div>
+          <label>迄點 Y</label>
+          <input type="text" id="endY" value="2724734">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>工程施工位置圖（1 張）</legend>
+      <label>上傳位置圖</label>
+      <input type="file" id="mapInput" accept="image/*">
+    </fieldset>
+
+    <div class="btn-row">
+      <button class="btn secondary" id="saveBtnMap">儲存</button>
+      <button class="btn secondary" id="exportWordMapBtn">匯出 Word 檔</button>
+    </div>
+
+    <fieldset>
+      <legend>現況照片（可多張）</legend>
+      <label>選擇照片（可一次選多張，會依序加入）</label>
+      <input type="file" id="photoInput" accept="image/*" multiple>
+      <div id="photoList"></div>
+      <div class="empty-hint" id="photoEmptyHint">尚未加入任何照片</div>
+    </fieldset>
+
+    <div class="btn-row">
+      <button class="btn secondary" id="saveBtnPhotos">儲存</button>
+      <button class="btn secondary" id="exportWordPhotosBtn">匯出 Word 檔</button>
+    </div>
+
+    <fieldset>
+      <legend>其他檔案（PDF / Word / Excel，每檔限 10MB）</legend>
+      <label>選擇檔案（可一次選多個，僅接受 pdf、doc(x)、xls(x)）</label>
+      <input type="file" id="attachInput" accept=".pdf,.doc,.docx,.xls,.xlsx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple>
+      <div id="attachList"></div>
+      <div class="empty-hint" id="attachEmptyHint">尚未加入任何檔案</div>
+      <div class="file-error" id="attachError"></div>
+    </fieldset>
+
+    <div class="btn-row">
+      <button class="btn" id="saveBtn">儲存</button>
+    </div>
+    <div class="export-note" id="saveStatus"></div>
+  </aside>
+
+  <main class="canvas" id="canvas">
+    <!-- 位置圖頁 -->
+    <section class="sheet" id="mapSheet">
+      <div class="doc-subtitle">工程施工位置圖</div>
+      <div class="route-name" id="mapRouteOut"></div>
+      <div class="map-frame" id="mapFrame">
+        <div class="placeholder">尚未上傳位置圖，請於左側「上傳位置圖」選擇圖檔</div>
+      </div>
+      <div class="coord-block">
+        <div class="grp"><b>起點：</b><span id="startOut"></span></div>
+        <div class="grp"><b>迄點：</b><span id="endOut"></span></div>
+      </div>
+    </section>
+
+    <!-- 照片頁會由 JS 動態產生 -->
+    <div id="photoPages"></div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var state = {
+    mapImage: null,
+    photos: [], // { id, dataUrl, label, note }
+    attachments: [] // { id, name, size, type, dataUrl }
+  };
+  var photoCounter = 0;
+  var attachCounter = 0;
+  var ALLOWED_ATTACH_EXTS = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+  var MAX_ATTACH_SIZE = 10 * 1024 * 1024; // 10MB
+
+  var el = {
+    routeName: document.getElementById('routeName'),
+    startX: document.getElementById('startX'),
+    startY: document.getElementById('startY'),
+    endX: document.getElementById('endX'),
+    endY: document.getElementById('endY'),
+    mapInput: document.getElementById('mapInput'),
+    photoInput: document.getElementById('photoInput'),
+    photoList: document.getElementById('photoList'),
+    photoEmptyHint: document.getElementById('photoEmptyHint'),
+    attachInput: document.getElementById('attachInput'),
+    attachList: document.getElementById('attachList'),
+    attachEmptyHint: document.getElementById('attachEmptyHint'),
+    attachError: document.getElementById('attachError'),
+    mapFrame: document.getElementById('mapFrame'),
+    mapRouteOut: document.getElementById('mapRouteOut'),
+    startOut: document.getElementById('startOut'),
+    endOut: document.getElementById('endOut'),
+    photoPages: document.getElementById('photoPages'),
+    saveBtn: document.getElementById('saveBtn'),
+    saveStatus: document.getElementById('saveStatus'),
+    saveBtnMap: document.getElementById('saveBtnMap'),
+    exportWordMapBtn: document.getElementById('exportWordMapBtn'),
+    saveBtnPhotos: document.getElementById('saveBtnPhotos'),
+    exportWordPhotosBtn: document.getElementById('exportWordPhotosBtn')
+  };
+
+  var STORAGE_KEY = 'siteReportTool.v1';
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function getExt(name) {
+    var parts = name.split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : '';
+  }
+
+  function fmtNow() {
+    var d = new Date();
+    function p(n) { return n < 10 ? '0' + n : n; }
+    return d.getFullYear() + '/' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+  }
+
+  function downloadBlob(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function buildWordBlob(title, bodyHtml) {
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" '
+      + 'xmlns:w="urn:schemas-microsoft-com:office:word" '
+      + 'xmlns="http://www.w3.org/TR/REC-html40">'
+      + '<head><meta charset="utf-8"><title>' + title + '</title></head>'
+      + '<body>' + bodyHtml + '</body></html>';
+    return new Blob(['\ufeff', html], { type: 'application/msword' });
+  }
+
+  function exportMapWord() {
+    var body = '<h2 style="text-align:center;font-family:Microsoft JhengHei,sans-serif;">工程施工位置圖</h2>'
+      + '<p style="font-family:Microsoft JhengHei,sans-serif;font-size:14px;">' + el.routeName.value + '</p>';
+    if (state.mapImage) {
+      body += '<p><img src="' + state.mapImage + '" style="width:600px;max-width:100%;border:2px solid #222;"></p>';
+    } else {
+      body += '<p style="color:#999;">（尚未上傳位置圖）</p>';
+    }
+    body += '<p style="font-family:Microsoft JhengHei,sans-serif;font-size:13px;">'
+      + '起點：X：' + el.startX.value + '　Y：' + el.startY.value + '<br>'
+      + '迄點：X：' + el.endX.value + '　Y：' + el.endY.value + '</p>';
+    downloadBlob(buildWordBlob('工程施工位置圖', body), '工程施工位置圖.doc');
+  }
+
+  function exportPhotosWord() {
+    var body = '<h2 style="text-align:center;font-family:Microsoft JhengHei,sans-serif;">現況照片</h2>';
+    if (state.photos.length === 0) {
+      body += '<p style="color:#999;">（尚未加入任何照片）</p>';
+    } else {
+      body += '<table style="width:100%;border-collapse:collapse;font-family:Microsoft JhengHei,sans-serif;font-size:12px;" border="1" cellpadding="6">';
+      state.photos.forEach(function (photo, idx) {
+        body += '<tr>';
+        body += '<td style="width:65%;">';
+        body += photo.dataUrl ? '<img src="' + photo.dataUrl + '" style="width:100%;">' : '（無圖片）';
+        body += '</td>';
+        body += '<td style="width:35%;vertical-align:top;">';
+        if (idx === 0) {
+          body += '<p><b>' + el.routeName.value + '</b><br>'
+            + '起點：X：' + el.startX.value + '　Y：' + el.startY.value + '<br>'
+            + '迄點：X：' + el.endX.value + '　Y：' + el.endY.value + '</p>';
+        }
+        body += '<p style="text-align:right;font-weight:bold;">' + (photo.label || '') + '</p>';
+        body += '</td>';
+        body += '</tr>';
+      });
+      body += '</table>';
+    }
+    downloadBlob(buildWordBlob('現況照片', body), '現況照片.doc');
+  }
+
+  function renderMapSheet() {
+    el.mapRouteOut.textContent = el.routeName.value;
+    el.startOut.textContent = 'X：' + el.startX.value + '　Y：' + el.startY.value;
+    el.endOut.textContent = 'X：' + el.endX.value + '　Y：' + el.endY.value;
+
+    el.mapFrame.querySelectorAll('img.map-img').forEach(function (n) { n.remove(); });
+    var ph = el.mapFrame.querySelector('.placeholder');
+    if (state.mapImage) {
+      if (ph) ph.style.display = 'none';
+      var img = document.createElement('img');
+      img.className = 'map-img';
+      img.src = state.mapImage;
+      el.mapFrame.insertBefore(img, el.mapFrame.firstChild);
+    } else if (ph) {
+      ph.style.display = 'block';
+    }
+  }
+
+  function projectInfoHtml() {
+    return '<div class="project-info"><b>' + el.routeName.value + '</b>'
+      + '起點：<br>X：' + el.startX.value + '<br>Y：' + el.startY.value + '<br>'
+      + '迄點：<br>X：' + el.endX.value + '<br>Y：' + el.endY.value + '</div>';
+  }
+
+  function renderPhotoPages() {
+    el.photoPages.innerHTML = '';
+    if (state.photos.length === 0) return;
+
+    var perPage = 3;
+    var pageCount = Math.ceil(state.photos.length / perPage);
+
+    for (var p = 0; p < pageCount; p++) {
+      var sheet = document.createElement('section');
+      sheet.className = 'sheet photo-sheet';
+
+      var rows = document.createElement('div');
+      rows.className = 'photo-rows';
+
+      var chunk = state.photos.slice(p * perPage, p * perPage + perPage);
+      chunk.forEach(function (photo, idxInChunk) {
+        var globalIdx = p * perPage + idxInChunk;
+        var row = document.createElement('div');
+        row.className = 'photo-row';
+
+        var photoCell = document.createElement('div');
+        photoCell.className = 'photo-cell';
+        if (photo.dataUrl) {
+          var img = document.createElement('img');
+          img.src = photo.dataUrl;
+          photoCell.appendChild(img);
+        } else {
+          var ph = document.createElement('div');
+          ph.className = 'placeholder';
+          ph.textContent = '照片 ' + (globalIdx + 1);
+          photoCell.appendChild(ph);
+        }
+        row.appendChild(photoCell);
+
+        var infoCell = document.createElement('div');
+        infoCell.className = 'info-cell';
+        if (globalIdx === 0) {
+          infoCell.innerHTML = projectInfoHtml();
+        } else {
+          var spacer = document.createElement('div');
+          infoCell.appendChild(spacer);
+        }
+        var mileage = document.createElement('div');
+        mileage.className = 'mileage';
+        mileage.textContent = photo.label || '';
+        infoCell.appendChild(mileage);
+        row.appendChild(infoCell);
+
+        rows.appendChild(row);
+      });
+
+      // pad remaining rows on last page for consistent layout
+      for (var r = chunk.length; r < perPage; r++) {
+        var emptyRow = document.createElement('div');
+        emptyRow.className = 'photo-row';
+        var emptyPhoto = document.createElement('div');
+        emptyPhoto.className = 'photo-cell';
+        var emptyInfo = document.createElement('div');
+        emptyInfo.className = 'info-cell';
+        emptyRow.appendChild(emptyPhoto);
+        emptyRow.appendChild(emptyInfo);
+        rows.appendChild(emptyRow);
+      }
+
+      sheet.appendChild(rows);
+      el.photoPages.appendChild(sheet);
+    }
+  }
+
+  function renderAll() {
+    renderMapSheet();
+    renderPhotoPages();
+  }
+
+  function renderPhotoListUI() {
+    el.photoList.innerHTML = '';
+    el.photoEmptyHint.style.display = state.photos.length === 0 ? 'block' : 'none';
+    state.photos.forEach(function (photo, idx) {
+      var item = document.createElement('div');
+      item.className = 'photo-item';
+
+      var head = document.createElement('div');
+      head.className = 'item-head';
+      head.innerHTML = '<span>照片 ' + (idx + 1) + '</span>';
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn danger';
+      delBtn.textContent = '刪除';
+      delBtn.onclick = function () {
+        state.photos = state.photos.filter(function (p2) { return p2.id !== photo.id; });
+        renderPhotoListUI();
+        renderAll();
+      };
+      head.appendChild(delBtn);
+      item.appendChild(head);
+
+      var thumbRow = document.createElement('div');
+      thumbRow.className = 'thumb-row';
+      var thumbEl;
+      if (photo.dataUrl) {
+        thumbEl = document.createElement('img');
+        thumbEl.className = 'thumb';
+        thumbEl.src = photo.dataUrl;
+      } else {
+        thumbEl = document.createElement('div');
+        thumbEl.className = 'thumb-placeholder';
+        thumbEl.textContent = '無圖';
+      }
+      thumbRow.appendChild(thumbEl);
+
+      var meta = document.createElement('div');
+      meta.className = 'meta';
+      var labelInput = document.createElement('input');
+      labelInput.type = 'text';
+      labelInput.placeholder = '里程／位置標示，例如 0K+000';
+      labelInput.value = photo.label;
+      labelInput.oninput = function () {
+        photo.label = labelInput.value;
+        renderPhotoPages();
+      };
+      meta.appendChild(labelInput);
+      thumbRow.appendChild(meta);
+      item.appendChild(thumbRow);
+
+      el.photoList.appendChild(item);
+    });
+  }
+
+  function renderAttachListUI() {
+    el.attachList.innerHTML = '';
+    el.attachEmptyHint.style.display = state.attachments.length === 0 ? 'block' : 'none';
+    state.attachments.forEach(function (file) {
+      var item = document.createElement('div');
+      item.className = 'file-item';
+
+      var meta = document.createElement('div');
+      meta.className = 'file-meta';
+      var nameEl = document.createElement('div');
+      nameEl.className = 'file-name';
+      nameEl.textContent = file.name;
+      nameEl.title = file.name;
+      var sizeEl = document.createElement('div');
+      sizeEl.className = 'file-size';
+      sizeEl.textContent = formatFileSize(file.size);
+      meta.appendChild(nameEl);
+      meta.appendChild(sizeEl);
+      item.appendChild(meta);
+
+      var actions = document.createElement('div');
+      actions.className = 'file-actions';
+
+      var dlBtn = document.createElement('a');
+      dlBtn.className = 'btn secondary tiny';
+      dlBtn.textContent = '下載';
+      dlBtn.href = file.dataUrl;
+      dlBtn.download = file.name;
+      actions.appendChild(dlBtn);
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn danger';
+      delBtn.textContent = '刪除';
+      delBtn.onclick = function () {
+        state.attachments = state.attachments.filter(function (f) { return f.id !== file.id; });
+        renderAttachListUI();
+      };
+      actions.appendChild(delBtn);
+
+      item.appendChild(actions);
+      el.attachList.appendChild(item);
+    });
+  }
+
+  el.mapInput.addEventListener('change', function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      state.mapImage = ev.target.result;
+      renderAll();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  el.photoInput.addEventListener('change', function (e) {
+    var files = Array.prototype.slice.call(e.target.files);
+    if (files.length === 0) return;
+    var remaining = files.length;
+    files.forEach(function (file) {
+      var reader = new FileReader();
+      var photo = { id: ++photoCounter, dataUrl: null, label: '', note: '' };
+      state.photos.push(photo);
+      reader.onload = function (ev) {
+        photo.dataUrl = ev.target.result;
+        remaining--;
+        renderPhotoListUI();
+        renderAll();
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  });
+
+  el.attachInput.addEventListener('change', function (e) {
+    var files = Array.prototype.slice.call(e.target.files);
+    if (files.length === 0) return;
+    var errors = [];
+    files.forEach(function (file) {
+      var ext = getExt(file.name);
+      if (ALLOWED_ATTACH_EXTS.indexOf(ext) === -1) {
+        errors.push(file.name + '：不支援的檔案格式（僅接受 pdf、doc、docx、xls、xlsx）');
+        return;
+      }
+      if (file.size > MAX_ATTACH_SIZE) {
+        errors.push(file.name + '：檔案超過 10MB（' + formatFileSize(file.size) + '）');
+        return;
+      }
+      var reader = new FileReader();
+      var attachment = { id: ++attachCounter, name: file.name, size: file.size, type: file.type, dataUrl: null };
+      state.attachments.push(attachment);
+      reader.onload = function (ev) {
+        attachment.dataUrl = ev.target.result;
+        renderAttachListUI();
+      };
+      reader.readAsDataURL(file);
+    });
+    el.attachError.textContent = errors.join('\n');
+    renderAttachListUI();
+    e.target.value = '';
+  });
+
+  [el.routeName, el.startX, el.startY, el.endX, el.endY].forEach(function (input) {
+    input.addEventListener('input', renderAll);
+  });
+
+  function saveState() {
+    var payload = {
+      routeName: el.routeName.value,
+      startX: el.startX.value,
+      startY: el.startY.value,
+      endX: el.endX.value,
+      endY: el.endY.value,
+      mapImage: state.mapImage,
+      photos: state.photos.map(function (p) { return { dataUrl: p.dataUrl, label: p.label, note: p.note }; }),
+      attachments: state.attachments.map(function (f) { return { name: f.name, size: f.size, type: f.type, dataUrl: f.dataUrl }; })
+    };
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      el.saveStatus.textContent = '已儲存（' + fmtNow() + '），下次開啟此頁面會自動載入。';
+    } catch (err) {
+      el.saveStatus.textContent = '儲存失敗：瀏覽器儲存空間不足，請減少照片數量或改用匯出 PDF 保存。';
+    }
+  }
+
+  function loadState() {
+    var raw;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch (err) {
+      return;
+    }
+    if (!raw) return;
+    var payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch (err) {
+      return;
+    }
+    el.routeName.value = payload.routeName || el.routeName.value;
+    el.startX.value = payload.startX || el.startX.value;
+    el.startY.value = payload.startY || el.startY.value;
+    el.endX.value = payload.endX || el.endX.value;
+    el.endY.value = payload.endY || el.endY.value;
+    state.mapImage = payload.mapImage || null;
+    state.photos = (payload.photos || []).map(function (p) {
+      return { id: ++photoCounter, dataUrl: p.dataUrl, label: p.label || '', note: p.note || '' };
+    });
+    state.attachments = (payload.attachments || []).map(function (f) {
+      return { id: ++attachCounter, name: f.name, size: f.size, type: f.type, dataUrl: f.dataUrl };
+    });
+  }
+
+  el.saveBtn.addEventListener('click', saveState);
+  el.saveBtnMap.addEventListener('click', saveState);
+  el.saveBtnPhotos.addEventListener('click', saveState);
+  el.exportWordMapBtn.addEventListener('click', exportMapWord);
+  el.exportWordPhotosBtn.addEventListener('click', exportPhotosWord);
+
+  loadState();
+  renderPhotoListUI();
+  renderAttachListUI();
+  renderAll();
+})();
+</script>
+</body>
+</html>
