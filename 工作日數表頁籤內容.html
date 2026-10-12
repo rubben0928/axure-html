@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>工作日數計算表 - 雛形系統</title>
+<style>
+  :root{
+    --border:#888; --bg:#f5f6f8; --accent:#2f6fbb; --accentD:#204b82;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:"Microsoft JhengHei","PMingLiU",Arial,sans-serif;margin:0;background:var(--bg);color:#222;}
+  header{background:var(--accentD);color:#fff;padding:14px 20px;}
+  header h1{margin:0;font-size:20px;}
+  header p{margin:4px 0 0;font-size:12px;opacity:.85;}
+  main{max-width:1400px;margin:0 auto;padding:16px 20px 60px;}
+  section.card{background:#fff;border:1px solid #dcdfe4;border-radius:8px;padding:16px 18px;margin-bottom:16px;}
+  section.card h2{margin:0 0 12px;font-size:15px;color:var(--accentD);border-left:4px solid var(--accent);padding-left:8px;}
+  .row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:4px;font-size:13px;}
+  .field label{font-weight:bold;color:#333;}
+  .field input,.field select{padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:13px;min-width:150px;}
+  .field.small input,.field.small select{min-width:90px;}
+  .field input:disabled,.field select:disabled{background:#eef0f3;color:#444;cursor:default;-webkit-text-fill-color:#444;opacity:1;}
+  .field input:disabled,.field select:disabled{background:transparent;border:none;border-radius:0;box-shadow:none;color:#222;cursor:default;-webkit-text-fill-color:#222;opacity:1;padding:6px 0;font-weight:600;min-width:0;}
+  button{background:var(--accent);color:#fff;border:none;border-radius:4px;padding:8px 14px;font-size:13px;cursor:pointer;}
+  button:hover{background:var(--accentD);}
+  button.secondary{background:#7a8494;}
+  button.secondary:hover{background:#5c6474;}
+  button.danger{background:#c1443c;}
+  button.danger:hover{background:#9c332c;}
+  .hint{font-size:12px;color:#777;margin-top:4px;}
+  textarea{width:100%;min-height:80px;font-family:monospace;font-size:12px;padding:8px;border:1px solid #bbb;border-radius:4px;}
+  table.rain{border-collapse:collapse;width:100%;font-size:12px;}
+  table.rain th,table.rain td{border:1px solid #ccc;padding:4px 6px;text-align:center;}
+  table.rain input{width:60px;text-align:center;border:1px solid #ccc;border-radius:3px;padding:3px;}
+  .status-box{font-size:12px;background:#eef3fa;border:1px dashed #9db8dc;border-radius:4px;padding:8px 10px;margin-top:8px;}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:900px){ .subgrid{grid-template-columns:1fr;} }
+  .subgrid h4{margin:0 0 6px;font-size:13px;color:#204b82;}
+  #resultWrap{overflow-x:auto;}
+  table.result{border-collapse:collapse;font-size:11px;white-space:nowrap;}
+  table.result th,table.result td{border:1px solid #333;padding:2px 3px;text-align:center;min-width:20px;height:22px;}
+  table.result thead th{background:#dfe6ee;}
+  table.result td.yearcol{writing-mode:vertical-rl;text-orientation:upright;font-weight:bold;background:#f0f2f5;min-width:26px;}
+  table.result td.monthcol{writing-mode:vertical-rl;text-orientation:upright;font-weight:bold;background:#f7f8fa;min-width:22px;}
+  table.result td.mark{font-weight:bold;color:#c1443c;}
+  table.result td.startend{font-weight:bold;color:#204b82;font-size:10px;line-height:1.1;}
+  table.result td.na{background:#f2f2f2;}
+  table.result td.num{font-weight:bold;background:#fbf6e9;}
+  table.result tfoot td{background:#e4e9ef;font-weight:bold;}
+  table.result td.remark{white-space:normal;min-width:140px;text-align:left;font-weight:normal;}
+  .toolbar{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;}
+  .formHeader{text-align:center;margin-bottom:8px;}
+  .formHeader h3{margin:2px 0;font-size:18px;}
+  .formHeader div{font-size:13px;text-align:left;margin-top:6px;}
+  table.result td.footnote-cell{text-align:left;white-space:normal;font-weight:normal;font-size:11px;line-height:1.9;padding:8px;height:120px;vertical-align:top;}
+
+  .page-header{display:flex;align-items:center;justify-content:space-between;gap:16px;}
+  .page-header h1{margin:0;font-size:20px;}
+  .page-header #dataManagementToggle{font-weight:bold;flex-shrink:0;}
+  .data-management-panel[hidden]{display:none;}
+  .data-management-panel{margin-bottom:16px;}
+  @media(max-width:700px){.page-header{flex-wrap:wrap;}}
+
+</style>
+</head>
+<body>
+<header class="page-header">
+  <h1>工作日數計算表</h1>
+  <button type="button" id="dataManagementToggle" aria-expanded="false" aria-controls="dataManagementPanel" onclick="toggleDataManagement()">資料管理</button>
+</header>
+<main>
+  <div id="dataManagementPanel" class="data-management-panel" hidden>
+    <section class="card">
+    <h2>人事行政總局辦公日曆表匯入</h2>
+    <div class="row">
+      <div class="field small">
+        <label>資料年度（民國）</label>
+        <select id="holidayYear"></select>
+      </div>
+      <div class="field" style="min-width:280px;">
+        <label>上傳人事行政總處辦公日曆表(Excel 檔)</label>
+        <input type="file" id="xlsxFile" accept=".xlsx">
+      </div>
+      <div class="field">
+        <label>&nbsp;</label>
+        <button type="button" onclick="parseAndImportXlsx()">確定匯入</button>
+      </div>
+    </div>
+    <div class="hint">請直接從人事行政總局公告的辦公日曆表下載Excel檔後，再匯入本系統即可。</div>
+    <div id="holidayStatus" class="status-box"></div>
+  </section>
+    <section class="card">
+    <h2>各處所轄區域平均降雨日數（每月，天）</h2>
+    <table class="rain" id="rainTable">
+      <thead>
+        <tr><th>月份</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th><th>11</th><th>12</th></tr>
+      </thead>
+      <tbody id="rainBody"></tbody>
+    </table>
+    <div class="toolbar no-print">
+      <button type="button" onclick="saveRainfall()">儲存降雨資料</button>
+    </div>
+  </section>
+  </div>
+  <section class="card">
+    <h2>① 工期參數</h2>
+    <div class="row">
+      <div class="field">
+        <label>預定開工日期</label>
+        <input id="startDate" type="date" disabled>
+      </div>
+      <div class="field small">
+        <label>施作天數</label>
+        <input id="workDays" type="number" value="45" disabled>
+      </div>
+      <div class="field">
+        <label>預定竣工日期</label>
+        <input id="endDate" type="date" disabled>
+      </div>
+    </div>
+    <div class="hint">以上欄位由預定進度頁籤建立後帶入，本頁僅供檢視，若需編輯請至預定進度頁籤修改。</div>
+  </section>
+  <section class="card">
+    <h2>② 產生工作日數計算表</h2>
+    <div class="toolbar no-print">
+      <button type="button" onclick="generateTable()">產生工作日數表(EXCEL)</button>
+    </div>
+    <div id="resultWrap"></div>
+  </section>
+</main>
+
+<script>
+const CHN_DIGIT = ['零','一','二','三','四','五','六','七','八','九'];
+const CHN_UNIT = ['','十','百','千'];
+const CHN_MONTH = ['一','二','三','四','五','六','七','八','九','十','十一','十二'];
+
+// 各處所轄區域平均降雨日數（每月，天）
+const RAIN_REGIONS = [
+  {key:'yilan', label:'宜蘭', keywords:['宜蘭'], values:[10,9,8,7,9,6,3,7,10,12,12,9]},
+  {key:'beiJiTaoyuan', label:'北基、桃園、石門', keywords:['台北','臺北','新北','基隆','桃園','石門'], values:[8,11,12,10,9,9,7,8,9,7,8,7]},
+  {key:'hsinchuMiaoli', label:'新竹、苗栗', keywords:['新竹','苗栗'], values:[5,5,6,10,7,7,3,6,5,1,1,2]},
+  {key:'taichungChanghua', label:'台中、彰化', keywords:['台中','臺中','彰化'], values:[5,5,7,10,8,12,8,9,6,2,2,2]},
+  {key:'nantouYunlin', label:'南投、雲林', keywords:['南投','雲林'], values:[2,3,4,9,6,9,6,8,5,1,1,1]},
+  {key:'chiaNan', label:'嘉南', keywords:['嘉義','台南','臺南'], values:[3,4,4,7,7,11,11,13,9,2,2,2]},
+  {key:'kaohsiung', label:'高雄', keywords:['高雄'], values:[2,2,2,6,5,9,8,11,9,1,1,1]},
+  {key:'pingtung', label:'屏東', keywords:['屏東'], values:[1,1,1,3,4,6,7,11,11,1,1,1]},
+  {key:'taitung', label:'台東', keywords:['台東','臺東'], values:[3,4,4,5,7,6,6,7,11,4,4,3]},
+  {key:'hualien', label:'花蓮', keywords:['花蓮'], values:[5,4,6,6,10,7,6,7,11,5,6,4]}
+];
+
+function regionKeyFromLocation(loc){
+  loc = loc || '';
+  const hit = RAIN_REGIONS.find(r=> r.keywords.some(k=> loc.indexOf(k)!==-1));
+  return hit ? hit.key : RAIN_REGIONS[0].key;
+}
+function regionLabelByKey(key){
+  const r = RAIN_REGIONS.find(x=>x.key===key);
+  return r ? r.label : key;
+}
+
+function numToChinese(num){
+  if(num===0) return '零';
+  const s = String(num);
+  let result='';
+  for(let i=0;i<s.length;i++){
+    const d = parseInt(s[i],10);
+    const unitIndex = s.length-i-1;
+    if(d!==0){
+      if(!(d===1 && unitIndex===1 && i===0)) result += CHN_DIGIT[d];
+      result += CHN_UNIT[unitIndex];
+    } else if(result.length && result[result.length-1] !== '零'){
+      result += '零';
+    }
+  }
+  return result.replace(/零+$/,'');
+}
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function fmt(date){ return date.getFullYear()+'-'+pad2(date.getMonth()+1)+'-'+pad2(date.getDate()); }
+function rocDateStr(date){ return (date.getFullYear()-1911)+'年'+pad2(date.getMonth()+1)+'月'+pad2(date.getDate())+'日'; }
+function parseISO(str){ const p=str.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function addDays(date,n){ const d=new Date(date); d.setDate(d.getDate()+n); return d; }
+function isWeekend(date){ const w=date.getDay(); return w===0 || w===6; }
+
+function loadHolidays(){
+  try{ return JSON.parse(localStorage.getItem('wd_holidays')||'{}'); }catch(e){ return {}; }
+}
+function saveHolidaysObj(obj){ localStorage.setItem('wd_holidays', JSON.stringify(obj)); }
+
+function loadRainfall(){
+  try{
+    const v = JSON.parse(localStorage.getItem('wd_rainfall')||'null');
+    if(v) return v;
+  }catch(e){}
+  return defaultRainfall();
+}
+function defaultRainfall(){
+  const obj = {};
+  RAIN_REGIONS.forEach(r=>{ obj[r.key] = r.values.slice(); });
+  return obj;
+}
+function saveRainfallObj(obj){ localStorage.setItem('wd_rainfall', JSON.stringify(obj)); }
+
+function renderRainTable(){
+  const rain = loadRainfall();
+  const body = document.getElementById('rainBody');
+  body.innerHTML='';
+  RAIN_REGIONS.forEach(region=>{
+    const tr = document.createElement('tr');
+    let html = '<th>'+region.label+'</th>';
+    for(let m=0;m<12;m++){
+      const v = (rain[region.key] && rain[region.key][m]!==undefined) ? rain[region.key][m] : region.values[m];
+      html += '<td><input type="number" step="0.1" min="0" data-region="'+region.key+'" data-month="'+m+'" value="'+v+'"></td>';
+    }
+    tr.innerHTML = html;
+    body.appendChild(tr);
+  });
+}
+function saveRainfall(){
+  const obj = {};
+  RAIN_REGIONS.forEach(r=>{ obj[r.key] = new Array(12).fill(0); });
+  document.querySelectorAll('#rainBody input').forEach(inp=>{
+    obj[inp.dataset.region][parseInt(inp.dataset.month,10)] = parseFloat(inp.value)||0;
+  });
+  saveRainfallObj(obj);
+  alert('降雨資料已儲存');
+}
+
+function refreshHolidayStatus(){
+  const data = loadHolidays();
+  const years = Object.keys(data).sort();
+  const box = document.getElementById('holidayStatus');
+  if(years.length===0){
+    box.innerHTML = '目前尚未匯入任何年度資料。';
+    return;
+  }
+  box.innerHTML = '目前已匯入年度：' + years.map(y=>'民國'+y+'年（放假日 '+(data[y]||[]).length+' 筆，其餘日期一律視為上班日）').join('、');
+}
+
+function buildSegments(start,end){
+  const segments=[];
+  let cur = new Date(start);
+  while(cur<=end){
+    const year = cur.getFullYear();
+    const month = cur.getMonth()+1;
+    const monthLastDay = new Date(year, month, 0).getDate();
+    const segStart = new Date(cur);
+    const segEndCandidate = new Date(year, month-1, monthLastDay);
+    const segEnd = segEndCandidate < end ? segEndCandidate : new Date(end);
+    segments.push({year:year, month:month, segStart:segStart, segEnd:segEnd, monthLastDay:monthLastDay});
+    cur = addDays(segEnd,1);
+  }
+  return segments;
+}
+
+function monthAfter(year, month){
+  month = month + 1;
+  if(month > 12){ month = 1; year = year + 1; }
+  return {year:year, month:month};
+}
+
+function computeSegmentStats(seg, region, holidaySet, coveredYears, overallStart, overallEnd, rainfall){
+  const startDay = seg.segStart.getDate();
+  const endDay = seg.segEnd.getDate();
+  const daysInSegment = endDay - startDay + 1;
+  const yearCovered = coveredYears.has(seg.year - 1911);
+  let holidayCount = 0;
+  const dayMarks = {};
+  for(let d=1; d<=seg.monthLastDay; d++){
+    if(d < startDay || d > endDay){ dayMarks[d]={type:'na'}; continue; }
+    const date = new Date(seg.year, seg.month-1, d);
+    const isStart = fmt(date)===fmt(overallStart);
+    const isEnd = fmt(date)===fmt(overallEnd);
+    const iso = fmt(date);
+    // 已匯入該年度：僅以 Excel 標註的粉紅（放假）日期為準，其餘一律視為上班日。
+    // 尚未匯入該年度：暫以週六日作為預設休息日，待匯入後以匯入結果為準。
+    const rest = yearCovered ? holidaySet.has(iso) : isWeekend(date);
+    if(rest) holidayCount++;
+    if(isStart && isEnd) dayMarks[d] = {type:'label', text: rest ? '開工<br>竣工<br>○' : '開工<br>竣工'};
+    else if(isStart) dayMarks[d] = {type:'label', text: rest ? '開工<br>○' : '開工'};
+    else if(isEnd) dayMarks[d] = {type:'label', text: rest ? '竣工<br>○' : '竣工'};
+    else if(rest) dayMarks[d] = {type:'mark', text:'○'};
+    else dayMarks[d] = {type:'blank'};
+  }
+  const rainAvgFull = (rainfall[region] && rainfall[region][seg.month-1]) || 0;
+  const rainRounded = Math.max(0, Math.round(rainAvgFull));
+  const workable = Math.max(0, daysInSegment - holidayCount - rainRounded);
+  return {daysInSegment:daysInSegment, holidayCount:holidayCount, rainRounded:rainRounded, workable:workable, dayMarks:dayMarks};
+}
+
+let lastSegmentsData = null;
+
+function generateTable(){
+  const startVal = document.getElementById('startDate').value;
+  const endVal = document.getElementById('endDate').value;
+  if(!startVal || !endVal){ alert('開工日期或竣工日期尚未帶入'); return; }
+  const start = parseISO(startVal);
+  const end = parseISO(endVal);
+  if(end < start){ alert('竣工日期需晚於開工日期'); return; }
+  // 施工地點欄位已依需求移除；無地點資料時採用預設區域。
+  const projLocEl = document.getElementById('projLoc');
+  const projLocVal = projLocEl ? projLocEl.value : '';
+  const region = regionKeyFromLocation(projLocVal);
+  const rainfall = loadRainfall();
+  const holidayData = loadHolidays();
+  const holidaySet = new Set();
+  const coveredYears = new Set();
+  const years = new Set();
+  let y = start.getFullYear();
+  while(y<=end.getFullYear()){ years.add(y-1911); y++; }
+  years.forEach(rocY=>{
+    if(Object.prototype.hasOwnProperty.call(holidayData, String(rocY))){
+      coveredYears.add(rocY);
+      (holidayData[String(rocY)]||[]).forEach(d=>holidaySet.add(d));
+    }
+  });
+
+  const segments = buildSegments(start,end);
+  const rows = segments.map(seg=>({
+    seg:seg,
+    stats: computeSegmentStats(seg, region, holidaySet, coveredYears, start, end, rainfall),
+    blank:false
+  }));
+
+  const totalRowsNeeded = Math.max(12, rows.length);
+  let cursor = {year:segments[segments.length-1].year, month:segments[segments.length-1].month};
+  while(rows.length < totalRowsNeeded){
+    cursor = monthAfter(cursor.year, cursor.month);
+    const monthLastDay = new Date(cursor.year, cursor.month, 0).getDate();
+    rows.push({
+      seg:{year:cursor.year, month:cursor.month, monthLastDay:monthLastDay},
+      stats:null,
+      blank:true
+    });
+  }
+
+  lastSegmentsData = {rows:rows, region:region, start:start, end:end};
+
+  const tableHtml = buildResultTableHtml(rows, region, start, end);
+  document.getElementById('resultWrap').innerHTML = tableHtml;
+  downloadExcel(tableHtml);
+}
+
+function buildResultTableHtml(rows, region, start, end){
+  let yearGroups = [];
+  rows.forEach(r=>{
+    const last = yearGroups[yearGroups.length-1];
+    if(last && last.year===r.seg.year){ last.count++; }
+    else yearGroups.push({year:r.seg.year, count:1});
+  });
+  const yearRowSpanMap = {};
+  let idx=0;
+  yearGroups.forEach(g=>{ yearRowSpanMap[idx]=g.count; idx+=g.count; });
+
+  let thead = '<tr><th rowspan="2">年<br>別</th><th rowspan="2">日別<br>月</th>';
+  for(let d=1; d<=31; d++) thead += '<th>'+d+'</th>';
+  thead += '<th rowspan="2">國定<br>假日<br>(天)</th><th rowspan="2">平均<br>降雨<br>(天)</th><th rowspan="2">可工<br>作天<br>(天)</th><th rowspan="2">計</th><th rowspan="2">備註<br>(平均降雨計算)</th></tr><tr></tr>';
+
+  let tbody = '';
+  let totalHoliday=0, totalRain=0, totalWork=0;
+  rows.forEach((r,i)=>{
+    let tr = '<tr>';
+    if(yearRowSpanMap[i]){
+      tr += '<td class="yearcol" rowspan="'+yearRowSpanMap[i]+'">'+numToChinese(r.seg.year-1911)+'</td>';
+    }
+    tr += '<td class="monthcol">'+CHN_MONTH[r.seg.month-1]+'</td>';
+
+    if(r.blank){
+      for(let d=1; d<=31; d++) tr += '<td class="na"></td>';
+      tr += '<td></td><td></td><td></td><td></td><td class="remark"></td>';
+    } else {
+      const stats = r.stats;
+      totalHoliday += stats.holidayCount;
+      totalRain += stats.rainRounded;
+      totalWork += stats.workable;
+      for(let d=1; d<=31; d++){
+        const m = stats.dayMarks[d];
+        if(!m || m.type==='na'){ tr += '<td class="na"></td>'; }
+        else if(m.type==='label'){ tr += '<td class="startend">'+m.text+'</td>'; }
+        else if(m.type==='mark'){ tr += '<td class="mark">'+m.text+'</td>'; }
+        else { tr += '<td></td>'; }
+      }
+      tr += '<td class="num">'+stats.holidayCount+'</td>';
+      tr += '<td class="num">'+stats.rainRounded+'</td>';
+      tr += '<td class="num">'+stats.workable+'</td>';
+      tr += '<td></td>';
+      tr += '<td class="remark"></td>';
+    }
+    tr += '</tr>';
+    tbody += tr;
+  });
+
+  let tfoot = '<tr><td colspan="2">合計</td>';
+  for(let d=1; d<=31; d++) tfoot += '<td></td>';
+  tfoot += '<td>'+totalHoliday+'</td><td>'+totalRain+'</td><td>'+totalWork+'</td><td></td><td class="remark"></td></tr>';
+
+  const workDaysVal = document.getElementById('workDays').value;
+  const nonWorkDays = totalHoliday + totalRain;
+  // 工程名稱及施工地點欄位已移除，輸出表頭不再讀取這兩個不存在的元素。
+  const header = '<div class="formHeader"><h3>農業部農田水利署○○管理處　工作日數計算表</h3></div>';
+  const footnoteText = '附註○　係習俗假日，包括國定假日、民俗節日、星期日及全國性選舉投票日及主管機關臨時公布之假日。<br>'
+    + '　　　×　係其他，包括特殊原因或依工地實際影響情形，經報准不計工作天之不能工作日。<br>'
+    + '一、本工程預定自中華民國'+rocDateStr(start)+'開工。<br>'
+    + '二、工程期限為'+workDaysVal+'個日曆天，其中包括'+nonWorkDays+'天為國定休假日及平均降雨天。<br>'
+    + '三、竣工期限至中華民國'+rocDateStr(end)+'完工。';
+  tfoot += '<tr><td colspan="38" class="footnote-cell">'+footnoteText+'</td></tr>';
+
+  return header+'<table class="result"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody><tfoot>'+tfoot+'</tfoot></table>';
+}
+
+function downloadExcel(tableHtml){
+  const doc = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">'
+    + '<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>'
+    + '<x:Name>工作日數計算表</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>'
+    + '</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>' + tableHtml + '</body></html>';
+  const blob = new Blob(['\uFEFF' + doc], {type:'application/vnd.ms-excel;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '工作日數計算表.xls';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+
+// ---------- xlsx (Excel) parsing: ZIP + OOXML, pure browser APIs ----------
+function readZipEntries(buf, wantedNames){
+  const bytes = new Uint8Array(buf);
+  const view = new DataView(buf);
+  let eocdOffset = -1;
+  for(let i=bytes.length-22; i>=0; i--){
+    if(view.getUint32(i,true)===0x06054b50){ eocdOffset=i; break; }
+  }
+  if(eocdOffset<0) throw new Error('找不到 ZIP 結尾記錄，檔案可能已損毀');
+  const totalEntries = view.getUint16(eocdOffset+10,true);
+  const centralDirOffset = view.getUint32(eocdOffset+16,true);
+  let offset = centralDirOffset;
+  const tasks = [];
+  for(let i=0; i<totalEntries; i++){
+    const sig = view.getUint32(offset,true);
+    if(sig !== 0x02014b50) break;
+    const compMethod = view.getUint16(offset+10,true);
+    const compSize = view.getUint32(offset+20,true);
+    const nameLen = view.getUint16(offset+28,true);
+    const extraLen = view.getUint16(offset+30,true);
+    const commentLen = view.getUint16(offset+32,true);
+    const localHeaderOffset = view.getUint32(offset+42,true);
+    const name = new TextDecoder('utf-8').decode(bytes.subarray(offset+46, offset+46+nameLen));
+    if(!wantedNames || wantedNames(name)){
+      tasks.push({name, compMethod, compSize, localHeaderOffset});
+    }
+    offset += 46+nameLen+extraLen+commentLen;
+  }
+  return Promise.all(tasks.map(async t=>{
+    const lNameLen = view.getUint16(t.localHeaderOffset+26,true);
+    const lExtraLen = view.getUint16(t.localHeaderOffset+28,true);
+    const dataStart = t.localHeaderOffset+30+lNameLen+lExtraLen;
+    const compData = bytes.slice(dataStart, dataStart+t.compSize);
+    let data;
+    if(t.compMethod===0){ data = compData; }
+    else if(t.compMethod===8){
+      const stream = new Blob([compData]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      data = new Uint8Array(await new Response(stream).arrayBuffer());
+    } else {
+      throw new Error('不支援的壓縮方式：'+t.compMethod);
+    }
+    return {name:t.name, data};
+  })).then(results=>{
+    const map = {};
+    results.forEach(r=>{ map[r.name] = r.data; });
+    return map;
+  });
+}
+
+function parsePinkStyleIndexes(stylesXmlText){
+  const doc = new DOMParser().parseFromString(stylesXmlText, 'application/xml');
+  const fillsEl = doc.getElementsByTagName('fills')[0];
+  const fills = fillsEl ? Array.from(fillsEl.getElementsByTagName('fill')) : [];
+  const pinkFillIdx = new Set();
+  fills.forEach((fillEl, idx)=>{
+    const pf = fillEl.getElementsByTagName('patternFill')[0];
+    if(!pf) return;
+    if(pf.getAttribute('patternType') !== 'solid') return;
+    const fg = pf.getElementsByTagName('fgColor')[0];
+    if(!fg) return;
+    const rgb = fg.getAttribute('rgb');
+    if(rgb && rgb.toUpperCase()==='FFFF99FF') pinkFillIdx.add(idx);
+  });
+  const cellXfsEl = doc.getElementsByTagName('cellXfs')[0];
+  const xfs = cellXfsEl ? Array.from(cellXfsEl.getElementsByTagName('xf')) : [];
+  const pinkStyleIdx = new Set();
+  xfs.forEach((xf, idx)=>{
+    const fillId = parseInt(xf.getAttribute('fillId')||'0',10);
+    if(pinkFillIdx.has(fillId)) pinkStyleIdx.add(idx);
+  });
+  return pinkStyleIdx;
+}
+
+function colLettersToNumber(letters){
+  let col = 0;
+  for(let i=0;i<letters.length;i++) col = col*26 + (letters.charCodeAt(i)-64);
+  return col;
+}
+
+function parseNumericCells(sheetXmlText){
+  const doc = new DOMParser().parseFromString(sheetXmlText, 'application/xml');
+  const cEls = Array.from(doc.getElementsByTagName('c'));
+  const cells = [];
+  cEls.forEach(c=>{
+    const ref = c.getAttribute('r');
+    if(!ref) return;
+    const t = c.getAttribute('t');
+    if(t && t!=='n') return;
+    const vEl = c.getElementsByTagName('v')[0];
+    if(!vEl) return;
+    const value = parseFloat(vEl.textContent);
+    if(!Number.isInteger(value)) return;
+    const m = ref.match(/^([A-Z]+)(\d+)$/);
+    if(!m) return;
+    const sAttr = c.getAttribute('s');
+    cells.push({
+      row: parseInt(m[2],10),
+      col: colLettersToNumber(m[1]),
+      value: value,
+      styleIdx: sAttr ? parseInt(sAttr,10) : 0
+    });
+  });
+  return cells;
+}
+
+function extractCalendarFromCells(cells, pinkStyleIdx, rocYear){
+  // 規則：Excel 中標註粉紅色底色的日期＝放假日；其餘（不論平日或週六日）一律視為白色上班日。
+  const year = rocYear + 1911;
+  const quarterHeaders = [3,17,31,45];
+  const colStarts = [2,9,16];
+  const cellMap = new Map();
+  cells.forEach(c=> cellMap.set(c.row+':'+c.col, c));
+  const holidays = new Set();
+  quarterHeaders.forEach((hr, bi)=>{
+    colStarts.forEach((cs, mi)=>{
+      const month = bi*3+mi+1;
+      for(let w=0; w<6; w++){
+        const dayRow = hr+2+2*w;
+        for(let wd=0; wd<7; wd++){
+          const col = cs+wd;
+          const cell = cellMap.get(dayRow+':'+col);
+          if(!cell) continue;
+          const day = cell.value;
+          if(!(day>=1 && day<=31)) continue;
+          const d = new Date(year, month-1, day);
+          if(d.getMonth() !== month-1) continue;
+          const iso = year+'-'+pad2(month)+'-'+pad2(day);
+          if(pinkStyleIdx.has(cell.styleIdx)) holidays.add(iso);
+        }
+      }
+    });
+  });
+  return {holidays: Array.from(holidays).sort()};
+}
+
+async function parseAndImportXlsx(){
+  const fileInput = document.getElementById('xlsxFile');
+  const rocYear = document.getElementById('holidayYear').value;
+  if(!fileInput.files || fileInput.files.length===0){ alert('請先上傳人事行政總處辦公日曆表 .xlsx 檔'); return; }
+  if(!rocYear){ alert('請先選擇民國年度'); return; }
+  try{
+    const file = fileInput.files[0];
+    const buf = await file.arrayBuffer();
+    const wanted = new Set(['xl/styles.xml']);
+    const entries = await readZipEntries(buf, name=> name==='xl/styles.xml' || /^xl\/worksheets\/sheet\d+\.xml$/.test(name));
+    const stylesData = entries['xl/styles.xml'];
+    if(!stylesData) throw new Error('找不到 xl/styles.xml，檔案格式可能不符');
+    let sheetName = 'xl/worksheets/sheet1.xml';
+    if(!entries[sheetName]){
+      const found = Object.keys(entries).find(n=>/^xl\/worksheets\/sheet\d+\.xml$/.test(n));
+      if(!found) throw new Error('找不到工作表 xl/worksheets/sheetN.xml');
+      sheetName = found;
+    }
+    const decoder = new TextDecoder('utf-8');
+    const stylesXml = decoder.decode(stylesData);
+    const sheetXml = decoder.decode(entries[sheetName]);
+
+    const pinkStyleIdx = parsePinkStyleIndexes(stylesXml);
+    const cells = parseNumericCells(sheetXml);
+    const {holidays} = extractCalendarFromCells(cells, pinkStyleIdx, parseInt(rocYear,10));
+
+    if(holidays.length===0){
+      alert('未偵測到任何粉紅色（放假）儲存格，請確認檔案格式與底色是否正確。');
+      return;
+    }
+
+    const holidayData = loadHolidays();
+    holidayData[rocYear] = holidays;
+    saveHolidaysObj(holidayData);
+
+    refreshHolidayStatus();
+    alert('已解析並匯入民國'+rocYear+'年資料，共 '+holidays.length+' 個放假日（粉紅色），其餘日期一律視為上班日。');
+  }catch(err){
+    alert('解析 Excel 檔案失敗：'+err.message);
+  }
+}
+
+function toggleDataManagement(){
+  const panel = document.getElementById('dataManagementPanel');
+  const button = document.getElementById('dataManagementToggle');
+  if(!panel || !button) return;
+  const isClosed = panel.hasAttribute('hidden') || getComputedStyle(panel).display === 'none';
+  if (isClosed) {
+    panel.removeAttribute('hidden');
+    panel.style.display = 'block';
+    button.setAttribute('aria-expanded', 'true');
+  } else {
+    panel.setAttribute('hidden', '');
+    panel.style.display = 'none';
+    button.setAttribute('aria-expanded', 'false');
+  }
+}
+
+(function init(){
+  const rocYear = new Date().getFullYear() - 1911;
+  const yearSelect = document.getElementById('holidayYear');
+  yearSelect.innerHTML = '<option value="'+rocYear+'">民國'+rocYear+'年</option><option value="'+(rocYear+1)+'">民國'+(rocYear+1)+'年</option>';
+
+  renderRainTable();
+  refreshHolidayStatus();
+  const today = new Date();
+  document.getElementById('startDate').value = fmt(today);
+  document.getElementById('endDate').value = fmt(addDays(today,44));
+})();
+</script>
+</body>
+</html>
