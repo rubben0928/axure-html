@@ -1,0 +1,1325 @@
+
+<!DOCTYPE html>
+
+<html lang="zh-TW"> <head> <meta charset="UTF-8"> <title>工程項目及地點</title> <style> /* ===== 原有樣式 ===== */ .custom-table { border-collapse: collapse; font-family: "Microsoft JhengHei", sans-serif; font-size: 14px; background-color: #fff; } .custom-table td { padding: 6px; vertical-align: middle; } .title-cell { background-color: #5bb27a; color: #0b1f31; font-weight: bold; text-align: center; width: 110px; line-height: 1.4; vertical-align: middle; } .title-cell .star { color: red; } .title-cell .btn-permit { display: block; margin: 6px auto 0 auto; } .content-cell { background-color: #e5e5e5; padding: 8px !important; } .select-group { margin-bottom: 6px; color: #333; } .select-group select { padding: 2px 4px; border: 1px solid #7a7a7a; background-color: #fff; font-size: 14px; border-radius: 2px; margin-right: 8px; } .inner-table { border-collapse: separate; border-spacing: 2px; width: 100%; margin-top: 4px; } .inner-table th { background-color: #5bb27a; color: #0b1f31; font-weight: bold; padding: 8px; text-align: center; } .inner-table td { background-color: #dedede; padding: 6px; text-align: center; color: #333; } .inner-table input[type="text"] { width: 95%; height: 26px; border: 1px solid #7a7a7a; background-color: #fff; box-sizing: border-box; padding: 0 4px; } .btn-add { background-color: #539fe5; color: #fff; border: 1px solid #3c82c4; border-radius: 4px; padding: 6px 14px; cursor: pointer; font-size: 14px; } .btn-add:hover { background-color: #438cd2; } .btn-delete { background-color: #e88686; color: #fff; border: 1px solid #d46c6c; border-radius: 4px; padding: 6px 14px; cursor: pointer; font-size: 14px; } .btn-delete:hover { background-color: #d67070; }
+
+    /* ===== 容許使用按鈕 ===== */
+    .btn-permit {
+        background-color: #f5a623;
+        color: #fff;
+        border: 1px solid #d48d1a;
+        border-radius: 4px;
+        padding: 5px 12px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: bold;
+        white-space: nowrap;
+        transition: background-color 0.2s;
+    }
+    .btn-permit:hover {
+        background-color: #e0951a;
+    }
+    .btn-permit-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+    }
+    .btn-permit-wrapper .hint {
+        font-size: 13px;
+        color: #555;
+    }
+
+    /* ===== 模态框 (Modal) ===== */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.55);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+    .modal-overlay.active {
+        display: flex;
+    }
+    .modal-box {
+        background-color: #fff;
+        border-radius: 8px;
+        max-width: 1500px;
+        width: 99%;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: modalFadeIn 0.25s ease;
+    }
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-30px) scale(0.97);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    .modal-header {
+        padding: 16px 24px;
+        background-color: #5bb27a;
+        color: #0b1f31;
+        border-radius: 8px 8px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .modal-header h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: bold;
+    }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 28px;
+        font-weight: bold;
+        color: #0b1f31;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0 6px;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+    }
+    .modal-close:hover {
+        opacity: 1;
+    }
+    .modal-body {
+        padding: 16px 20px;
+        overflow-y: auto;
+        flex: 1;
+    }
+    .modal-body .empty-msg {
+        text-align: center;
+        color: #888;
+        font-size: 16px;
+        padding: 30px 0;
+    }
+    .modal-footer {
+        padding: 14px 24px;
+        background-color: #f5f5f5;
+        border-radius: 0 0 8px 8px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-shrink: 0;
+        border-top: 1px solid #ddd;
+    }
+    .modal-footer .btn-confirm {
+        background-color: #5bb27a;
+        color: #fff;
+        border: 1px solid #4a9a66;
+        border-radius: 4px;
+        padding: 8px 28px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    .modal-footer .btn-confirm:hover {
+        background-color: #4a9a66;
+    }
+    .modal-footer .btn-cancel {
+        background-color: #ccc;
+        color: #333;
+        border: 1px solid #aaa;
+        border-radius: 4px;
+        padding: 8px 28px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.2s;
+    }
+    .modal-footer .btn-cancel:hover {
+        background-color: #bbb;
+    }
+
+    /* ===== 模态框表格 ===== */
+    .modal-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        min-width: 900px;
+    }
+    .modal-table th {
+        background-color: #5bb27a;
+        color: #0b1f31;
+        padding: 8px 6px;
+        text-align: center;
+        font-weight: bold;
+        border: 1px solid #4a9a66;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+    .modal-table td {
+        padding: 6px 4px;
+        border: 1px solid #ccc;
+        vertical-align: middle;
+        background-color: #fafafa;
+    }
+    .modal-table .row-label {
+        font-weight: bold;
+        text-align: center;
+        background-color: #eef6f0;
+        white-space: nowrap;
+    }
+    .modal-table select,
+    .modal-table input[type="text"] {
+        width: 100%;
+        padding: 4px 4px;
+        border: 1px solid #aaa;
+        border-radius: 3px;
+        background-color: #fff;
+        font-size: 13px;
+        box-sizing: border-box;
+        min-height: 30px;
+    }
+    .modal-table select:disabled,
+    .modal-table input:disabled {
+        background-color: #f0f0f0;
+        color: #555;
+    }
+    .modal-table input[readonly] {
+        background-color: #f5f5f5;
+        color: #555;
+        cursor: default;
+        border-color: #ddd;
+    }
+    .modal-table .item-name {
+        text-align: left;
+        padding-left: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        min-width: 120px;
+        max-width: 180px;
+        word-break: break-word;
+    }
+
+    /* ===== 地籍資料服務式介面 ===== */
+    .land-service {
+        border: 1px solid #c8d6e5;
+        border-radius: 5px;
+        background: #f7fafc;
+        padding: 7px;
+    }
+
+    .land-service-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .land-service-title {
+        color: #245b7a;
+        font-size: 12px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .land-service-status {
+        color: #3f7f59;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .land-container {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: stretch;
+    }
+
+    .land-group {
+        display: grid;
+        grid-template-columns: minmax(85px, 1.15fr) minmax(55px, .75fr) 10px minmax(55px, .75fr) minmax(95px, 1fr) minmax(70px, .7fr) 24px;
+        align-items: center;
+        gap: 3px;
+        padding: 4px;
+        background: #fff;
+        border: 1px solid #d7e0e8;
+        border-radius: 3px;
+    }
+
+    .land-field {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .land-field-label {
+        color: #65717c;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .land-group input[type="text"] {
+        width: 100%;
+        min-width: 0;
+        height: 27px;
+        padding: 2px 4px;
+        border: 1px solid #aebdca;
+        border-radius: 3px;
+        background: #fff;
+        box-sizing: border-box;
+        font-size: 12px;
+    }
+
+    .land-group select.land-use-input,
+    .land-group input.area-input {
+        width: 100%;
+        min-width: 0;
+        height: 27px;
+        padding: 2px 4px;
+        border: 1px solid #aebdca;
+        border-radius: 3px;
+        background: #fff;
+        box-sizing: border-box;
+        font-size: 11px;
+    }
+
+    .land-group input.area-input {
+        text-align: right;
+    }
+    .group-total-area {
+        display: inline-block;
+        min-width: 70px;
+        text-align: right;
+        font-weight: bold;
+        color: #245b7a;
+        font-size: 14px;
+    }
+
+    .land-group input[type="text"]:focus {
+        outline: none;
+        border-color: #539fe5;
+        box-shadow: 0 0 0 1px rgba(83,159,229,.15);
+    }
+
+    .land-separator {
+        text-align: center;
+        color: #697781;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .land-group .btn-remove-land {
+        background-color: #e88686;
+        color: #fff;
+        border: 1px solid #d46c6c;
+        border-radius: 3px;
+        width: 22px;
+        height: 22px;
+        font-size: 14px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0;
+        text-align: center;
+    }
+
+    .land-group .btn-remove-land:hover {
+        background-color: #d67070;
+    }
+
+    .btn-add-land,
+    .btn-land-query {
+        color: #fff;
+        border-radius: 3px;
+        padding: 4px 9px;
+        font-size: 11px;
+        cursor: pointer;
+        margin-top: 5px;
+        white-space: nowrap;
+    }
+
+    .btn-add-land {
+        background-color: #539fe5;
+        border: 1px solid #3c82c4;
+    }
+
+    .btn-add-land:hover {
+        background-color: #438cd2;
+    }
+
+    .btn-land-query {
+        background-color: #5bb27a;
+        border: 1px solid #4a9a66;
+        margin-left: 4px;
+    }
+
+    .btn-land-query:hover {
+        background-color: #4a9a66;
+    }
+
+    .land-query-result {
+        display: none;
+        margin-top: 6px;
+        padding: 5px 7px;
+        background: #edf7f0;
+        border-left: 3px solid #5bb27a;
+        color: #41604c;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .land-query-result.active {
+        display: block;
+    }
+
+    .land-service-note {
+        margin-top: 5px;
+        color: #7a858e;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+        .land-group {
+            grid-template-columns: 1fr 1fr 10px 1fr 24px;
+        }
+
+        .land-service-header {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 2px;
+        }
+    }
+
+    /* ===== 座標查詢地籍 ===== */
+    .coordinate-query {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 6px;
+        padding: 5px 7px;
+        background: #eef6fb;
+        border: 1px solid #c9dce9;
+        border-radius: 4px;
+    }
+
+    .coordinate-query-label {
+        color: #245b7a;
+        font-size: 11px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .coordinate-query input {
+        width: 82px;
+        height: 27px;
+        padding: 2px 5px;
+        border: 1px solid #aebdca;
+        border-radius: 3px;
+        box-sizing: border-box;
+        font-size: 12px;
+    }
+
+    .btn-coordinate-query {
+        background-color: #539fe5;
+        color: #fff;
+        border: 1px solid #3c82c4;
+        border-radius: 3px;
+        padding: 4px 9px;
+        font-size: 11px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-coordinate-query:hover {
+        background-color: #438cd2;
+    }
+
+    .land-auto-badge {
+        display: inline-block;
+        margin-left: 4px;
+        padding: 1px 4px;
+        border-radius: 3px;
+        background: #e8f5ec;
+        color: #3f7f59;
+        font-size: 9px;
+    }
+
+    .land-service-note {
+        margin-top: 5px;
+        color: #7a858e;
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    /* ===== 響應式調整 ===== */
+    @media (max-width: 768px) {
+        .modal-box {
+            max-width: 100%;
+            width: 100%;
+            max-height: 98vh;
+            border-radius: 4px;
+        }
+        .modal-table {
+            font-size: 12px;
+            min-width: 700px;
+        }
+        .modal-table th,
+        .modal-table td {
+            padding: 4px 3px;
+        }
+        .title-cell {
+            width: 80px;
+            font-size: 12px;
+        }
+        .btn-permit {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+    }
+    @media (max-width: 480px) {
+        .modal-table {
+            font-size: 11px;
+            min-width: 600px;
+        }
+        .modal-table th,
+        .modal-table td {
+            padding: 3px 2px;
+        }
+        .title-cell {
+            width: 60px;
+            font-size: 11px;
+        }
+    }
+
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+        background: #f0f0f0;
+        border-radius: 3px;
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #bbb;
+        border-radius: 3px;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+</style>
+
+</head> <body>
+
+<table class="custom-table">
+    <tr>
+        <td class="title-cell">
+            <span><span class="star">*</span>工程項目及地點</span>
+            <button type="button" class="btn-permit" onclick="openPermitModal()">新增容許使用</button>
+        </td>
+        <td class="content-cell">
+            <div class="select-group">
+                縣市：
+                <select name="county">
+                    <option value="屏東縣" selected>屏東縣</option>
+                </select>
+                鄉鎮市區：
+                <select name="town">
+                    <option value="琉球鄉" selected>琉球鄉</option>
+                </select>
+                村里：
+                <select name="village">
+                    <option value="中福村" selected>中福村</option>
+                </select>
+            </div>
+
+            <table class="inner-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">工區</th>
+                        <th style="width: 45%;">預計辦理項目及概估數量</th>
+                        <th style="width: 15%;">X坐標</th>
+                        <th style="width: 15%;">Y坐標</th>
+                        <th style="width: 15%;">刪除</th>
+                    </tr>
+                </thead>
+                <tbody id="itemList">
+                    <tr>
+                        <td><input type="text" id="inputZone" placeholder="工區1"></td>
+                        <td><input type="text" id="inputItem"></td>
+                        <td><input type="text" id="inputX" required placeholder="請輸入X坐標"></td>
+                        <td><input type="text" id="inputY" required placeholder="請輸入Y坐標"></td>
+                        <td><button type="button" class="btn-add" onclick="addItem()">新增</button></td>
+                    </tr>
+                    <tr>
+                        <td>工區1</td>
+                        <td style="text-align: left; padding-left: 12px;">擋土牆 長80m 高6m、欄桿 100m、多功能廣場700m²、步道 30m</td>
+                        <td>186433</td>
+                        <td>2472420</td>
+                        <td><button type="button" class="btn-delete" onclick="deleteRow(this)">刪除</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<!-- ===== 模态框 ===== -->
+<div class="modal-overlay" id="permitModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>📋 新增容許使用</h2>
+            <button class="modal-close" onclick="closePermitModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <div id="modalContent"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closePermitModal()">取消</button>
+            <button class="btn-confirm" onclick="confirmPermit()">確認</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    //  1. 原有功能：新增 / 刪除 項目
+    // ============================================================
+    function addItem() {
+    const xInput = document.getElementById('inputX');
+    const yInput = document.getElementById('inputY');
+    const x = xInput?.value.trim() || '';
+    const y = yInput?.value.trim() || '';
+    if (!x) {
+        alert('X坐標為必填，請先輸入X坐標。');
+        xInput?.focus();
+        return;
+    }
+    if (!y) {
+        alert('Y坐標為必填，請先輸入Y坐標。');
+        yInput?.focus();
+        return;
+    }
+        const zoneInput = document.getElementById('inputZone');
+        const itemInput = document.getElementById('inputItem');
+        const zoneVal = zoneInput.value.trim() || `工區${document.querySelectorAll('#itemList tr').length}`;
+        const itemVal = itemInput.value.trim();
+        const xVal = xInput.value.trim();
+        const yVal = yInput.value.trim();
+
+        if (!itemVal && !xVal && !yVal) {
+            alert('請至少輸入一項內容！');
+            return;
+        }
+
+        const tbody = document.getElementById('itemList');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${escapeHtml(zoneVal)}</td>
+            <td style="text-align: left; padding-left: 12px;">${escapeHtml(itemVal)}</td>
+            <td>${escapeHtml(xVal)}</td>
+            <td>${escapeHtml(yVal)}</td>
+            <td><button type="button" class="btn-delete" onclick="deleteRow(this)">刪除</button></td>
+          `;
+        tbody.appendChild(newRow);
+
+        zoneInput.value = '';
+        itemInput.value = '';
+        xInput.value = '';
+        yInput.value = '';
+    }
+
+    function deleteRow(btn) {
+        const row = btn.closest('tr');
+        row.remove();
+    }
+
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // ============================================================
+    //  2. 類型 ↔ 細目 對應表
+    // ============================================================
+    const detailMap = {
+        '安全設施': ['警政及消防設施', '社區防災避難設施', '防汛防蓄水設施', '夜照明及安全防護欄杆'],
+        '保育設施': ['生態保育設施', '水土保持設施', '環境綠化設施', '動植物保護設施'],
+        '生活基礎設施': ['供水設施', '供電設施', '排水設施', '道路設施', '通訊設施'],
+        '休憩設施': ['涼亭設施', '座椅設施', '步道設施', '觀景平台', '遊樂設施'],
+        '其他設施': ['其他相關設施']
+    };
+
+    // ============================================================
+    //  3. 模态框控制
+    // ============================================================
+    function openPermitModal() {
+        const modal = document.getElementById('permitModal');
+        modal.classList.add('active');
+        renderPermitContent();
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closePermitModal() {
+        const modal = document.getElementById('permitModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.getElementById('permitModal').addEventListener('click', function(e) {
+        if (e.target === this) closePermitModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closePermitModal();
+    });
+
+    // ============================================================
+    //  4. 渲染模态框内容
+    // ============================================================
+    function renderPermitContent() {
+        const container = document.getElementById('modalContent');
+
+        const tbody = document.getElementById('itemList');
+        const rows = tbody.querySelectorAll('tr');
+        const dataRows = [];
+        for (let i = 0; i < rows.length; i++) {
+            const tr = rows[i];
+            const hasInput = tr.querySelector('input[type="text"]');
+            if (hasInput) continue;
+            const tds = tr.querySelectorAll('td');
+            if (tds.length < 3) continue;
+
+            const zoneName = tds[0].textContent.trim();
+            const itemName = tds[1].textContent.trim();
+            const xVal = tds[2].textContent.trim();
+            const yVal = tds[3].textContent.trim();
+
+            // 同一筆原始資料視為同一個「工區」，
+            // 但「預計辦理項目及概估數量」中的多個項目各自成一列。
+            const itemParts = itemName
+                .split('、')
+                .map(item => item.trim())
+                .filter(item => item);
+
+            dataRows.push({
+                zoneName,
+                xVal,
+                yVal,
+                items: itemParts.length ? itemParts : [itemName]
+            });
+        }
+
+        if (dataRows.length === 0) {
+            container.innerHTML = `<div class="empty-msg">⚠️ 目前沒有「預計辦理項目及概估數量」資料，請先新增項目。</div>`;
+            return;
+        }
+
+        let html = `
+            <table class="modal-table">
+              <thead>
+                <tr>
+                  <th style="width:6%;">工區</th>
+                  <th style="width:17%;">預計辦理項目及概估數量</th>
+                  <th style="width:9%;">類型</th>
+                  <th style="width:11%;">細目</th>
+                  <th style="width:7%;">X坐標</th>
+                  <th style="width:7%;">Y坐標</th>
+                  <th style="width:33%;">地段／地號／使用地類別／面積 <span style="font-weight:normal;font-size:12px;">(地籍資料服務)</span></th>
+                  <th style="width:10%;">總面積</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+        dataRows.forEach((group, groupIndex) => {
+            const zoneNo = group.zoneName || `工區${groupIndex + 1}`;
+            const rowSpan = group.items.length;
+
+            group.items.forEach((itemName, itemIndex) => {
+                const safeItem = escapeHtml(itemName);
+                const safeX = escapeHtml(group.xVal);
+                const safeY = escapeHtml(group.yVal);
+
+                const typeOpts = Object.keys(detailMap).map(t =>
+                    `<option value="${t}">${t}</option>`
+                ).join('');
+
+                const landUseOpts = ['農牧用地', '林業用地', '養殖用地'].map(t =>
+                    `<option value="${t}">${t}</option>`
+                ).join('');
+
+                const dataIndex = `${groupIndex}-${itemIndex}`;
+
+                html += `
+                    <tr data-index="${dataIndex}" data-group-index="${groupIndex}" data-item-index="${itemIndex}" data-itemname="${safeItem}">
+                      ${itemIndex === 0 ? `<td class="row-label" rowspan="${rowSpan}">${escapeHtml(zoneNo)}</td>` : ''}
+                      <td class="item-name">${safeItem}</td>
+                      <td>
+                        <select class="sel-type" data-index="${dataIndex}" onchange="updateDetailOptions('${dataIndex}')">
+                          ${typeOpts}
+                        </select>
+                      </td>
+                      <td>
+                        <select class="sel-detail" data-index="${dataIndex}">
+                          <!-- 由 JS 動態填充 -->
+                        </select>
+                      </td>
+                      <td>
+                        <input type="text" class="input-x" value="${safeX}" placeholder="X坐標">
+                      </td>
+                      <td>
+                        <input type="text" class="input-y" value="${safeY}" placeholder="Y坐標">
+                      </td>
+                      <td>
+                        <div class="land-service">
+                          <div class="land-service-header">
+                            <span class="land-service-title">地籍資料服務</span>
+                            <span class="land-service-status">● 地籍資料</span>
+                          </div>
+
+                          <div class="land-container" data-index="${dataIndex}">
+                            <div class="land-group">
+                              <div class="land-field">
+                              <span class="land-field-label">地段</span>
+                              <input type="text" class="section-input" placeholder="由坐標自動帶入">
+                            </div>
+                            <div class="land-field">
+                              <span class="land-field-label">母號</span>
+                              <input type="text" class="main-input" placeholder="由坐標自動帶入">
+                            </div>
+                            <span class="land-separator">－</span>
+                            <div class="land-field">
+                              <span class="land-field-label">子號</span>
+                              <input type="text" class="sub-input" placeholder="由坐標自動帶入">
+                            </div>
+                            <div class="land-field">
+                              <span class="land-field-label">使用地類別</span>
+                              <select class="land-use-input">
+                                <option value="">請選擇</option>
+                                <option value="農牧用地">農牧用地</option>
+                                <option value="林業用地">林業用地</option>
+                                <option value="養殖用地">養殖用地</option>
+                              </select>
+                            </div>
+                            <div class="land-field">
+                              <span class="land-field-label">面積</span>
+                              <input type="number" class="area-input" min="0" step="0.01" placeholder="㎡" oninput="updateGroupTotalArea(this)">
+                            </div>
+                            <button type="button" class="btn-remove-land" onclick="removeLandGroup(this)" style="display:none;">×</button>
+                            </div>
+                          </div>
+
+                          <button type="button" class="btn-add-land" onclick="addLandGroup('${dataIndex}')">＋ 新增地段／地號</button>
+                          <div class="land-query-result" id="landQueryResult-${dataIndex}"></div>
+                          <div style="margin-top:6px;"><button type="button" class="btn-query-land" onclick="queryCadastralByCoordinate('${dataIndex}')">↗ 依坐標帶入地段／地號／使用地類別／面積</button></div>
+                          <div class="land-service-note">可新增多筆地段／地號，每筆可指定使用地類別及面積。</div>
+                        </div>
+                      </td>
+                      ${itemIndex === 0 ? `
+                      <td class="group-total-area-cell" rowspan="${rowSpan}">
+                        <span class="group-total-area" data-group-index="${groupIndex}">0</span>
+                        <span style="font-size:11px;color:#777;">㎡</span>
+                      </td>` : ''}
+                    </tr>
+                `;
+
+                // 第一個項目就是同一工區的第一列；其餘項目只是同工區的子列。
+            });
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+        bindAreaChangeEvents();
+        refreshSectionOptions(container);
+
+        const rows2 = container.querySelectorAll('tr[data-index]');
+        rows2.forEach((tr, idx) => {
+            const typeSel = tr.querySelector('.sel-type');
+            const detailSel = tr.querySelector('.sel-detail');
+            if (typeSel && detailSel) {
+                const defaultType = typeSel.value || '安全設施';
+                updateDetailOptionsForSelect(detailSel, defaultType);
+                if (detailSel.options.length > 0) {
+                    detailSel.selectedIndex = 0;
+                }
+            }
+            const landContainer = tr.querySelector('.land-container');
+            if (landContainer) {
+                const groups = landContainer.querySelectorAll('.land-group');
+                if (groups.length === 1) {
+                    const btn = groups[0].querySelector('.btn-remove-land');
+                    if (btn) btn.style.display = 'none';
+                }
+            }
+        });
+        refreshAllGroupTotalAreas();
+    }
+
+    // ============================================================
+    //  5. 類型 ↔ 細目 連動
+    // ============================================================
+    function updateDetailOptions(index) {
+        const tr = document.querySelector(`.modal-table tr[data-index="${index}"]`);
+        if (!tr) return;
+        const typeSel = tr.querySelector('.sel-type');
+        const detailSel = tr.querySelector('.sel-detail');
+        if (!typeSel || !detailSel) return;
+        const selectedType = typeSel.value;
+        updateDetailOptionsForSelect(detailSel, selectedType);
+        if (detailSel.options.length > 0) {
+            detailSel.selectedIndex = 0;
+        }
+    }
+
+    function updateDetailOptionsForSelect(detailSel, typeKey) {
+        const details = detailMap[typeKey] || ['其他細目'];
+        detailSel.innerHTML = '';
+        details.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d;
+            opt.textContent = d;
+            detailSel.appendChild(opt);
+        });
+    }
+
+    // ============================================================
+    //  6. 地段/地號 新增 / 刪除（母號、子號）
+    // ============================================================
+
+    // ============================================================
+    //  6. 地段/地號 新增 / 刪除（母號、子號）
+    // ============================================================
+    const sectionMap = {
+        '屏東縣|琉球鄉|中福村': ['中福段', '大福段', '本福段'],
+        '屏東縣|琉球鄉|漁福村': ['漁福段', '大福段'],
+        '屏東縣|琉球鄉|南福村': ['南福段', '大福段'],
+        '屏東縣|琉球鄉|本福村': ['本福段', '中福段']
+    };
+
+    function getSectionOptions() {
+        const county = document.querySelector('select[name="county"]')?.value || '';
+        const town = document.querySelector('select[name="town"]')?.value || '';
+        const village = document.querySelector('select[name="village"]')?.value || '';
+        const key = `${county}|${town}|${village}`;
+        return sectionMap[key] || ['請由地籍資料服務帶入'];
+    }
+
+    function refreshSectionOptions(scope = document) {
+        const options = getSectionOptions();
+        scope.querySelectorAll('.section-input').forEach(input => {
+            // 第一組地段使用文字輸入，新增組則是 select。
+            if (input.tagName !== 'SELECT') return;
+            const oldValue = input.value;
+            input.innerHTML = '<option value="">請選擇地段</option>';
+            options.forEach(section => {
+                const opt = document.createElement('option');
+                opt.value = section;
+                opt.textContent = section;
+                input.appendChild(opt);
+            });
+            if (options.includes(oldValue)) input.value = oldValue;
+        });
+    }
+
+    function bindAreaChangeEvents() {
+        ['county', 'town', 'village'].forEach(name => {
+            const select = document.querySelector(`select[name="${name}"]`);
+            if (select && !select.dataset.sectionBound) {
+                select.addEventListener('change', () => refreshSectionOptions(document));
+                select.dataset.sectionBound = '1';
+            }
+        });
+    }
+
+    function addLandGroup(index) {
+        const container = document.querySelector(`.land-container[data-index="${index}"]`);
+        if (!container) return;
+
+        const group = document.createElement('div');
+        group.className = 'land-group';
+        group.innerHTML = `
+            <div class="land-field">
+              <span class="land-field-label">地段</span>
+              <select class="section-input">
+                <option value="">請先選擇</option>
+              </select>
+            </div>
+            <div class="land-field">
+              <span class="land-field-label">母號</span>
+              <input type="text" class="main-input" placeholder="例：123">
+            </div>
+            <span class="land-separator">－</span>
+            <div class="land-field">
+              <span class="land-field-label">子號</span>
+              <input type="text" class="sub-input" placeholder="例：4">
+            </div>
+            <div class="land-field">
+              <span class="land-field-label">使用地類別</span>
+              <select class="land-use-input">
+                <option value="">請選擇</option>
+                <option value="農牧用地">農牧用地</option>
+                <option value="林業用地">林業用地</option>
+                <option value="養殖用地">養殖用地</option>
+              </select>
+            </div>
+            <div class="land-field">
+              <span class="land-field-label">面積</span>
+              <input type="number" class="area-input" min="0" step="0.01" placeholder="㎡" oninput="updateGroupTotalArea(this)">
+            </div>
+            <button type="button" class="btn-remove-land" onclick="removeLandGroup(this)">×</button>
+        `;
+        container.appendChild(group);
+        refreshSectionOptions(group);
+
+        container.querySelectorAll('.btn-remove-land').forEach(btn => btn.style.display = '');
+        const first = container.querySelector('.land-group:first-child .btn-remove-land');
+        if (first && container.querySelectorAll('.land-group').length === 1) first.style.display = 'none';
+
+        const area = group.querySelector('.area-input');
+        if (area) updateGroupTotalArea(area);
+    }
+
+    function removeLandGroup(btn) {
+        const group = btn.closest('.land-group');
+        const container = group?.closest('.land-container');
+        if (!container) return;
+
+        const groups = container.querySelectorAll('.land-group');
+        if (groups.length <= 1) {
+            alert('至少保留一組地段、地號。');
+            return;
+        }
+
+        group.remove();
+
+        const remaining = container.querySelectorAll('.land-group');
+        if (remaining.length === 1) {
+            const delBtn = remaining[0].querySelector('.btn-remove-land');
+            if (delBtn) delBtn.style.display = 'none';
+        }
+
+        const firstArea = container.querySelector('.area-input');
+        if (firstArea) updateGroupTotalArea(firstArea);
+    }
+
+    // ============================================================
+    //  6-0. 工區總面積自動加總
+    //      同一工區內所有「預計辦理項目及概估數量」
+    //      的所有地段／地號面積全部加總
+    // ============================================================
+    function updateGroupTotalArea(areaInput) {
+        const currentRow = areaInput.closest('tr[data-group-index]');
+        if (!currentRow) return;
+
+        const groupIndex = currentRow.getAttribute('data-group-index');
+        let total = 0;
+
+        document.querySelectorAll(
+            `.modal-table tr[data-group-index="${groupIndex}"] .area-input`
+        ).forEach(input => {
+            const value = parseFloat(input.value);
+            if (Number.isFinite(value) && value >= 0) {
+                total += value;
+            }
+        });
+
+        const totalInput = document.querySelector(
+            `.group-total-area[data-group-index="${groupIndex}"]`
+        );
+
+        if (totalInput) {
+            totalInput.textContent = Number.isInteger(total)
+                ? String(total)
+                : total.toFixed(2).replace(/\.?0+$/, '');
+        }
+    }
+
+    function refreshAllGroupTotalAreas() {
+        const groups = new Set();
+
+        document.querySelectorAll('.modal-table tr[data-group-index]').forEach(row => {
+            groups.add(row.getAttribute('data-group-index'));
+        });
+
+        groups.forEach(groupIndex => {
+            const firstArea = document.querySelector(
+                `.modal-table tr[data-group-index="${groupIndex}"] .area-input`
+            );
+            if (firstArea) {
+                updateGroupTotalArea(firstArea);
+            }
+        });
+    }
+
+    // ============================================================
+    //  6-1. 依座標查詢地籍資料
+    // ============================================================
+    async function queryCadastralByCoordinate(index) {
+        const tr = document.querySelector(`.modal-table tr[data-index="${index}"]`);
+        const resultBox = document.getElementById(`landQueryResult-${index}`);
+        if (!tr || !resultBox) return;
+
+        const xInput = tr.querySelector('.input-x');
+        const yInput = tr.querySelector('.input-y');
+        const x = xInput ? xInput.value.trim() : '';
+        const y = yInput ? yInput.value.trim() : '';
+
+        if (!x || !y) {
+            alert('請先輸入 X、Y 座標。');
+            return;
+        }
+
+        const xNum = Number(x.replace(/,/g, ''));
+        const yNum = Number(y.replace(/,/g, ''));
+
+        if (!Number.isFinite(xNum) || !Number.isFinite(yNum)) {
+            alert('X、Y 座標必須為數字。');
+            return;
+        }
+
+        try {
+            /*
+             * 正式環境：
+             * 將此 URL 改成甲方／地政資料服務實際提供的 API。
+             *
+             * 預期 API 回傳格式：
+             * {
+             *   "success": true,
+             *   "section": "○○段",
+             *   "mainNumber": "123",
+             *   "subNumber": "4"
+             * }
+             */
+            const apiUrl = `/api/cadastral/by-coordinate?x=${encodeURIComponent(xNum)}&y=${encodeURIComponent(yNum)}`;
+
+            // =====================================================
+            // Demo 模式
+            // 若目前尚未有後端 API，先使用座標範例資料測試畫面流程。
+            // 正式串接時可將 demoCadastralLookup() 移除，直接使用 fetch。
+            // =====================================================
+            const data = await demoCadastralLookup(xNum, yNum);
+
+            if (!data || !data.success) {
+                throw new Error('查無對應地籍資料');
+            }
+
+            const landContainer = tr.querySelector('.land-container');
+            const firstGroup = landContainer ? landContainer.querySelector('.land-group') : null;
+
+            if (!firstGroup) throw new Error('找不到地段／地號欄位');
+
+            firstGroup.querySelector('.section-input').value = data.section || '';
+            firstGroup.querySelector('.main-input').value = data.mainNumber || '';
+            firstGroup.querySelector('.sub-input').value = data.subNumber || '';
+
+            const landUseInput = firstGroup.querySelector('.land-use-input');
+            if (landUseInput) landUseInput.value = data.landUse || '';
+
+            const areaInput = firstGroup.querySelector('.area-input');
+            if (areaInput) {
+                areaInput.value = data.area ?? '';
+                updateGroupTotalArea(areaInput);
+            }
+
+            resultBox.innerHTML = `
+                <strong>✓ 已依座標取得地籍資料</strong><br>
+                座標：${escapeHtml(String(x))} ／ ${escapeHtml(String(y))}<br>
+                地段：${escapeHtml(data.section || '')}
+              　地號：${escapeHtml(data.mainNumber || '')}${data.subNumber ? '－' + escapeHtml(data.subNumber) : ''}<br>
+                使用地類別：${escapeHtml(data.landUse || '')}　面積：${escapeHtml(String(data.area ?? ''))} ㎡
+                <span class="land-auto-badge">自動帶入</span>
+            `;
+        } catch (error) {
+            resultBox.innerHTML = `
+                <span style="color:#a94442;">
+                    ⚠️ ${escapeHtml(error.message || '地籍資料查詢失敗')}
+                </span>
+            `;
+        }
+    }
+
+    // ============================================================
+    // Demo 地籍資料服務
+    // ============================================================
+    async function demoCadastralLookup(x, y) {
+        /*
+         * 這裡是前端 Demo。
+         * 正式環境請改為：
+         *
+         * const response = await fetch(apiUrl);
+         * if (!response.ok) throw new Error('地籍資料服務連線失敗');
+         * return await response.json();
+         *
+         * 目前提供一組與原 HTML 範例相符的座標，
+         * 方便直接展示「輸入座標 → 自動帶入地段／母號／子號」。
+         */
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Demo 模式：讓所有工區／所有項目的「依坐標帶入」都能使用相同流程。
+        // 正式環境請改由地籍 API 依實際 X/Y 回傳對應資料。
+        return {
+            success: true,
+            section: '中福段',
+            mainNumber: '123',
+            subNumber: '4',
+            landUse: '農牧用地',
+            area: '120.5'
+        };
+    }
+
+    // 保留原有函式名稱，避免其他既有程式呼叫時出錯。
+    function queryCadastralData(index) {
+        const tr = document.querySelector(`.modal-table tr[data-index="${index}"]`);
+        const container = document.querySelector(`.land-container[data-index="${index}"]`);
+        const resultBox = document.getElementById(`landQueryResult-${index}`);
+        if (!tr || !container || !resultBox) return;
+
+        const x = tr.querySelector('.input-x')?.value.trim() || '';
+        const y = tr.querySelector('.input-y')?.value.trim() || '';
+
+        if (!x || !y) {
+            alert('請先確認 X、Y 座標都有資料。');
+            return;
+        }
+
+        // Demo：正式環境在此呼叫「座標 → 地籍圖／地號」API。
+        // 先依鄉鎮市區／村里縮小地段範圍，再由 X/Y 取得實際地段、母號、子號。
+        const sections = getSectionOptions().filter(v => v !== '請由地籍資料服務帶入');
+        const groups = container.querySelectorAll('.land-group');
+        const targetGroup = groups[0];
+
+        if (targetGroup) {
+            const sectionSelect = targetGroup.querySelector('.section-input');
+            if (sectionSelect) {
+                refreshSectionOptions(targetGroup);
+                if (!sectionSelect.value && sections.length > 0) {
+                    sectionSelect.value = sections[0];
+                }
+            }
+
+            // Demo 範例：實際資料應由 API 回傳，不應由前端自行推算地號。
+            targetGroup.querySelector('.main-input').value = '123';
+            targetGroup.querySelector('.sub-input').value = '4';
+            const landUse = targetGroup.querySelector('.land-use-input');
+            if (landUse) landUse.value = '農牧用地';
+            const area = targetGroup.querySelector('.area-input');
+            if (area) { area.value = '120.5'; updateGroupTotalArea(area); }
+        }
+
+        resultBox.innerHTML = '';
+        resultBox.classList.remove('active');
+    }
+
+    // ============================================================
+    //  7. 確認按鈕：收集所有數據（母號、子號分開）
+    // ============================================================
+    function confirmPermit() {
+        const container = document.getElementById('modalContent');
+        const rows = container.querySelectorAll('tr[data-index]');
+
+        if (rows.length === 0) {
+            alert('沒有資料可儲存。');
+            return;
+        }
+
+        const result = [];
+        let hasError = false;
+
+        rows.forEach((tr) => {
+            const index = tr.getAttribute('data-index');
+            const itemName = tr.getAttribute('data-itemname') || '';
+
+            const typeSel = tr.querySelector('.sel-type');
+            const detailSel = tr.querySelector('.sel-detail');
+            const xInput = tr.querySelector('.input-x');
+            const yInput = tr.querySelector('.input-y');
+            const landUseSel = tr.querySelector('.land-use-input');
+
+            const type = typeSel ? typeSel.value : '';
+            const detail = detailSel ? detailSel.value : '';
+            const x = xInput ? xInput.value.trim() : '';
+            const y = yInput ? yInput.value.trim() : '';
+            const landUse = landUseSel ? landUseSel.value : '';
+
+            const landContainer = tr.querySelector('.land-container');
+            const landGroups = [];
+            if (landContainer) {
+                const groups = landContainer.querySelectorAll('.land-group');
+                groups.forEach(group => {
+                    const section = group.querySelector('.section-input')?.value.trim() || '';
+                    const mainNumber = group.querySelector('.main-input')?.value.trim() || '';
+                    const subNumber = group.querySelector('.sub-input')?.value.trim() || '';
+                    const landUse = group.querySelector('.land-use-input')?.value.trim() || '';
+                    const area = group.querySelector('.area-input')?.value.trim() || '';
+                    if (section || mainNumber || subNumber || landUse || area) {
+                        landGroups.push({ section, mainNumber, subNumber, landUse, area });
+                    }
+                });
+            }
+
+            if (!type) {
+                alert(`工區 ${parseInt(index.split('-')[0]) + 1} 請選擇「類型」。`);
+                hasError = true;
+                return;
+            }
+            if (!detail) {
+                alert(`工區 ${parseInt(index.split('-')[0]) + 1} 請選擇「細目」。`);
+                hasError = true;
+                return;
+            }
+            if (landGroups.length === 0) {
+                alert(`工區 ${parseInt(index.split('-')[0]) + 1} 請至少輸入一組「地段 / 地號」。`);
+                hasError = true;
+                return;
+            }
+
+            result.push({
+                工區編號: `工區${parseInt(index.split('-')[0]) + 1}`,
+                預計辦理項目: itemName,
+                類型: type,
+                細目: detail,
+                X坐標: x,
+                Y坐標: y,
+                地段地號: landGroups,  // 每組包含 section, mainNumber, subNumber
+                使用地類別: landGroups.map(g => g.landUse).filter(Boolean),
+                總面積: landGroups.reduce((sum, g) => {
+                    const a = parseFloat(g.area);
+                    return sum + (Number.isFinite(a) && a >= 0 ? a : 0);
+                }, 0)
+            });
+        });
+
+        if (hasError) return;
+
+        console.log('===== 容許使用資料 =====');
+        console.log(JSON.stringify(result, null, 2));
+        console.log('=========================');
+
+        alert(`✅ 已成功收集 ${result.length} 筆容許使用資料！\n請查看瀏覽器主控台 (F12) 查看完整 JSON。`);
+    }
+
+    console.log('✅ 系統已載入，點擊「新增容許使用」按鈕試試！');
+</script>
+
+</body> </html>
+
